@@ -28,14 +28,14 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 ### A. Reservasi dan Antrian
 1. Pemilik Hewan melakukan reservasi dengan memilih hewan, jenis layanan (Vaksin, Checkup, Pengobatan), tanggal kunjungan, catatan, dan riwayat medis sebelumnya.
 2. Resepsionis meninjau janji temu.
-   - Jika Diterima, sistem memberikan nomor antrian (menaik/incremental).
+   - Jika Diterima, sistem memberikan nomor antrian. Nomor ini ditentukan berdasarkan waktu pembuatan janji temu oleh pemilik hewan.
    - Jika Ditolak, alasan penolakan harus diinformasikan ke pemilik hewan.
 3. Pada hari-H, Resepsionis melakukan Check-In saat hewan diserahkan.
-   - Pemilik dapat memantau sisa antrian (jumlah pasien di depan mereka yang sudah Check-In).
+   - Pemilik dapat memantau sisa antrian (posisi urutan saat ini).
 
 ### B. Penanganan Medis
-1. Resepsionis melakukan Alokasi Dokter pada pasien yang sudah Check-In.
-2. Dokter meninjau tugas. Jika Ditolak (wajib mengisi alasan), layanan kembali ke pool untuk dialokasikan ulang.
+1. Saat waktu penanganan hewan telah tiba (setelah masa tunggu setelah Check-In), Resepsionis melakukan Alokasi Dokter.
+2. Dokter meninjau tugas. Jika Ditolak (wajib mengisi alasan), layanan kembali ke pool untuk dialokasikan ulang oleh Resepsionis.
 3. Jika Diterima, status berubah menjadi Dalam Penanganan.
 4. Dokter menangani hewan dan mengisi:
    - Detail Medis (Hasil pemeriksaan, diagnosa, tindakan, sesuai jenis layanan).
@@ -70,7 +70,7 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 
 ## 5. Ketentuan Teknis dan Logika
 
-- Nomor Antrian: Identitas urut tetap untuk hari layanan tersebut.
-- Sisa Antrian: Jumlah pasien berstatus Check-In, Alokasi Dokter, atau Menunggu Dokter dengan nomor antrian lebih kecil dari pengguna.
+- Nomor Antrian: Identitas urut tetap untuk hari layanan tersebut, ditentukan berdasarkan waktu pembuatan janji temu.
+- Sisa Antrian: Menunjukkan posisi urutan saat ini, dihitung dengan rumus: (Nomor Antrian hewan tersebut - jumlah hewan dengan nomor antrian lebih kecil yang sudah berstatus Selesai).
 - Integritas Data: Data medis dan reminder bersifat read-only setelah layanan berstatus Selesai.
 - Audit Log: Setiap perubahan status mencatat waktu dan aktor pelaksana.
