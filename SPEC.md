@@ -1,68 +1,76 @@
 # Spesifikasi Sistem Klinik Hewan
 
-Sistem ini memiliki 2 website yang terpisah yaitu eksternal untuk pemilik hewan dan internal untuk klinik.
+Sistem ini memiliki 2 platform yang terpisah: platform eksternal untuk pemilik hewan dan platform internal untuk operasional klinik.
 
-## Alur Bisnis
+## 1. Peran Pengguna
 
-Berikut adalah alur bisnis utama dalam sistem ini:
+- Pemilik Hewan: Pengguna eksternal yang mendaftarkan hewan dan melakukan reservasi layanan.
+- Manajer: Staf internal yang mengelola akun staf (Resepsionis dan Dokter) serta profil profesional dokter.
+- Resepsionis: Staf internal yang mengelola administrasi, konfirmasi janji temu, antrian, dan alokasi dokter.
+- Dokter: Staf medis internal yang melakukan tindakan, mengisi rekam medis, dan mengatur jadwal pengingat (reminder).
 
-- Pemilik hewan membuat akun di website eksternal.
-- Pemilik hewan menambahkan data hewan peliharaannya.
-- Pemilik hewan memilih layanan untuk janji temu
-  - Ada 3 jenis layanan yaitu: Vaksin, Checkup Rutin dan Pengobatan
-  - Pemilik hewan memilih hewan yang akan diberikan layanan
-  - Pemilik hewan memilih tanggal, catatan pemilik (keluhan dan waktu luang (opsional)), dan riwayat pemeriksaan sebelumnya dari klinik lain
-- Resepsionis dapat menerima janji temu atau menolaknya
-  - Jika janji temu diterima, maka layanan akan mendapatkan nomor antrian sesuai dengan urutan pengiriman janji temu
-  - Jika ditolak, maka harus memberikan alasan
-- Saat hari-H, Pemilik hewan kemudian bisa menyerahkan hewan dan Resepsionis klik konfirmasi bahwa hewan sudah diterima
-- Jika hewan sudah mulai ditangai maka Resepsionis bisa klik konfirmasi bahwa hewan sudah ditangai
-  - Resepsionis perlu memilih dokter mana yang menanganinya
-- Dokter dapat menerima atau menolak penanganan hewan tersebut
-  - Jika ditolak maka kembali ke status sebelumnya dan Resepsionis bisa memilih dokter lain. Harus mengisi alasan tolak
-- Dokter kemudian menangai hewan tersebut
-- Jika hewan perlu reminder, maka dokter bisa menambahkan reminder untuk berlakukan perawatan secara rutin
-  - Reminder bersifat rekomendasi, jadi kalau melebihi waktu tesebut tidak masalah
-- Setelah selesai, maka dokter bisa mengisi detail medis untuk hewan sesuai dengan layanan yang dipilih. Status hewan akan berubah menjadi "selesai"
-- Pemilik hewan bisa mengambil hewannya kembali
+## 2. Daftar State Layanan
 
-## Kebutuhan
+Status layanan bersifat sekuensial untuk menjaga integritas data:
 
-Pemilik Hewan:
+- Menunggu Konfirmasi: Janji temu baru saja dikirim oleh pemilik hewan. (Aktor: Resepsionis)
+- Diterima: Janji temu disetujui dan mendapatkan nomor antrian. (Aktor: Resepsionis)
+- Ditolak: Janji temu ditolak dengan alasan yang wajib diisi. (Aktor: Resepsionis)
+- Check-In: Pemilik hewan tiba di lokasi; sistem mulai menghitung sisa antrian. (Aktor: Resepsionis)
+- Alokasi Dokter: Resepsionis menunjuk dokter untuk menangani pasien. (Aktor: Resepsionis)
+- Menunggu Dokter: Dokter menerima notifikasi tugas dan dapat memilih Terima/Tolak. (Aktor: Dokter)
+- Dalam Penanganan: Dokter sedang melakukan tindakan medis. Data medis dan reminder dapat diisi. (Aktor: Dokter)
+- Selesai: Tindakan selesai. Data medis dan reminder dikunci (Read-Only). (Aktor: Dokter)
+- Selesai Administrasi: Hewan siap diambil dan urusan administrasi tuntas. (Aktor: Resepsionis)
 
-- Dapat membua akun serta mengubah detailnya
-- Dapat mengelola data hewan miliknya
-- Dapat membuat janji temu untuk hewan peliharaanya
-- Dapat melihat daftar reminder untuk hewan miliknya
-- Dapat melihat riwayat perawatan hewan miliknya
-- Dapat melihat detail perawatan hewan miliknya termasuk dokter yang menanganinya
-- Dapat membuat janji temu yang sesuai dengan reminder (dengan ini maka reminder tersebut akan dianggap sudah ditangai oleh janji temu yang baru)
-- Dapat melihat status janji temu
-- Dapat melihat nomor antrian hewan dan nomor sisa antrian
+## 3. Alur Bisnis Utama
 
-Janji temu dan reminder itu entitas terpisah
+### A. Reservasi dan Antrian
+1. Pemilik Hewan melakukan reservasi dengan memilih hewan, jenis layanan (Vaksin, Checkup, Pengobatan), tanggal kunjungan, catatan, dan riwayat medis sebelumnya.
+2. Resepsionis meninjau janji temu.
+   - Jika Diterima, sistem memberikan nomor antrian (menaik/incremental).
+   - Jika Ditolak, alasan penolakan harus diinformasikan ke pemilik hewan.
+3. Pada hari-H, Resepsionis melakukan Check-In saat hewan diserahkan.
+   - Pemilik dapat memantau sisa antrian (jumlah pasien di depan mereka yang sudah Check-In).
 
-Manajer:
+### B. Penanganan Medis
+1. Resepsionis melakukan Alokasi Dokter pada pasien yang sudah Check-In.
+2. Dokter meninjau tugas. Jika Ditolak (wajib mengisi alasan), layanan kembali ke pool untuk dialokasikan ulang.
+3. Jika Diterima, status berubah menjadi Dalam Penanganan.
+4. Dokter menangani hewan dan mengisi:
+   - Detail Medis (Hasil pemeriksaan, diagnosa, tindakan, sesuai jenis layanan).
+   - Reminder (Rekomendasi perawatan rutin atau kontrol ulang).
+5. Dokter menekan tombol Selesai. Status menjadi Selesai dan data menjadi permanen.
 
-- Dapat memgelola akun resepsionis
-- Dapat memgelola akun dokter
-- Dapat mengelola detail dokter serta menonaktifkan dokter
+### C. Kepulangan dan Tindak Lanjut
+1. Resepsionis menutup layanan setelah administrasi selesai.
+2. Pemilik Hewan mengambil hewan kembali.
+3. Pemilik dapat membuat janji temu baru berdasarkan reminder. Jika janji temu dibuat dari reminder, maka reminder tersebut dianggap sudah ditangani.
 
-Resepsionis:
+## 4. Fitur Berdasarkan Peran
 
-- Dapat melihat antrian hewan
-- Dapat melihat semua janji temu
-- Dapat menerima atau menolak janji temu
-- Dapat mengarahkan janji temu ke dokter yang sesuai
-- Dapat melihat detail janji temu termasuk detail hewan
+### Pemilik Hewan
+- Kelola akun dan profil hewan.
+- Buat dan pantau status janji temu (termasuk nomor antrian dan sisa antrian).
+- Lihat riwayat rekam medis lengkap dan daftar pengingat (reminder).
+- Buat janji temu baru dari reminder yang ada.
 
-Dokter Hewan:
+### Manajer
+- Kelola akun staf (Resepsionis dan Dokter).
+- Kelola profil profesional dokter dan status aktif/nonaktif dokter.
 
-- Dapat melihat detail janji temu termasuk detail hewan. Hanya janji temu yang ditugaskan ke dokter tersebut
-- Dapat mengisi detail medis sesuai dengan layanan
-- Dapat mengisi reminder untuk hewan yang ditangani oleh dokter tersebut. Hanya dapat dilakukan jika pelayanan masih belum selesai
+### Resepsionis
+- Manajemen antrian dan semua janji temu.
+- Konfirmasi janji temu (Terima/Tolak).
+- Alokasi dokter untuk pasien yang sudah Check-In.
 
-Mekanisme Antrian:
+### Dokter
+- Dashboard tugas pribadi (hanya janji temu yang dialokasikan ke dirinya).
+- Pengisian data medis dan reminder (hanya selama state Dalam Penanganan).
 
-- Pemilik Hewan yang mendaftar membuat janji temu pertama akan mendapatka antrian pertama
-- Antrian akan terus bertambah sesuai dengan jumlah janji temu yang dibuat oleh pemilik hewan di hari tersebut
+## 5. Ketentuan Teknis dan Logika
+
+- Nomor Antrian: Identitas urut tetap untuk hari layanan tersebut.
+- Sisa Antrian: Jumlah pasien berstatus Check-In, Alokasi Dokter, atau Menunggu Dokter dengan nomor antrian lebih kecil dari pengguna.
+- Integritas Data: Data medis dan reminder bersifat read-only setelah layanan berstatus Selesai.
+- Audit Log: Setiap perubahan status mencatat waktu dan aktor pelaksana.
