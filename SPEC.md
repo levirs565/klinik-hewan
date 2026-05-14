@@ -74,3 +74,43 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 - Sisa Antrian: Menunjukkan posisi urutan saat ini, dihitung dengan rumus: (Nomor Antrian hewan tersebut - jumlah hewan dengan nomor antrian lebih kecil yang sudah berstatus Selesai).
 - Integritas Data: Data medis dan reminder bersifat read-only setelah layanan berstatus Selesai.
 - Audit Log: Setiap perubahan status mencatat waktu dan aktor pelaksana.
+
+## Detail Data Hewan
+
+- Nama
+- Jenis (Kucing/Anjing/dsb)
+- Ras Hewan
+- Warna Bulu
+- TL / Umur
+- Jenis Kelamin'
+
+## 6. Detail Data Medis Berdasarkan Layanan
+
+Data medis yang wajib diisi oleh Dokter ditentukan oleh jenis layanan yang dipilih saat reservasi.
+
+### Data Pemeriksaan Fisik (Wajib untuk semua layanan)
+- Berat badan (kg)
+- Suhu tubuh (derajat Celsius)
+- Kondisi fisik umum (mata, telinga, mulut, kulit/bulu)
+- Detak jantung dan frekuensi nafas (jika diperlukan)
+
+### Layanan Vaksin
+- Jenis vaksin (misal: F3, F4, Rabies)
+- Merk dan nomor batch vaksin
+- Tanggal pemberian vaksin
+- Catatan kondisi hewan sebelum vaksinasi (harus dalam kondisi sehat)
+- Catatan reaksi pasca vaksin (jika ada)
+
+### Layanan Checkup Rutin
+- Hasil palpasi (pemeriksaan organ dalam melalui perabaan)
+- Catatan kebersihan (gigi, kuku, telinga)
+- Rekomendasi nutrisi atau vitamin
+- Rekomendasi perawatan berkala (misal: scaling gigi)
+
+### Layanan Pengobatan
+- Gejala klinis (keluhan utama yang diamati pemilik atau dokter)
+- Diagnosa (hasil analisis dokter mengenai penyakit hewan)
+- Tindakan medis (misal: pembersihan luka, pemberian infus, atau suntikan)
+- Resep obat (nama obat, dosis, dan frekuensi pemberian)
+- Catatan khusus perawatan di rumah (misal: harus dikandangkan atau dilarang mandi)
+- Estimasi biaya tindakan medis
