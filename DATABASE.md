@@ -4,34 +4,43 @@ Berikut adalah rancangan tabel basis data berdasarkan spesifikasi sistem.
 
 ```mermaid
 erDiagram
-    USER ||--o{ ANIMAL : owns
-    USER {
+    EXTERNAL_USER ||--o{ ANIMAL : owns
+    EXTERNAL_USER {
         uuid id PK
         string username
         string password
-        string role "owner, manager, receptionist, doctor"
         string full_name
         string address
         string phone_number
+        datetime last_login
     }
 
-    DOCTOR_PROFILE ||--|| USER : is
+    INTERNAL_USER ||--|| DOCTOR_PROFILE : is
+    INTERNAL_USER {
+        uuid id PK
+        string username
+        string password
+        string role "manager, receptionist, doctor"
+        string full_name
+        boolean is_active
+    }
+
+    DOCTOR_PROFILE ||--o{ APPOINTMENT : has
     DOCTOR_PROFILE {
         uuid id PK
-        uuid user_id FK
+        uuid internal_user_id FK
         date birth_date
         text education_history
         date practice_start_date
         date join_date
         text practice_location_history
-        boolean is_active
         text special_services_history
     }
 
     ANIMAL ||--o{ APPOINTMENT : has
     ANIMAL {
         uuid id PK
-        uuid owner_id FK
+        uuid owner_id FK "refers to EXTERNAL_USER"
         string name
         string type "cat, dog, etc"
         string breed
@@ -45,7 +54,7 @@ erDiagram
     APPOINTMENT {
         uuid id PK
         uuid animal_id FK
-        uuid doctor_id FK "assigned doctor"
+        uuid doctor_id FK "refers to INTERNAL_USER"
         string service_type "vaccine, checkup, treatment"
         date appointment_date
         integer queue_number
@@ -59,7 +68,7 @@ erDiagram
         uuid id PK
         uuid appointment_id FK
         string state
-        uuid actor_id FK
+        uuid actor_id FK "refers to INTERNAL_USER"
         datetime changed_at
         text reason "required for rejection"
     }
@@ -101,17 +110,18 @@ erDiagram
         uuid fulfilling_appointment_id FK
         string description
         date reminder_date
-        boolean is_handled
+        boolean is_handled computed
     }
 ```
 
 ## Penjelasan Tabel
 
-1. **USER**: Menyimpan data login dan profil dasar untuk semua peran (Pemilik, Manajer, Resepsionis, Dokter).
-2. **DOCTOR_PROFILE**: Data tambahan khusus untuk peran Dokter, termasuk riwayat pendidikan dan status aktif.
-3. **ANIMAL**: Data hewan peliharaan yang terhubung ke Pemilik (USER).
-4. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini.
-5. **STATUS_HISTORY**: Audit log untuk mencatat setiap perubahan status (state) layanan, aktor yang mengubah, dan alasan (jika ditolak).
-6. **MEDICAL_RECORD**: Data pemeriksaan fisik umum dan hasil medis yang diisi oleh Dokter.
-7. **VACCINE_DETAIL**: Tabel tambahan khusus untuk menyimpan detail teknis vaksinasi (merk, batch, dll).
-8. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak apakah pengingat sudah ditangani melalui janji temu baru.
+1. **EXTERNAL_USER**: Menyimpan data login dan profil untuk Pemilik Hewan pada aplikasi eksternal.
+2. **INTERNAL_USER**: Menyimpan data login dan peran staf klinik (Manajer, Resepsionis, Dokter) pada aplikasi internal.
+3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal.
+4. **ANIMAL**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER).
+5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini.
+6. **STATUS_HISTORY**: Audit log untuk mencatat setiap perubahan status layanan, aktor internal yang mengubah, dan alasan penolakan.
+7. **MEDICAL_RECORD**: Data pemeriksaan fisik umum dan hasil medis yang diisi oleh Dokter.
+8. **VACCINE_DETAIL**: Tabel tambahan khusus untuk menyimpan detail teknis vaksinasi.
+9. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak keterkaitan dengan janji temu asal dan janji temu baru yang menanganinya.
