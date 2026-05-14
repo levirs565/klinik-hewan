@@ -2,14 +2,14 @@
 
 Sistem ini memiliki 2 platform yang terpisah: platform eksternal untuk pemilik hewan dan platform internal untuk operasional klinik.
 
-## 1. Peran Pengguna
+## Peran Pengguna
 
 - Pemilik Hewan: Pengguna eksternal yang mendaftarkan hewan dan melakukan reservasi layanan.
 - Manajer: Staf internal yang mengelola akun staf (Resepsionis dan Dokter) serta profil profesional dokter.
 - Resepsionis: Staf internal yang mengelola administrasi, konfirmasi janji temu, antrian, dan alokasi dokter.
 - Dokter: Staf medis internal yang melakukan tindakan, mengisi rekam medis, dan mengatur jadwal pengingat (reminder).
 
-## 2. Daftar State Layanan
+## Daftar State Layanan
 
 Status layanan bersifat sekuensial untuk menjaga integritas data:
 
@@ -23,7 +23,7 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 - Selesai: Tindakan selesai. Data medis dan reminder dikunci (Read-Only). (Aktor: Dokter)
 - Selesai Administrasi: Hewan siap diambil dan urusan administrasi tuntas. (Aktor: Resepsionis)
 
-## 3. Alur Bisnis Utama
+## Alur Bisnis Utama
 
 ### A. Reservasi dan Antrian
 1. Pemilik Hewan melakukan reservasi dengan memilih hewan, jenis layanan (Vaksin, Checkup, Pengobatan), tanggal kunjungan, catatan, dan riwayat medis sebelumnya.
@@ -47,7 +47,7 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 2. Pemilik Hewan mengambil hewan kembali.
 3. Pemilik dapat membuat janji temu baru berdasarkan reminder. Jika janji temu dibuat dari reminder, maka reminder tersebut dianggap sudah ditangani.
 
-## 4. Fitur Berdasarkan Peran
+## Fitur Berdasarkan Peran
 
 ### Pemilik Hewan
 - Kelola akun dan profil hewan.
@@ -68,7 +68,7 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 - Dashboard tugas pribadi (hanya janji temu yang dialokasikan ke dirinya).
 - Pengisian data medis dan reminder (hanya selama state Dalam Penanganan).
 
-## 5. Ketentuan Teknis dan Logika
+## Ketentuan Teknis dan Logika
 
 - Nomor Antrian: Identitas urut tetap untuk hari layanan tersebut, ditentukan berdasarkan waktu pembuatan janji temu.
 - Sisa Antrian: Menunjukkan posisi urutan saat ini, dihitung dengan rumus: (Nomor Antrian hewan tersebut - jumlah hewan dengan nomor antrian lebih kecil yang sudah berstatus Selesai).
@@ -84,7 +84,7 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 - TL / Umur
 - Jenis Kelamin'
 
-## 6. Detail Data Medis Berdasarkan Layanan
+## Detail Data Medis Berdasarkan Layanan
 
 Data medis yang wajib diisi oleh Dokter ditentukan oleh jenis layanan yang dipilih saat reservasi.
 
