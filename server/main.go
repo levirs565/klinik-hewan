@@ -1,15 +1,22 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
 
 func main() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		slog.Warn("Error loading .env file, using environment variables")
+	}
+
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())

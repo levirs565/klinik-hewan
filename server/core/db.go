@@ -2,14 +2,20 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"vetconnect-server/models"
 
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func InitDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("vetconnect.db"), &gorm.Config{})
+	dsn := os.Getenv("DB_URL")
+	if dsn == "" {
+		return nil, fmt.Errorf("DB_URL environment variable is not set")
+	}
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect database: %w", err)
 	}

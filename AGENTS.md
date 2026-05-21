@@ -10,3 +10,5 @@ Instruksi ini dikhusukan jika sedang mengerjakan server. Sebelum memulai, pastik
 - [server/ARCHITECTURE.md](server/ARCHITECTURE.md)
 
 Server berada di folder `server`. Jangan pernah menjalankan server secara langsung. Agen tidak boleh menjalankan server.
+
+Selalu build server ke folder `server/build`.
