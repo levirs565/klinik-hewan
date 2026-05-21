@@ -73,7 +73,7 @@ erDiagram
         uuid fulfilling_appointment_id FK
         string description
         date reminder_date
-        boolean is_handled computed
+        boolean is_handled "computed"
     }
 ```
 
@@ -188,7 +188,7 @@ Menyimpan token Firebase Cloud Messaging untuk notifikasi push.
 ```
 
 ### 6. refresh_tokens
-Menyimpan refresh token untuk manajemen sesi yang aman.
+Menyimpan refresh token untuk manajemen sesi yang aman. TTL diatur pada `ttl_expiry` yang nilainya lebih lama dari `expires_at` (misal: +7 hari) untuk memungkinkan audit dan fitur "logout all devices" bahkan setelah token tidak lagi berlaku secara fungsional.
 
 ```json
 {
@@ -196,7 +196,8 @@ Menyimpan refresh token untuk manajemen sesi yang aman.
   "user_id": "UUID",
   "user_type": "string (internal | external)",
   "token": "string",
-  "expires_at": "datetime (index TTL)",
+  "expires_at": "datetime",
+  "ttl_expiry": "datetime (index TTL, set to expires_at + 7 days)",
   "created_at": "datetime",
   "is_revoked": "boolean"
 }
