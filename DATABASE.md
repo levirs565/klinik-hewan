@@ -1,5 +1,7 @@
 # Skema Basis Data Klinik Hewan
 
+## MySQL
+
 Berikut adalah rancangan tabel basis data berdasarkan spesifikasi sistem.
 
 ```mermaid
@@ -49,8 +51,6 @@ erDiagram
         string gender
     }
 
-    APPOINTMENT ||--o{ MEDICAL_RECORD : produces
-    APPOINTMENT ||--o{ STATUS_HISTORY : tracks
     APPOINTMENT {
         uuid id PK
         uuid animal_id FK
@@ -62,43 +62,6 @@ erDiagram
         text previous_medical_history
         string current_state
         datetime created_at
-    }
-
-    STATUS_HISTORY {
-        uuid id PK
-        uuid appointment_id FK
-        string state
-        uuid actor_id FK "refers to INTERNAL_USER"
-        datetime changed_at
-        text reason "required for rejection"
-    }
-
-    MEDICAL_RECORD {
-        uuid id PK
-        uuid appointment_id FK
-        float weight
-        float temperature
-        string physical_condition
-        string heart_rate
-        string respiratory_rate
-        text diagnosis
-        text clinical_symptoms
-        text medical_action
-        text prescription
-        text home_care_notes
-        decimal estimated_cost
-    }
-
-    VACCINE_DETAIL ||--|| MEDICAL_RECORD : extends
-    VACCINE_DETAIL {
-        uuid id PK
-        uuid medical_record_id FK
-        string vaccine_type
-        string brand
-        string batch_number
-        date administration_date
-        text pre_vaccine_condition
-        text post_vaccine_reaction
     }
 
     REMINDER ||--o{ APPOINTMENT : triggered_by
@@ -114,14 +77,127 @@ erDiagram
     }
 ```
 
-## Penjelasan Tabel
-
 1. **EXTERNAL_USER**: Menyimpan data login dan profil untuk Pemilik Hewan pada aplikasi eksternal.
 2. **INTERNAL_USER**: Menyimpan data login dan peran staf klinik (Manajer, Resepsionis, Dokter) pada aplikasi internal.
 3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal.
 4. **ANIMAL**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER).
-5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini.
-6. **STATUS_HISTORY**: Audit log untuk mencatat setiap perubahan status layanan, aktor internal yang mengubah, dan alasan penolakan.
-7. **MEDICAL_RECORD**: Data pemeriksaan fisik umum dan hasil medis yang diisi oleh Dokter.
-8. **VACCINE_DETAIL**: Tabel tambahan khusus untuk menyimpan detail teknis vaksinasi.
-9. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak keterkaitan dengan janji temu asal dan janji temu baru yang menanganinya.
+5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini. Data riwayat status dan rekam medis disimpan di MongoDB.
+6. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak keterkaitan dengan janji temu asal dan janji temu baru yang menanganinya.
+
+## MongoDB
+
+### 1. medical_records
+Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu dokumen per rekam medis dengan sub-dokumen untuk data spesifik layanan.
+
+```json
+{
+  "_id": "ObjectId",
+  "appointment_id": "UUID",
+  "physical_examination": {
+    "weight": "float",
+    "temperature": "float",
+    "physical_condition": "string",
+    "heart_rate": "string",
+    "respiratory_rate": "string"
+  },
+  "service_data": {
+    "type": "string (vaccine | checkup | treatment)",
+    "details": {
+      // Jika type == vaccine
+      "vaccine_type": "string",
+      "brand": "string",
+      "batch_number": "string",
+      "administration_date": "date",
+      "pre_vaccine_condition": "text",
+      "post_vaccine_reaction": "text",
+      
+      // Jika type == checkup
+      "palpation": "text",
+      "cleanliness_notes": "text",
+      "nutrition_recommendations": "text",
+      "periodic_care_recommendations": "text",
+
+      // Jika type == treatment
+      "clinical_symptoms": "text",
+      "diagnosis": "text",
+      "medical_actions": "text",
+      "prescription": "text",
+      "home_care_notes": "text",
+      "estimated_cost": "decimal"
+    }
+  },
+  "created_at": "datetime"
+}
+```
+
+### 2. status_histories
+Audit log untuk melacak perubahan status pada janji temu.
+
+```json
+{
+  "_id": "ObjectId",
+  "appointment_id": "UUID",
+  "state": "string",
+  "actor_id": "UUID",
+  "actor_role": "string",
+  "changed_at": "datetime",
+  "reason": "string (optional, mandatory for rejection)"
+}
+```
+
+### 3. login_logs
+Mencatat riwayat login pengguna untuk tujuan keamanan dan audit.
+
+```json
+{
+  "_id": "ObjectId",
+  "user_id": "UUID",
+  "user_type": "string (internal | external)",
+  "ip_address": "string",
+  "user_agent": "string",
+  "login_at": "datetime"
+}
+```
+
+### 4. otp_logins
+Penyimpanan sementara untuk kode OTP dengan mekanisme kedaluwarsa otomatis.
+
+```json
+{
+  "_id": "ObjectId",
+  "user_id": "UUID",
+  "user_type": "string (internal | external)",
+  "otp_code": "string",
+  "expires_at": "datetime (index TTL)"
+}
+```
+
+### 5. fcm_tokens
+Menyimpan token Firebase Cloud Messaging untuk notifikasi push.
+
+```json
+{
+  "_id": "ObjectId",
+  "user_id": "UUID",
+  "user_type": "string (internal | external)",
+  "token": "string",
+  "device_type": "string",
+  "created_at": "datetime",
+  "last_used_at": "datetime"
+}
+```
+
+### 6. refresh_tokens
+Menyimpan refresh token untuk manajemen sesi yang aman.
+
+```json
+{
+  "_id": "ObjectId",
+  "user_id": "UUID",
+  "user_type": "string (internal | external)",
+  "token": "string",
+  "expires_at": "datetime (index TTL)",
+  "created_at": "datetime",
+  "is_revoked": "boolean"
+}
+```
