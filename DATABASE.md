@@ -159,7 +159,7 @@ Mencatat riwayat login pengguna untuk tujuan keamanan dan audit.
 }
 ```
 
-### 4. otp_logins
+### 4. otp_logins (Opsional)
 Penyimpanan sementara untuk kode OTP dengan mekanisme kedaluwarsa otomatis.
 
 ```json
