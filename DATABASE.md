@@ -9,7 +9,7 @@ erDiagram
     EXTERNAL_USER ||--o{ ANIMAL : owns
     EXTERNAL_USER {
         uuid id PK
-        string username
+        string email
         string password
         string full_name
         string address
