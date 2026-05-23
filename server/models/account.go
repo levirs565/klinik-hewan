@@ -10,10 +10,10 @@ const (
 )
 
 type ExternalUser struct {
-	ID          uint   `gorm:"primaryKey" json:"id"`
-	Email       string `gorm:"uniqueIndex;not null" json:"email"`
-	Password    string `gorm:"not null" json:"-"`
-	FullName    string `gorm:"not null" json:"full_name"`
-	Address     string `json:"address"`
-	PhoneNumber string `json:"phone_number"`
+	ID          uint   `gorm:"primaryKey"`
+	Email       string `gorm:"uniqueIndex;not null"`
+	Password    string `gorm:"not null"`
+	FullName    string `gorm:"not null"`
+	Address     string
+	PhoneNumber string
 }
