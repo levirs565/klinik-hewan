@@ -6,20 +6,19 @@ Berikut adalah rancangan tabel basis data berdasarkan spesifikasi sistem.
 
 ```mermaid
 erDiagram
-    EXTERNAL_USER ||--o{ ANIMAL : owns
+    EXTERNAL_USER ||--o{ PET : owns
     EXTERNAL_USER {
-        uuid id PK
+        uint id PK
         string email
         string password
         string full_name
         string address
         string phone_number
-        datetime last_login
     }
 
     INTERNAL_USER ||--|| DOCTOR_PROFILE : is
     INTERNAL_USER {
-        uuid id PK
+        uint id PK
         string username
         string password
         string role "manager, receptionist, doctor"
@@ -29,8 +28,8 @@ erDiagram
 
     DOCTOR_PROFILE ||--o{ APPOINTMENT : has
     DOCTOR_PROFILE {
-        uuid id PK
-        uuid internal_user_id FK
+        uint id PK
+        uint internal_user_id FK
         date birth_date
         text education_history
         date practice_start_date
@@ -39,22 +38,24 @@ erDiagram
         text special_services_history
     }
 
-    ANIMAL ||--o{ APPOINTMENT : has
-    ANIMAL {
-        uuid id PK
-        uuid owner_id FK "refers to EXTERNAL_USER"
+    PET ||--o{ APPOINTMENT : has
+    PET {
+        uint id PK
+        uint owner_id FK "refers to EXTERNAL_USER"
         string name
         string species
         string breed
         string hair_color
         date birth_date
         enum gender "female, male"
+        text initial_medical_history
+        string avatar_id
     }
 
     APPOINTMENT {
         uuid id PK
-        uuid animal_id FK
-        uuid doctor_id FK "refers to INTERNAL_USER"
+        uint pet_id FK
+        uint doctor_id FK "refers to INTERNAL_USER"
         string service_type "vaccine, checkup, treatment"
         date appointment_date
         integer queue_number
@@ -68,7 +69,7 @@ erDiagram
     REMINDER ||--o{ APPOINTMENT : fulfills
     REMINDER {
         uuid id PK
-        uuid animal_id FK
+        uint pet_id FK
         uuid source_appointment_id FK
         uuid fulfilling_appointment_id FK
         string description
@@ -80,7 +81,7 @@ erDiagram
 1. **EXTERNAL_USER**: Menyimpan data login dan profil untuk Pemilik Hewan pada aplikasi eksternal.
 2. **INTERNAL_USER**: Menyimpan data login dan peran staf klinik (Manajer, Resepsionis, Dokter) pada aplikasi internal.
 3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal.
-4. **ANIMAL**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER).
+4. **PET**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER). Menyimpan informasi medis dasar dan referensi avatar.
 5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini. Data riwayat status dan rekam medis disimpan di MongoDB.
 6. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak keterkaitan dengan janji temu asal dan janji temu baru yang menanganinya.
 

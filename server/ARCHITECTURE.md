@@ -8,6 +8,7 @@ The project follows a modular structure where each domain (e.g., auth, notificat
 - **Controller (controller.go):** Handles HTTP transport logic using the Echo framework. Responsible for binding, validation, and calling the appropriate service.
 - **Service (service.go):** Contains the core business logic. It is agnostic of the transport layer and interacts with the database or external services.
 - **DTOs (dto.go):** Data Transfer Objects that define the contract between the API and the client, preventing leak of database models to the edge. DTO also use `validate` tags for validation.
+- **Models (server/models/):** Represents the database schema. **Strict Rule:** Models MUST NOT contain `json` tags. API response and request structures must be exclusively defined in DTOs.
 
 ## 2. Data Access Layer (GORM)
 The project utilizes the latest **GORM Generic API** for type-safe database operations.
@@ -33,8 +34,8 @@ For non-relational data such as audit logs, medical records, and session managem
 - **Request Processing:** Use `core.BindAndValidate` in Controllers to ensure consistent binding and validation logic.
 - **Action Responses:** For operations that do not return a specific resource (e.g., delete, logout, status updates), use `core.CreateActionResponse(success bool)` to provide a standardized JSON response: `{"success": true}`.
 - **Error Propagation:** 
-    - Propagate raw errors for internal failures or generic binding/validation issues to allow Echo's default handler to manage them.
-    - Define and handle specific domain errors (e.g., `ErrEmailAlreadyRegistered`) only when custom HTTP status codes (like 409) are required.
+    - **Internal/Unknown Errors:** Propagate raw errors for unexpected failures (e.g., database connection issues, S3 timeout) to allow Echo's default handler to manage them, usually resulting in a 500 Internal Server Error.
+    - **Known Domain Errors:** If an error is expected as part of business logic (e.g., `ErrAvatarNotFound`, `ErrEmailAlreadyRegistered`), define a specific error variable in the **Service** layer. The **Controller** MUST then check for these errors using `errors.Is` and map them to appropriate HTTP status codes (e.g., 400 Bad Request, 409 Conflict, 404 Not Found). This prevents business logic failures from appearing as generic system crashes.
 - **Route Management:** Controllers should implement a `RegisterRoutes(group *echo.Group)` method to manage their own domain routing, keeping `main.go` clean.
 
 ### Middleware & Authorization
@@ -44,9 +45,9 @@ For non-relational data such as audit logs, medical records, and session managem
     - `core.GuardRoleLoggedIn`: Ensures the user is authenticated.
     - `core.GuardRoleNotLoggedIn`: Ensures the user is NOT authenticated (e.g., for login/register routes).
     - `models.AccountRole`: Pass a specific role (e.g., `models.RoleOwner`, `models.RoleDoctor`) to restrict access to that role only.
-- **Session Retrieval:** Use `core.GetUserSession(c)` in controllers to safely retrieve the current user's session data.
+- **Session Retrieval:** Use `core.GetUserSession(c)` in controllers to safely retrieve the current user's session data. This is a **custom function** that extracts session information from the Echo context after it has been populated by the Session Middleware.
 
-## 4. Development Workflow
+## 5. Development Workflow
 1. Define the GORM database model in server/models/.
 2. Register the model in db.AutoMigrate in main.go.
 3. Implement the Service logic.

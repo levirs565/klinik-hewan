@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -71,13 +72,14 @@ type PresignedURLResponse struct {
 	Headers map[string]string `json:"headers"`
 }
 
-func (s *S3Helper) GeneratePresignedPutURL(ctx context.Context, key string, contentType string, expiresIn time.Duration) (*PresignedURLResponse, error) {
+func (s *S3Helper) GeneratePresignedPutURL(ctx context.Context, key string, contentType string, size int64, expiresIn time.Duration) (*PresignedURLResponse, error) {
 	presignClient := s3.NewPresignClient(s.Client)
 
 	request, err := presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
-		Bucket:      aws.String(s.Bucket),
-		Key:         aws.String(key),
-		ContentType: aws.String(contentType),
+		Bucket:        aws.String(s.Bucket),
+		Key:           aws.String(key),
+		ContentType:   aws.String(contentType),
+		ContentLength: aws.Int64(size),
 	}, s3.WithPresignExpires(expiresIn))
 
 	if err != nil {
@@ -96,4 +98,58 @@ func (s *S3Helper) GeneratePresignedPutURL(ctx context.Context, key string, cont
 		Method:  request.Method,
 		Headers: headers,
 	}, nil
+}
+
+func (s *S3Helper) GeneratePresignedGetURL(ctx context.Context, key string, expiresIn time.Duration) (string, error) {
+	presignClient := s3.NewPresignClient(s.Client)
+
+	request, err := presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.Bucket),
+		Key:    aws.String(key),
+	}, s3.WithPresignExpires(expiresIn))
+
+	if err != nil {
+		return "", fmt.Errorf("failed to presign get object: %w", err)
+	}
+
+	return request.URL, nil
+}
+
+func (s *S3Helper) MoveObject(ctx context.Context, sourceKey string, destinationKey string) error {
+	copySource := fmt.Sprintf("%s/%s", s.Bucket, sourceKey)
+
+	_, err := s.Client.CopyObject(ctx, &s3.CopyObjectInput{
+		Bucket:     aws.String(s.Bucket),
+		CopySource: aws.String(copySource),
+		Key:        aws.String(destinationKey),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to copy object: %w", err)
+	}
+
+	_, err = s.Client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.Bucket),
+		Key:    aws.String(sourceKey),
+	})
+	if err != nil {
+		fmt.Printf("warning: failed to delete source object %s: %v\n", sourceKey, err)
+	}
+
+	return nil
+}
+
+func (s *S3Helper) FileExists(ctx context.Context, key string) (bool, error) {
+	_, err := s.Client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(s.Bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		var nsk *types.NoSuchKey
+		var nf *types.NotFound
+		if errors.As(err, &nsk) || errors.As(err, &nf) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

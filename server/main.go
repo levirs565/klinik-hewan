@@ -63,7 +63,7 @@ func main() {
 		panic(fmt.Errorf("failed to configure S3 lifecycle policy: %w", err))
 	}
 
-	petService := pet.NewService(s3Helper)
+	petService := pet.NewService(db, s3Helper)
 	petController := pet.NewController(petService)
 
 	// Routes

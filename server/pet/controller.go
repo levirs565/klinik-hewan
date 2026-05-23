@@ -1,6 +1,7 @@
 package pet
 
 import (
+	"errors"
 	"net/http"
 	"vetconnect-server/core"
 
@@ -12,15 +13,33 @@ type Controller struct {
 }
 
 func NewController(service *Service) *Controller {
-	return &Controller{
-		service: service,
-	}
+	return &Controller{service: service}
 }
 
 func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	petGroup := group.Group("/pets")
 	petGroup.Use(core.NewGuardRoleMiddleware(core.GuardRoleOwner))
+	petGroup.POST("", ctrl.CreatePet)
 	petGroup.POST("/avatar/presigned-url", ctrl.GetPresignedURL)
+}
+
+func (ctrl *Controller) CreatePet(c *echo.Context) error {
+	session := core.GetUserSession(c)
+
+	var req CreatePetRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	res, err := ctrl.service.CreatePet((*c).Request().Context(), session.ID, req)
+	if err != nil {
+		if errors.Is(err, ErrAvatarNotFound) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, res)
 }
 
 func (ctrl *Controller) GetPresignedURL(c *echo.Context) error {
@@ -31,7 +50,7 @@ func (ctrl *Controller) GetPresignedURL(c *echo.Context) error {
 
 	session := core.GetUserSession(c)
 
-	res, err := ctrl.service.GetPresignedURL(c.Request().Context(), session.ID, req.ContentType)
+	res, err := ctrl.service.GetPresignedURL((*c).Request().Context(), session.ID, req.ContentType, req.FileSize)
 	if err != nil {
 		return err
 	}
