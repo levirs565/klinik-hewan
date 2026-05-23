@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
+	"vetconnect-server/core"
 	"vetconnect-server/models"
 
 	"golang.org/x/crypto/argon2"
@@ -16,14 +18,21 @@ import (
 
 var (
 	ErrEmailAlreadyRegistered = errors.New("email already registered")
+	ErrInvalidCredentials     = errors.New("invalid email or password")
 )
 
 type Service struct {
-	db *gorm.DB
+	db          *gorm.DB
+	mongo       *core.MongoStorage
+	tokenHelper *core.TokenHelper
 }
 
-func NewService(db *gorm.DB) *Service {
-	return &Service{db: db}
+func NewService(db *gorm.DB, mongo *core.MongoStorage, tokenHelper *core.TokenHelper) *Service {
+	return &Service{
+		db:          db,
+		mongo:       mongo,
+		tokenHelper: tokenHelper,
+	}
 }
 
 type argon2Params struct {
@@ -68,6 +77,45 @@ func (s *Service) RegisterOwner(ctx context.Context, req RegisterOwnerRequest) (
 		ID:       user.ID,
 		FullName: user.FullName,
 		Email:    user.Email,
+	}, nil
+}
+
+func (s *Service) LoginOwner(ctx context.Context, req LoginOwnerRequest) (*LoginOwnerResponse, error) {
+	user, err := gorm.G[models.ExternalUser](s.db).Where("email = ?", req.Email).First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+
+	match, err := s.ComparePassword(req.Password, user.Password)
+	if err != nil || !match {
+		return nil, ErrInvalidCredentials
+	}
+	tokens, err := s.tokenHelper.GenerateToken(user.ID, models.RoleOwner)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store refresh token in MongoDB
+	refreshTokenDoc := models.RefreshToken{
+		UserID:    user.ID,
+		UserType:  models.UserTypeExternal,
+		Token:     tokens.RefreshTokenHash,
+		ExpiresAt: tokens.RefreshTokenExpiresAt,
+		TTLExpiry: tokens.RefreshTokenExpiresAt.Add(7 * 24 * time.Hour),
+		CreatedAt: time.Now(),
+		IsRevoked: false,
+	}
+
+	if _, err := s.mongo.RefreshTokens.InsertOne(ctx, refreshTokenDoc); err != nil {
+		return nil, err
+	}
+
+	return &LoginOwnerResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
 	}, nil
 }
 

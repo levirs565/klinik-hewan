@@ -16,7 +16,13 @@ The project utilizes the latest **GORM Generic API** for type-safe database oper
 - **Example:** gorm.G[models.Product](s.db).Where("id = ?", id).First(ctx)
 - **Transactions:** Complex operations involving multiple steps are wrapped in db.Transaction.
 
-## 3. Engineering Standards & Best Practices
+## 3. Data Access Layer (MongoDB)
+For non-relational data such as audit logs, medical records, and session management, the project uses MongoDB with a centralized storage pattern.
+
+- **MongoStorage:** A centralized struct in `core/db.go` that exposes specific collections as typed fields. This eliminates magic strings in service logic.
+- **Usage:** Access collections via `s.mongo.CollectionName` (e.g., `s.mongo.RefreshTokens`).
+
+## 4. Engineering Standards & Best Practices
 
 ### Security
 - **Password Hashing:** Uses **Argon2id** for industry-standard security.

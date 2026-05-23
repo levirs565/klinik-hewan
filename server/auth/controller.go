@@ -18,6 +18,7 @@ func NewController(service *Service) *Controller {
 
 func (ctrl *Controller) RegisterRoutes(e *echo.Group) {
 	e.POST("/owner/register", ctrl.RegisterOwner)
+	e.POST("/owner/login", ctrl.LoginOwner)
 }
 
 func (ctrl *Controller) RegisterOwner(c *echo.Context) error {
@@ -35,4 +36,21 @@ func (ctrl *Controller) RegisterOwner(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, res)
+}
+
+func (ctrl *Controller) LoginOwner(c *echo.Context) error {
+	var req LoginOwnerRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	res, err := ctrl.service.LoginOwner((*c).Request().Context(), req)
+	if err != nil {
+		if errors.Is(err, ErrInvalidCredentials) {
+			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }

@@ -2,7 +2,7 @@
 
 ## Server
 
-Instruksi ini dikhusukan jika sedang mengerjakan server. Sebelum memulai, pastikan membaca:
+Instruksi ini dikhusukan jika sedang mengerjakan server. Sebelum memulai, Anda **harus** membaca ini:
 
 - [DATABASE.md](DATABASE.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)

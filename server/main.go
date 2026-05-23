@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"os"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
 
@@ -30,8 +31,20 @@ func main() {
 		panic(err)
 	}
 
+	mongoClient, err := core.InitMongoDB()
+	if err != nil {
+		panic(err)
+	}
+
+	// Initialize TokenHelper
+	jwtKey := os.Getenv("JWT_SECRET")
+	if jwtKey == "" {
+		panic("JWT_SECRET environment variable is not set")
+	}
+	tokenHelper := core.NewTokenHelper(jwtKey)
+
 	// Initialize Layers
-	authService := auth.NewService(db)
+	authService := auth.NewService(db, mongoClient, tokenHelper)
 	authController := auth.NewController(authService)
 
 	// Routes
