@@ -86,6 +86,13 @@ func ensureIndexes(ctx context.Context, s *MongoStorage) error {
 	_, err := s.RefreshTokens.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
 			Keys: bson.D{
+				{Key: "token", Value: 1},
+				{Key: "is_revoked", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{
 				{Key: "user_type", Value: 1},
 				{Key: "user_id", Value: 1},
 			},
