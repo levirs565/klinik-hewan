@@ -9,6 +9,7 @@ import (
 	"vetconnect-server/models"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
 
@@ -76,7 +77,7 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 	}
 
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&pet).Error; err != nil {
+		if err := gorm.G[models.Pet](tx).Create(ctx, &pet); err != nil {
 			return err
 		}
 
@@ -95,6 +96,35 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 	}
 
 	return s.MapToResponse(ctx, pet), nil
+}
+
+func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse, error) {
+	pets, err := gorm.G[models.Pet](s.db).Where("owner_id = ?", ownerID).Find(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := lo.Map(pets, func(pet models.Pet, _ int) MyPetResponse {
+		res := MyPetResponse{
+			Name:      pet.Name,
+			Species:   pet.Species,
+			BirthDate: pet.BirthDate,
+		}
+
+		if pet.AvatarID != "" {
+			permanentKey := s.getPermanentAvatarKey(pet.ID, pet.AvatarID)
+			url, err := s.s.GeneratePresignedGetURL(ctx, permanentKey, 1*time.Hour)
+			if err != nil {
+				fmt.Printf("warning: failed to generate presigned GET url for pet %d: %v\n", pet.ID, err)
+			} else {
+				res.AvatarURL = url
+			}
+		}
+
+		return res
+	})
+
+	return responses, nil
 }
 
 func (s *Service) MapToResponse(ctx context.Context, pet models.Pet) *PetResponse {

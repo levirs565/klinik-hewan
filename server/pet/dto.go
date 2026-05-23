@@ -1,6 +1,10 @@
 package pet
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/datatypes"
+)
 
 type GetPresignedURLRequest struct {
 	FileSize    int64  `json:"file_size" validate:"required,min=1,max=5242880"` // Max 5MB
@@ -15,26 +19,33 @@ type GetPresignedURLResponse struct {
 }
 
 type CreatePetRequest struct {
-	Name                  string    `json:"name" validate:"required"`
-	Species               string    `json:"species" validate:"required"`
-	Breed                 string    `json:"breed" validate:"required"`
-	Gender                string    `json:"gender" validate:"required,oneof=male female"`
-	BirthDate             time.Time `json:"birth_date" validate:"required"`
-	HairColor             string    `json:"hair_color" validate:"required"`
-	InitialMedicalHistory string    `json:"initial_medical_history"`
-	AvatarUploadID        string    `json:"avatar_upload_id"`
+	Name                  string         `json:"name" validate:"required"`
+	Species               string         `json:"species" validate:"required"`
+	Breed                 string         `json:"breed" validate:"required"`
+	Gender                string         `json:"gender" validate:"required,oneof=male female"`
+	BirthDate             datatypes.Date `json:"birth_date" validate:"required"`
+	HairColor             string         `json:"hair_color" validate:"required"`
+	InitialMedicalHistory string         `json:"initial_medical_history"`
+	AvatarUploadID        string         `json:"avatar_upload_id"`
 }
 
 type PetResponse struct {
-	ID                    uint      `json:"id"`
-	OwnerID               uint      `json:"owner_id"`
-	Name                  string    `json:"name"`
-	Species               string    `json:"species"`
-	Breed                 string    `json:"breed"`
-	Gender                string    `json:"gender"`
-	BirthDate             time.Time `json:"birth_date"`
-	HairColor             string    `json:"hair_color"`
-	InitialMedicalHistory string    `json:"initial_medical_history,omitempty"`
-	AvatarURL             string    `json:"avatar_url,omitempty"`
-	CreatedAt             time.Time `json:"created_at"`
+	ID                    uint           `json:"id"`
+	OwnerID               uint           `json:"owner_id"`
+	Name                  string         `json:"name"`
+	Species               string         `json:"species"`
+	Breed                 string         `json:"breed"`
+	Gender                string         `json:"gender"`
+	BirthDate             datatypes.Date `json:"birth_date"`
+	HairColor             string         `json:"hair_color"`
+	InitialMedicalHistory string         `json:"initial_medical_history,omitempty"`
+	AvatarURL             string         `json:"avatar_url,omitempty"`
+	CreatedAt             time.Time      `json:"created_at"`
+}
+
+type MyPetResponse struct {
+	Name      string         `json:"name"`
+	AvatarURL string         `json:"avatar_url,omitempty"`
+	Species   string         `json:"species"`
+	BirthDate datatypes.Date `json:"birth_date"`
 }

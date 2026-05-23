@@ -19,8 +19,20 @@ func NewController(service *Service) *Controller {
 func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	petGroup := group.Group("/pets")
 	petGroup.Use(core.NewGuardRoleMiddleware(core.GuardRoleOwner))
+	petGroup.GET("", ctrl.GetMyPets)
 	petGroup.POST("", ctrl.CreatePet)
 	petGroup.POST("/avatar/presigned-url", ctrl.GetPresignedURL)
+}
+
+func (ctrl *Controller) GetMyPets(c *echo.Context) error {
+	session := core.GetUserSession(c)
+
+	res, err := ctrl.service.GetMyPets((*c).Request().Context(), session.ID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (ctrl *Controller) CreatePet(c *echo.Context) error {
