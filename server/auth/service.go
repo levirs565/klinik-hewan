@@ -12,6 +12,7 @@ import (
 	"vetconnect-server/core"
 	"vetconnect-server/models"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/argon2"
 	"gorm.io/gorm"
 )
@@ -19,6 +20,8 @@ import (
 var (
 	ErrEmailAlreadyRegistered = errors.New("email already registered")
 	ErrInvalidCredentials     = errors.New("invalid email or password")
+	ErrInvalidRefreshToken    = errors.New("invalid refresh token")
+	ErrExpiredRefreshToken    = errors.New("expired refresh token")
 )
 
 type Service struct {
@@ -117,6 +120,101 @@ func (s *Service) LoginOwner(ctx context.Context, req LoginOwnerRequest) (*Login
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 	}, nil
+}
+
+func (s *Service) RefreshToken(ctx context.Context, req RefreshTokenRequest) (*RefreshTokenResponse, error) {
+	tokenHash := s.tokenHelper.HashToken(req.RefreshToken)
+
+	var refreshToken models.RefreshToken
+	err := s.mongo.RefreshTokens.FindOne(ctx, bson.M{
+		"token":      tokenHash,
+		"is_revoked": false,
+	}).Decode(&refreshToken)
+
+	if err != nil {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	if time.Now().After(refreshToken.ExpiresAt) {
+		return nil, ErrExpiredRefreshToken
+	}
+
+	// Revoke old token
+	_, err = s.mongo.RefreshTokens.UpdateOne(ctx,
+		bson.M{"_id": refreshToken.ID},
+		bson.M{"$set": bson.M{"is_revoked": true}},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// For now, only handle ExternalUser (Owner)
+	role := models.RoleOwner
+	// In the future, we might need to fetch internal user and their role if UserType is internal
+
+	tokens, err := s.tokenHelper.GenerateToken(refreshToken.UserID, role)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store new refresh token
+	newRefreshTokenDoc := models.RefreshToken{
+		UserID:    refreshToken.UserID,
+		UserType:  refreshToken.UserType,
+		Token:     tokens.RefreshTokenHash,
+		ExpiresAt: tokens.RefreshTokenExpiresAt,
+		TTLExpiry: tokens.RefreshTokenExpiresAt.Add(7 * 24 * time.Hour),
+		CreatedAt: time.Now(),
+		IsRevoked: false,
+	}
+
+	if _, err := s.mongo.RefreshTokens.InsertOne(ctx, newRefreshTokenDoc); err != nil {
+		return nil, err
+	}
+
+	return &RefreshTokenResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}, nil
+}
+
+func (s *Service) Logout(ctx context.Context, req LogoutRequest) error {
+	tokenHash := s.tokenHelper.HashToken(req.RefreshToken)
+
+	result, err := s.mongo.RefreshTokens.UpdateOne(ctx,
+		bson.M{
+			"token":      tokenHash,
+			"is_revoked": false,
+		},
+		bson.M{"$set": bson.M{"is_revoked": true}},
+	)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return ErrInvalidRefreshToken
+	}
+
+	return nil
+}
+
+func (s *Service) GetMe(ctx context.Context, session core.UserSession) (*MeResponse, error) {
+	if session.Role == string(models.RoleOwner) {
+		user, err := gorm.G[models.ExternalUser](s.db).Where("id = ?", session.ID).First(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &MeResponse{
+			ID:       user.ID,
+			FullName: user.FullName,
+			Email:    user.Email,
+			Role:     session.Role,
+		}, nil
+	}
+
+	return nil, errors.New("unsupported role")
 }
 
 func (s *Service) hashPassword(password string) (string, error) {

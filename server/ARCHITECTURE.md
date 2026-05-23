@@ -31,10 +31,20 @@ For non-relational data such as audit logs, medical records, and session managem
 
 ### Request & Error Handling
 - **Request Processing:** Use `core.BindAndValidate` in Controllers to ensure consistent binding and validation logic.
+- **Action Responses:** For operations that do not return a specific resource (e.g., delete, logout, status updates), use `core.CreateActionResponse(success bool)` to provide a standardized JSON response: `{"success": true}`.
 - **Error Propagation:** 
     - Propagate raw errors for internal failures or generic binding/validation issues to allow Echo's default handler to manage them.
     - Define and handle specific domain errors (e.g., `ErrEmailAlreadyRegistered`) only when custom HTTP status codes (like 409) are required.
 - **Route Management:** Controllers should implement a `RegisterRoutes(group *echo.Group)` method to manage their own domain routing, keeping `main.go` clean.
+
+### Middleware & Authorization
+
+- **Session Middleware:** `core.NewSessionMiddleware` must be registered (usually in `main.go` for the `/api` group) to populate the `UserSession` in the Echo context from JWT tokens.
+- **Guard Middleware:** Use `core.NewGuardRoleMiddleware(rule)` to enforce access control on specific routes. 
+    - `core.GuardRoleLoggedIn`: Ensures the user is authenticated.
+    - `core.GuardRoleNotLoggedIn`: Ensures the user is NOT authenticated (e.g., for login/register routes).
+    - `models.AccountRole`: Pass a specific role (e.g., `models.RoleOwner`, `models.RoleDoctor`) to restrict access to that role only.
+- **Session Retrieval:** Use `core.GetUserSession(c)` in controllers to safely retrieve the current user's session data.
 
 ## 4. Development Workflow
 1. Define the GORM database model in server/models/.

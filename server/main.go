@@ -54,6 +54,7 @@ func main() {
 
 	// Register Domain Routes
 	api := e.Group("/api")
+	api.Use(core.NewSessionMiddleware(tokenHelper))
 	authController.RegisterRoutes(api)
 
 	if err := e.Start(":1323"); err != nil {
