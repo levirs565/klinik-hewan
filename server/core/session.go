@@ -62,8 +62,12 @@ type UserSession struct {
 type GuardRoleRule string
 
 const (
-	GuardRoleNotLoggedIn GuardRoleRule = ""
-	GuardRoleLoggedIn    GuardRoleRule = "logged-in"
+	GuardRoleNotLoggedIn  GuardRoleRule = ""
+	GuardRoleLoggedIn     GuardRoleRule = "logged-in"
+	GuardRoleManager      GuardRoleRule = "manager"
+	GuardRoleReceptionist GuardRoleRule = "receptionist"
+	GuardRoleDoctor       GuardRoleRule = "doctor"
+	GuardRoleOwner        GuardRoleRule = "owner"
 )
 
 func GuardRole(session UserSession, rule GuardRoleRule) error {

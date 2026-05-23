@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
+	"vetconnect-server/pet"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
@@ -47,6 +51,21 @@ func main() {
 	authService := auth.NewService(db, mongoClient, tokenHelper)
 	authController := auth.NewController(authService)
 
+	s3Helper, err := core.NewS3Helper()
+	if err != nil {
+		panic(fmt.Errorf("S3 Helper initialization failed: %w", err))
+	}
+
+	// Set lifecycle policy for temp files
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s3Helper.ConfigureLifecyclePolicy(ctx); err != nil {
+		panic(fmt.Errorf("failed to configure S3 lifecycle policy: %w", err))
+	}
+
+	petService := pet.NewService(s3Helper)
+	petController := pet.NewController(petService)
+
 	// Routes
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "VetConnect API")
@@ -56,6 +75,7 @@ func main() {
 	api := e.Group("/api")
 	api.Use(core.NewSessionMiddleware(tokenHelper))
 	authController.RegisterRoutes(api)
+	petController.RegisterRoutes(api)
 
 	if err := e.Start(":1323"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

@@ -44,11 +44,11 @@ erDiagram
         uuid id PK
         uuid owner_id FK "refers to EXTERNAL_USER"
         string name
-        string type "cat, dog, etc"
+        string species
         string breed
         string hair_color
-        date birth_date_or_age
-        string gender
+        date birth_date
+        enum gender "female, male"
     }
 
     APPOINTMENT {
