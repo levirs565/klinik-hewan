@@ -110,14 +110,24 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 	}, nil
 }
 
-func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint) (*GetOwnerAppointmentsResponse, error) {
-	appointments, err := gorm.G[models.Appointment](s.db).
+func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter string) (*GetOwnerAppointmentsResponse, error) {
+	query := gorm.G[models.Appointment](s.db).
 		Select("appointments.id", "current_state", "service_type", "appointment_date").
 		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
 			db.Select("id", "name", "breed", "avatar_id")
 			return nil
 		}).
-		Where("`Pet`.owner_id = ?", ownerID).
+		Where("`Pet`.owner_id = ?", ownerID)
+
+	today := time.Now().Format("2006-01-02")
+	switch filter {
+	case "upcoming":
+		query = query.Where("appointments.appointment_date >= ?", today)
+	case "past":
+		query = query.Where("appointments.appointment_date < ?", today)
+	}
+
+	appointments, err := query.
 		Order("appointments.appointment_date DESC, appointments.created_at DESC").
 		Find(ctx)
 

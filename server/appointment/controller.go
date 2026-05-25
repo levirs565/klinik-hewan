@@ -46,8 +46,9 @@ func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
 }
 
 func (ctrl *Controller) GetOwnerAppointments(c *echo.Context) error {
+	filter := c.QueryParam("filter")
 	session := core.GetUserSession(c)
-	res, err := ctrl.service.GetOwnerAppointments(c.Request().Context(), session.ID)
+	res, err := ctrl.service.GetOwnerAppointments(c.Request().Context(), session.ID, filter)
 	if err != nil {
 		return err
 	}
