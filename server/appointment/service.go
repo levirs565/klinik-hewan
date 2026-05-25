@@ -146,7 +146,7 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint) (*GetO
 }
 
 func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {
-	app, err := gorm.G[models.Appointment](s.db.Debug()).
+	app, err := gorm.G[models.Appointment](s.db).
 		Select("appointments.id", "current_state", "service_type", "appointment_date", "owner_notes", "previous_medical_history").
 		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
 			db.Select("id", "name", "breed", "avatar_id", "birth_date")
@@ -173,7 +173,7 @@ func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appoin
 			Name:      app.Pet.Name,
 			Breed:     app.Pet.Breed,
 			BirthDate: core.Date(app.Pet.BirthDate),
-			AvatarURL: s.s3.GetPetAvatarURL(ctx, app.PetID, app.Pet.AvatarID),
+			AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
 		},
 		Status:                 string(app.CurrentState),
 		ServiceType:            app.ServiceType,
@@ -182,7 +182,7 @@ func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appoin
 		PreviousMedicalHistory: app.PreviousMedicalHistory,
 	}
 
-	if app.DoctorID != nil && app.Doctor != nil && app.Doctor.InternalUser.ID != 0 {
+	if app.Doctor != nil && app.Doctor.InternalUser.ID != 0 {
 		response.Doctor = &AppointmentDoctorSummary{
 			ID:   app.Doctor.InternalUser.ID,
 			Name: app.Doctor.InternalUser.FullName,

@@ -2,6 +2,9 @@
 
 ## MySQL
 
+> [!IMPORTANT]
+> **TODO:** Migrasikan tabel `EXTERNAL_USER`, `INTERNAL_USER`, `DOCTOR_PROFILE`, dan `PET` untuk menggunakan **UUID** sebagai Primary Key (saat ini masih menggunakan `uint`). Tabel `APPOINTMENT` dan `REMINDER` sudah menggunakan UUID.
+
 Berikut adalah rancangan tabel basis data berdasarkan spesifikasi sistem.
 
 ```mermaid
