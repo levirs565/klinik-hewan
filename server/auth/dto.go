@@ -10,6 +10,16 @@ type LoginOwnerResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type LoginInternalRequest struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+type LoginInternalResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type RegisterOwnerRequest struct {
 	FullName string `json:"full_name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
@@ -38,6 +48,7 @@ type LogoutRequest struct {
 type MeResponse struct {
 	ID       uint   `json:"id"`
 	FullName string `json:"full_name"`
-	Email    string `json:"email"`
+	Email    string `json:"email,omitempty"`
+	Username string `json:"username,omitempty"`
 	Role     string `json:"role"`
 }
