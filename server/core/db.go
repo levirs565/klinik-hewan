@@ -46,6 +46,7 @@ type MongoStorage struct {
 	RefreshTokens           *mongo.Collection
 	AppointmentReservations *mongo.Collection
 	StatusHistories         *mongo.Collection
+	FCMTokens               *mongo.Collection
 }
 
 func InitMongoDB() (*MongoStorage, error) {
@@ -80,6 +81,7 @@ func InitMongoDB() (*MongoStorage, error) {
 		RefreshTokens:           db.Collection("refresh_tokens"),
 		AppointmentReservations: db.Collection("appointment_reservations"),
 		StatusHistories:         db.Collection("status_histories"),
+		FCMTokens:               db.Collection("fcm_tokens"),
 	}
 
 	if err := ensureIndexes(ctx, storage); err != nil {
@@ -127,6 +129,23 @@ func ensureIndexes(ctx context.Context, s *MongoStorage) error {
 	// Indexes for StatusHistories
 	_, err = s.StatusHistories.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{{Key: "appointment_id", Value: 1}},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Indexes for FCMTokens
+	_, err = s.FCMTokens.Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "token", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{
+				{Key: "user_type", Value: 1},
+				{Key: "user_id", Value: 1},
+			},
+		},
 	})
 	return err
 }

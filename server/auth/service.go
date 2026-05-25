@@ -13,6 +13,7 @@ import (
 	"vetconnect-server/models"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/argon2"
 	"gorm.io/gorm"
 )
@@ -312,6 +313,43 @@ func (s *Service) CreateInternalUser(ctx context.Context, username, password, fu
 	}
 
 	return gorm.G[models.InternalUser](s.db).Create(ctx, &user)
+}
+
+func (s *Service) SaveFCMToken(ctx context.Context, session core.UserSession, req SaveFCMTokenRequest) error {
+	userType := models.UserTypeInternal
+	if session.Role == string(models.RoleOwner) {
+		userType = models.UserTypeExternal
+	}
+
+	filter := bson.M{"token": req.Token}
+	update := bson.M{
+		"$set": bson.M{
+			"user_id":      session.ID,
+			"user_type":    userType,
+			"device_type":  req.DeviceType,
+			"last_used_at": time.Now(),
+		},
+		"$setOnInsert": bson.M{
+			"created_at": time.Now(),
+		},
+	}
+
+	_, err := s.mongo.FCMTokens.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
+	return err
+}
+
+func (s *Service) DeleteFCMToken(ctx context.Context, session core.UserSession, req DeleteFCMTokenRequest) error {
+	userType := models.UserTypeInternal
+	if session.Role == string(models.RoleOwner) {
+		userType = models.UserTypeExternal
+	}
+
+	_, err := s.mongo.FCMTokens.DeleteOne(ctx, bson.M{
+		"token":     req.Token,
+		"user_id":   session.ID,
+		"user_type": userType,
+	})
+	return err
 }
 
 func (s *Service) hashPassword(password string) (string, error) {

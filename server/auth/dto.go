@@ -52,3 +52,12 @@ type MeResponse struct {
 	Username string `json:"username,omitempty"`
 	Role     string `json:"role"`
 }
+
+type SaveFCMTokenRequest struct {
+	Token      string `json:"token" validate:"required"`
+	DeviceType string `json:"device_type" validate:"required"`
+}
+
+type DeleteFCMTokenRequest struct {
+	Token string `json:"token" validate:"required"`
+}

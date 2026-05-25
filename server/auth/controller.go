@@ -23,6 +23,8 @@ func (ctrl *Controller) RegisterRoutes(e *echo.Group) {
 	e.POST("/token/refresh", ctrl.RefreshToken)
 	e.POST("/logout", ctrl.Logout)
 	e.GET("/me", ctrl.GetMe, core.NewGuardRoleMiddleware(core.GuardRoleLoggedIn))
+	e.POST("/fcm/token", ctrl.SaveFCMToken, core.NewGuardRoleMiddleware(core.GuardRoleLoggedIn))
+	e.DELETE("/fcm/token", ctrl.DeleteFCMToken, core.NewGuardRoleMiddleware(core.GuardRoleLoggedIn))
 }
 
 func (ctrl *Controller) RegisterOwner(c *echo.Context) error {
@@ -118,4 +120,34 @@ func (ctrl *Controller) GetMe(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) SaveFCMToken(c *echo.Context) error {
+	var req SaveFCMTokenRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err := ctrl.service.SaveFCMToken((*c).Request().Context(), session, req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
+}
+
+func (ctrl *Controller) DeleteFCMToken(c *echo.Context) error {
+	var req DeleteFCMTokenRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err := ctrl.service.DeleteFCMToken((*c).Request().Context(), session, req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }
