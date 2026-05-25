@@ -53,3 +53,27 @@ type AppointmentListItem struct {
 type GetOwnerAppointmentsResponse struct {
 	Items []AppointmentListItem `json:"items"`
 }
+
+type AppointmentDetailPet struct {
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Breed     string    `json:"breed"`
+	BirthDate core.Date `json:"birth_date"`
+	AvatarURL string    `json:"avatar_url,omitempty"`
+}
+
+type AppointmentDoctorSummary struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type AppointmentDetailResponse struct {
+	ID                     uuid.UUID                 `json:"id"`
+	Pet                    AppointmentDetailPet      `json:"pet"`
+	Doctor                 *AppointmentDoctorSummary `json:"doctor,omitempty"`
+	Status                 string                    `json:"status"`
+	ServiceType            string                    `json:"service_type"`
+	AppointmentDate        core.Date                 `json:"appointment_date"`
+	OwnerNotes             string                    `json:"owner_notes"`
+	PreviousMedicalHistory string                    `json:"previous_medical_history"`
+}

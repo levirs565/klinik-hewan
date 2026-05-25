@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"vetconnect-server/core"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 )
 
@@ -23,6 +24,7 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	appointments.Use(core.NewGuardRoleMiddleware(core.GuardRoleOwner))
 	appointments.POST("", ctrl.CreateAppointment)
 	appointments.GET("", ctrl.GetOwnerAppointments)
+	appointments.GET("/:id", ctrl.GetAppointmentDetail)
 }
 
 func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
@@ -47,6 +49,25 @@ func (ctrl *Controller) GetOwnerAppointments(c *echo.Context) error {
 	session := core.GetUserSession(c)
 	res, err := ctrl.service.GetOwnerAppointments(c.Request().Context(), session.ID)
 	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) GetAppointmentDetail(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	session := core.GetUserSession(c)
+	res, err := ctrl.service.GetAppointmentDetail(c.Request().Context(), session.ID, appointmentID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
 		return err
 	}
 

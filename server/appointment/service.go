@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	ErrPetNotFound = errors.New("pet not found or does not belong to you")
+	ErrPetNotFound         = errors.New("pet not found or does not belong to you")
+	ErrAppointmentNotFound = errors.New("appointment not found or does not belong to you")
 )
 
 type Service struct {
@@ -111,6 +112,7 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 
 func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint) (*GetOwnerAppointmentsResponse, error) {
 	appointments, err := gorm.G[models.Appointment](s.db).
+		Select("appointments.id", "current_state", "service_type", "appointment_date").
 		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
 			db.Select("id", "name", "breed", "avatar_id")
 			return nil
@@ -141,4 +143,51 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint) (*GetO
 	return &GetOwnerAppointmentsResponse{
 		Items: items,
 	}, nil
+}
+
+func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {
+	app, err := gorm.G[models.Appointment](s.db.Debug()).
+		Select("appointments.id", "current_state", "service_type", "appointment_date", "owner_notes", "previous_medical_history").
+		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+			db.Select("id", "name", "breed", "avatar_id", "birth_date")
+			return nil
+		}).
+		Joins(clause.JoinTarget{Association: "Doctor.InternalUser", Type: clause.LeftJoin}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+			db.Select("id", "full_name")
+			return nil
+		}).
+		Where("appointments.id = ? AND `Pet`.owner_id = ?", appointmentID, ownerID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrAppointmentNotFound
+		}
+		return nil, err
+	}
+
+	response := &AppointmentDetailResponse{
+		ID: app.ID,
+		Pet: AppointmentDetailPet{
+			ID:        app.Pet.ID,
+			Name:      app.Pet.Name,
+			Breed:     app.Pet.Breed,
+			BirthDate: core.Date(app.Pet.BirthDate),
+			AvatarURL: s.s3.GetPetAvatarURL(ctx, app.PetID, app.Pet.AvatarID),
+		},
+		Status:                 string(app.CurrentState),
+		ServiceType:            app.ServiceType,
+		AppointmentDate:        core.Date(app.AppointmentDate),
+		OwnerNotes:             app.OwnerNotes,
+		PreviousMedicalHistory: app.PreviousMedicalHistory,
+	}
+
+	if app.DoctorID != nil && app.Doctor != nil && app.Doctor.InternalUser.ID != 0 {
+		response.Doctor = &AppointmentDoctorSummary{
+			ID:   app.Doctor.InternalUser.ID,
+			Name: app.Doctor.InternalUser.FullName,
+		}
+	}
+
+	return response, nil
 }

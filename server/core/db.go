@@ -28,6 +28,8 @@ func InitDB() (*gorm.DB, error) {
 	// Auto Migrate the models
 	err = db.AutoMigrate(
 		&models.ExternalUser{},
+		&models.InternalUser{},
+		&models.DoctorProfile{},
 		&models.Pet{},
 		&models.Appointment{},
 	)

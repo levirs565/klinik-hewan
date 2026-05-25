@@ -26,6 +26,7 @@ type Appointment struct {
 	PetID                  uint             `gorm:"not null"`
 	Pet                    Pet              `gorm:"foreignKey:PetID"`
 	DoctorID               *uint            `gorm:"default:null"`
+	Doctor                 *DoctorProfile   `gorm:"foreignKey:DoctorID"`
 	ServiceType            string           `gorm:"type:enum('vaccine','checkup','treatment');not null"`
 	AppointmentDate        datatypes.Date   `gorm:"type:date;not null"`
 	QueueNumber            *int             `gorm:"default:null"`

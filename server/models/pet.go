@@ -9,6 +9,7 @@ import (
 type Pet struct {
 	ID                    uint           `gorm:"primaryKey"`
 	OwnerID               uint           `gorm:"not null"`
+	Owner                 ExternalUser   `gorm:"foreignKey:OwnerID"`
 	Name                  string         `gorm:"size:255;not null"`
 	Species               string         `gorm:"size:100;not null"`
 	Breed                 string         `gorm:"size:100;not null"`
