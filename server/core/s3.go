@@ -138,6 +138,17 @@ func (s *S3Helper) MoveObject(ctx context.Context, sourceKey string, destination
 	return nil
 }
 
+func (s *S3Helper) DeleteObject(ctx context.Context, key string) error {
+	_, err := s.Client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.Bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to delete object: %w", err)
+	}
+	return nil
+}
+
 func (s *S3Helper) FileExists(ctx context.Context, key string) (bool, error) {
 	_, err := s.Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(s.Bucket),

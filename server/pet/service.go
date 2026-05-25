@@ -111,6 +111,71 @@ func (s *Service) GetPetDetail(ctx context.Context, ownerID uint, petID uint) (*
 	return s.MapToResponse(ctx, pet), nil
 }
 
+// TODO: Maybe we need to delete avatar? We need check frontend
+func (s *Service) UpdatePet(ctx context.Context, ownerID uint, petID uint, req CreatePetRequest) (*PetResponse, error) {
+	pet, err := gorm.G[models.Pet](s.db).Where("id = ? AND owner_id = ?", petID, ownerID).First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPetNotFound
+		}
+		return nil, err
+	}
+
+	oldAvatarID := pet.AvatarID
+	pet.Name = req.Name
+	pet.Species = req.Species
+	pet.Breed = req.Breed
+	pet.Gender = req.Gender
+	pet.BirthDate = req.BirthDate
+	pet.HairColor = req.HairColor
+	pet.InitialMedicalHistory = req.InitialMedicalHistory
+
+	var sourceKey string
+	if req.AvatarUploadID != "" && req.AvatarUploadID != oldAvatarID {
+		sourceKey = s.getTempAvatarKey(ownerID, req.AvatarUploadID)
+		exists, err := s.s.FileExists(ctx, sourceKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to check avatar file: %w", err)
+		}
+		if !exists {
+			return nil, ErrAvatarNotFound
+		}
+		pet.AvatarID = req.AvatarUploadID
+	}
+
+	err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		rows, err := gorm.G[models.Pet](tx).Updates(ctx, pet)
+		if err != nil {
+			return err
+		}
+		if rows == 0 {
+			return ErrPetNotFound
+		}
+
+		if pet.AvatarID != "" && pet.AvatarID != oldAvatarID {
+			permanentKey := s.getPermanentAvatarKey(pet.ID, pet.AvatarID)
+			if err := s.s.MoveObject(ctx, sourceKey, permanentKey); err != nil {
+				return err
+			}
+
+			if oldAvatarID != "" {
+				oldKey := s.getPermanentAvatarKey(pet.ID, oldAvatarID)
+				if err := s.s.DeleteObject(ctx, oldKey); err != nil {
+					fmt.Printf("warning: failed to delete old avatar %s: %v\n", oldKey, err)
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.MapToResponse(ctx, pet), nil
+}
+
 func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse, error) {
 	pets, err := gorm.G[models.Pet](s.db).Where("owner_id = ?", ownerID).Find(ctx)
 	if err != nil {
