@@ -11,11 +11,21 @@ The project follows a modular structure where each domain (e.g., auth, notificat
 - **Models (server/models/):** Represents the database schema. **Strict Rule:** Models MUST NOT contain `json` tags. API response and request structures must be exclusively defined in DTOs.
 
 ## 2. Data Access Layer (GORM)
-The project utilizes the latest **GORM Generic API** for type-safe database operations.
+The project utilizes the latest **GORM Generic API** (`gorm.io/gorm` v1.30+) for type-safe database operations.
 
-- **Usage:** gorm.G[models.ModelName](db) is used to create a typed DB instance.
-- **Example:** gorm.G[models.Product](s.db).Where("id = ?", id).First(ctx)
-- **Transactions:** Complex operations involving multiple steps are wrapped in db.Transaction.
+- **Usage:** `gorm.G[models.ModelName](db)` is used to create a typed DB instance.
+- **Explicit Selection:** Always use `.Select()` to specify only the columns required for the response. Avoid using `Select("*")` or relying on default selects to optimize performance and prevent over-fetching.
+- **Constraint:** NEVER mix `gorm.G` with traditional GORM patterns (e.g., `db.Find(&models)`) in the same query chain. The generic wrapper is designed to provide type safety and context-aware execution; mixing them breaks these guarantees.
+- **Identity:** New tables MUST use **UUID** as the Primary Key type (stored as `char(36)` in MySQL). Existing tables using `int` are preserved for compatibility but should be migrated when feasible.
+- **Example:**
+  ```go
+  // Correct idiomatic usage
+  results, err := gorm.G[models.Product](s.db).
+      Select("id", "name", "price").
+      Where("category_id = ?", catID).
+      Find(ctx)
+  ```
+- **Transactions:** Complex operations involving multiple steps are wrapped in `db.Transaction`.
 
 ## 3. Data Access Layer (MongoDB)
 For non-relational data such as audit logs, medical records, and session management, the project uses MongoDB with a centralized storage pattern.
@@ -48,7 +58,7 @@ For non-relational data such as audit logs, medical records, and session managem
 - **Session Retrieval:** Use `core.GetUserSession(c)` in controllers to safely retrieve the current user's session data. This is a **custom function** that extracts session information from the Echo context after it has been populated by the Session Middleware.
 
 ## 5. Development Workflow
-1. Define the GORM database model in server/models/.
+1. Define the GORM and MongoDB database model in server/models/.
 2. Register the model in db.AutoMigrate in main.go.
 3. Implement the Service logic.
 4. Implement the Controller and DTOs.
