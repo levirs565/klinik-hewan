@@ -15,6 +15,7 @@ import (
 
 var (
 	ErrAvatarNotFound = errors.New("avatar file not found in temporary storage")
+	ErrPetNotFound    = errors.New("pet not found")
 )
 
 type Service struct {
@@ -98,6 +99,18 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 	return s.MapToResponse(ctx, pet), nil
 }
 
+func (s *Service) GetPetDetail(ctx context.Context, ownerID uint, petID uint) (*PetResponse, error) {
+	pet, err := gorm.G[models.Pet](s.db).Where("id = ? AND owner_id = ?", petID, ownerID).First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPetNotFound
+		}
+		return nil, err
+	}
+
+	return s.MapToResponse(ctx, pet), nil
+}
+
 func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse, error) {
 	pets, err := gorm.G[models.Pet](s.db).Where("owner_id = ?", ownerID).Find(ctx)
 	if err != nil {
@@ -106,6 +119,7 @@ func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse,
 
 	responses := lo.Map(pets, func(pet models.Pet, _ int) MyPetResponse {
 		res := MyPetResponse{
+			ID:        pet.ID,
 			Name:      pet.Name,
 			Species:   pet.Species,
 			BirthDate: pet.BirthDate,
