@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -59,7 +60,7 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 		Species:               req.Species,
 		Breed:                 req.Breed,
 		Gender:                req.Gender,
-		BirthDate:             req.BirthDate,
+		BirthDate:             datatypes.Date(req.BirthDate.Time()),
 		InitialMedicalHistory: req.InitialMedicalHistory,
 	}
 
@@ -125,7 +126,7 @@ func (s *Service) UpdatePet(ctx context.Context, ownerID uint, petID uint, req C
 	pet.Species = req.Species
 	pet.Breed = req.Breed
 	pet.Gender = req.Gender
-	pet.BirthDate = req.BirthDate
+	pet.BirthDate = datatypes.Date(req.BirthDate.Time())
 	pet.InitialMedicalHistory = req.InitialMedicalHistory
 
 	var sourceKey string
@@ -185,7 +186,7 @@ func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse,
 			ID:        pet.ID,
 			Name:      pet.Name,
 			Species:   pet.Species,
-			BirthDate: pet.BirthDate,
+			BirthDate: core.Date(pet.BirthDate),
 		}
 
 		if pet.AvatarID != "" {
@@ -212,7 +213,7 @@ func (s *Service) MapToResponse(ctx context.Context, pet models.Pet) *PetRespons
 		Species:               pet.Species,
 		Breed:                 pet.Breed,
 		Gender:                pet.Gender,
-		BirthDate:             pet.BirthDate,
+		BirthDate:             core.Date(pet.BirthDate),
 		InitialMedicalHistory: pet.InitialMedicalHistory,
 		CreatedAt:             pet.CreatedAt,
 	}
