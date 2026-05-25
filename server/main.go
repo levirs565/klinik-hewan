@@ -67,7 +67,7 @@ func main() {
 	petService := pet.NewService(db, s3Helper)
 	petController := pet.NewController(petService)
 
-	appointmentService := appointment.NewService(db, mongoClient)
+	appointmentService := appointment.NewService(db, mongoClient, s3Helper)
 	appointmentController := appointment.NewController(appointmentService)
 
 	// Routes

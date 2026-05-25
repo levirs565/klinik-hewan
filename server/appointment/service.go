@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -19,12 +20,14 @@ var (
 type Service struct {
 	db    *gorm.DB
 	mongo *core.MongoStorage
+	s3    *core.S3Helper
 }
 
-func NewService(db *gorm.DB, mongo *core.MongoStorage) *Service {
+func NewService(db *gorm.DB, mongo *core.MongoStorage, s3 *core.S3Helper) *Service {
 	return &Service{
 		db:    db,
 		mongo: mongo,
+		s3:    s3,
 	}
 }
 
@@ -103,5 +106,39 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 
 	return &CreateAppointmentResponse{
 		ID: appointmentID,
+	}, nil
+}
+
+func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint) (*GetOwnerAppointmentsResponse, error) {
+	appointments, err := gorm.G[models.Appointment](s.db).
+		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+			db.Select("id", "name", "breed", "avatar_id")
+			return nil
+		}).
+		Where("`Pet`.owner_id = ?", ownerID).
+		Order("appointments.appointment_date DESC, appointments.created_at DESC").
+		Find(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]AppointmentListItem, len(appointments))
+	for i, app := range appointments {
+		items[i] = AppointmentListItem{
+			ID: app.ID,
+			Pet: AppointmentPetSummary{
+				Name:      app.Pet.Name,
+				Breed:     app.Pet.Breed,
+				AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
+			},
+			Status:          string(app.CurrentState),
+			ServiceType:     app.ServiceType,
+			AppointmentDate: core.Date(app.AppointmentDate),
+		}
+	}
+
+	return &GetOwnerAppointmentsResponse{
+		Items: items,
 	}, nil
 }

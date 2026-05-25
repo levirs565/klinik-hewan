@@ -115,6 +115,27 @@ func (s *S3Helper) GeneratePresignedGetURL(ctx context.Context, key string, expi
 	return request.URL, nil
 }
 
+func (s *S3Helper) GetTempAvatarKey(userID uint, uploadID string) string {
+	return fmt.Sprintf("temp/%d/pet_avatar/%s", userID, uploadID)
+}
+
+func (s *S3Helper) GetPermanentAvatarKey(petID uint, uploadID string) string {
+	return fmt.Sprintf("pets/%d/avatar/%s", petID, uploadID)
+}
+
+func (s *S3Helper) GetPetAvatarURL(ctx context.Context, petID uint, avatarID string) string {
+	if avatarID == "" {
+		return ""
+	}
+	key := s.GetPermanentAvatarKey(petID, avatarID)
+	url, err := s.GeneratePresignedGetURL(ctx, key, 1*time.Hour)
+	if err != nil {
+		fmt.Printf("warning: failed to generate presigned GET url for pet %d: %v\n", petID, err)
+		return ""
+	}
+	return url
+}
+
 func (s *S3Helper) MoveObject(ctx context.Context, sourceKey string, destinationKey string) error {
 	copySource := fmt.Sprintf("%s/%s", s.Bucket, sourceKey)
 

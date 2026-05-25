@@ -22,6 +22,7 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	appointments := g.Group("/appointments")
 	appointments.Use(core.NewGuardRoleMiddleware(core.GuardRoleOwner))
 	appointments.POST("", ctrl.CreateAppointment)
+	appointments.GET("", ctrl.GetOwnerAppointments)
 }
 
 func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
@@ -40,4 +41,14 @@ func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, res)
+}
+
+func (ctrl *Controller) GetOwnerAppointments(c *echo.Context) error {
+	session := core.GetUserSession(c)
+	res, err := ctrl.service.GetOwnerAppointments(c.Request().Context(), session.ID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }

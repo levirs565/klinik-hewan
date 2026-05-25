@@ -35,3 +35,21 @@ type VaccineDetails struct {
 type CreateAppointmentResponse struct {
 	ID uuid.UUID `json:"id"`
 }
+
+type AppointmentPetSummary struct {
+	Name      string `json:"name"`
+	Breed     string `json:"breed"`
+	AvatarURL string `json:"avatar_url,omitempty"`
+}
+
+type AppointmentListItem struct {
+	ID              uuid.UUID             `json:"id"`
+	Pet             AppointmentPetSummary `json:"pet"`
+	Status          string                `json:"status"`
+	ServiceType     string                `json:"service_type"`
+	AppointmentDate core.Date             `json:"appointment_date"`
+}
+
+type GetOwnerAppointmentsResponse struct {
+	Items []AppointmentListItem `json:"items"`
+}

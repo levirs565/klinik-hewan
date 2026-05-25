@@ -28,17 +28,9 @@ func NewService(db *gorm.DB, s3 *core.S3Helper) *Service {
 	return &Service{db: db, s: s3}
 }
 
-func (s *Service) getTempAvatarKey(userID uint, uploadID string) string {
-	return fmt.Sprintf("temp/%d/pet_avatar/%s", userID, uploadID)
-}
-
-func (s *Service) getPermanentAvatarKey(petID uint, uploadID string) string {
-	return fmt.Sprintf("pets/%d/avatar/%s", petID, uploadID)
-}
-
 func (s *Service) GetPresignedURL(ctx context.Context, userID uint, contentType string, size int64) (*GetPresignedURLResponse, error) {
 	uploadID := uuid.New().String()
-	key := s.getTempAvatarKey(userID, uploadID)
+	key := s.s.GetTempAvatarKey(userID, uploadID)
 
 	presigned, err := s.s.GeneratePresignedPutURL(ctx, key, contentType, size, 15*time.Minute)
 	if err != nil {
@@ -66,7 +58,7 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 
 	var sourceKey string
 	if req.AvatarUploadID != "" {
-		sourceKey = s.getTempAvatarKey(ownerID, req.AvatarUploadID)
+		sourceKey = s.s.GetTempAvatarKey(ownerID, req.AvatarUploadID)
 		exists, err := s.s.FileExists(ctx, sourceKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check avatar file: %w", err)
@@ -83,7 +75,7 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 		}
 
 		if pet.AvatarID != "" {
-			permanentKey := s.getPermanentAvatarKey(pet.ID, pet.AvatarID)
+			permanentKey := s.s.GetPermanentAvatarKey(pet.ID, pet.AvatarID)
 			if err := s.s.MoveObject(ctx, sourceKey, permanentKey); err != nil {
 				return err
 			}
@@ -131,7 +123,7 @@ func (s *Service) UpdatePet(ctx context.Context, ownerID uint, petID uint, req C
 
 	var sourceKey string
 	if req.AvatarUploadID != "" && req.AvatarUploadID != oldAvatarID {
-		sourceKey = s.getTempAvatarKey(ownerID, req.AvatarUploadID)
+		sourceKey = s.s.GetTempAvatarKey(ownerID, req.AvatarUploadID)
 		exists, err := s.s.FileExists(ctx, sourceKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check avatar file: %w", err)
@@ -152,13 +144,13 @@ func (s *Service) UpdatePet(ctx context.Context, ownerID uint, petID uint, req C
 		}
 
 		if pet.AvatarID != "" && pet.AvatarID != oldAvatarID {
-			permanentKey := s.getPermanentAvatarKey(pet.ID, pet.AvatarID)
+			permanentKey := s.s.GetPermanentAvatarKey(pet.ID, pet.AvatarID)
 			if err := s.s.MoveObject(ctx, sourceKey, permanentKey); err != nil {
 				return err
 			}
 
 			if oldAvatarID != "" {
-				oldKey := s.getPermanentAvatarKey(pet.ID, oldAvatarID)
+				oldKey := s.s.GetPermanentAvatarKey(pet.ID, oldAvatarID)
 				if err := s.s.DeleteObject(ctx, oldKey); err != nil {
 					fmt.Printf("warning: failed to delete old avatar %s: %v\n", oldKey, err)
 				}
@@ -187,16 +179,7 @@ func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse,
 			Name:      pet.Name,
 			Species:   pet.Species,
 			BirthDate: core.Date(pet.BirthDate),
-		}
-
-		if pet.AvatarID != "" {
-			permanentKey := s.getPermanentAvatarKey(pet.ID, pet.AvatarID)
-			url, err := s.s.GeneratePresignedGetURL(ctx, permanentKey, 1*time.Hour)
-			if err != nil {
-				fmt.Printf("warning: failed to generate presigned GET url for pet %d: %v\n", pet.ID, err)
-			} else {
-				res.AvatarURL = url
-			}
+			AvatarURL: s.s.GetPetAvatarURL(ctx, pet.ID, pet.AvatarID),
 		}
 
 		return res
@@ -216,18 +199,7 @@ func (s *Service) MapToResponse(ctx context.Context, pet models.Pet) *PetRespons
 		BirthDate:             core.Date(pet.BirthDate),
 		InitialMedicalHistory: pet.InitialMedicalHistory,
 		CreatedAt:             pet.CreatedAt,
-	}
-
-	if pet.AvatarID != "" {
-		permanentKey := s.getPermanentAvatarKey(pet.ID, pet.AvatarID)
-		// Generate presigned GET URL since file is private
-		url, err := s.s.GeneratePresignedGetURL(ctx, permanentKey, 1*time.Hour)
-		if err != nil {
-			// Log error but don't fail the whole response, just leave URL empty
-			fmt.Printf("warning: failed to generate presigned GET url for pet %d: %v\n", pet.ID, err)
-		} else {
-			res.AvatarURL = url
-		}
+		AvatarURL:             s.s.GetPetAvatarURL(ctx, pet.ID, pet.AvatarID),
 	}
 
 	return res
