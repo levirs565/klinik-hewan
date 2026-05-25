@@ -24,7 +24,6 @@ type CreatePetRequest struct {
 	Breed                 string         `json:"breed" validate:"required"`
 	Gender                string         `json:"gender" validate:"required,oneof=male female"`
 	BirthDate             datatypes.Date `json:"birth_date" validate:"required"`
-	HairColor             string         `json:"hair_color" validate:"required"`
 	InitialMedicalHistory string         `json:"initial_medical_history"`
 	AvatarUploadID        string         `json:"avatar_upload_id"`
 }
@@ -37,7 +36,6 @@ type PetResponse struct {
 	Breed                 string         `json:"breed"`
 	Gender                string         `json:"gender"`
 	BirthDate             datatypes.Date `json:"birth_date"`
-	HairColor             string         `json:"hair_color"`
 	InitialMedicalHistory string         `json:"initial_medical_history,omitempty"`
 	AvatarURL             string         `json:"avatar_url,omitempty"`
 	CreatedAt             time.Time      `json:"created_at"`

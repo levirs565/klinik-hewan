@@ -60,7 +60,6 @@ func (s *Service) CreatePet(ctx context.Context, ownerID uint, req CreatePetRequ
 		Breed:                 req.Breed,
 		Gender:                req.Gender,
 		BirthDate:             req.BirthDate,
-		HairColor:             req.HairColor,
 		InitialMedicalHistory: req.InitialMedicalHistory,
 	}
 
@@ -127,7 +126,6 @@ func (s *Service) UpdatePet(ctx context.Context, ownerID uint, petID uint, req C
 	pet.Breed = req.Breed
 	pet.Gender = req.Gender
 	pet.BirthDate = req.BirthDate
-	pet.HairColor = req.HairColor
 	pet.InitialMedicalHistory = req.InitialMedicalHistory
 
 	var sourceKey string
@@ -215,7 +213,6 @@ func (s *Service) MapToResponse(ctx context.Context, pet models.Pet) *PetRespons
 		Breed:                 pet.Breed,
 		Gender:                pet.Gender,
 		BirthDate:             pet.BirthDate,
-		HairColor:             pet.HairColor,
 		InitialMedicalHistory: pet.InitialMedicalHistory,
 		CreatedAt:             pet.CreatedAt,
 	}

@@ -80,7 +80,6 @@ Status layanan bersifat sekuensial untuk menjaga integritas data:
 - Nama
 - Jenis (Kucing/Anjing/dsb)
 - Ras Hewan
-- Warna Bulu
 - TL / Umur
 - Jenis Kelamin'
 

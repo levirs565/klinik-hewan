@@ -45,7 +45,6 @@ erDiagram
         string name
         string species
         string breed
-        string hair_color
         date birth_date
         enum gender "female, male"
         text initial_medical_history
