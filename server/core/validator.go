@@ -30,6 +30,10 @@ func NewValidator() *Validator {
 	return &result
 }
 
+func (v *Validator) RegisterStructValidation(fn validator.StructLevelFunc, types ...any) {
+	v.validator.RegisterStructValidation(fn, types...)
+}
+
 func (v *Validator) Validate(i any) error {
 	if err := v.validator.Struct(i); err != nil {
 		// TODO: Better message

@@ -28,7 +28,10 @@ func InitDB() (*gorm.DB, error) {
 	// Auto Migrate the models
 	err = db.AutoMigrate(
 		&models.ExternalUser{},
+		&models.InternalUser{},
+		&models.DoctorProfile{},
 		&models.Pet{},
+		&models.Appointment{},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
@@ -38,9 +41,12 @@ func InitDB() (*gorm.DB, error) {
 }
 
 type MongoStorage struct {
-	Client        *mongo.Client
-	Database      *mongo.Database
-	RefreshTokens *mongo.Collection
+	Client                  *mongo.Client
+	Database                *mongo.Database
+	RefreshTokens           *mongo.Collection
+	AppointmentReservations *mongo.Collection
+	StatusHistories         *mongo.Collection
+	FCMTokens               *mongo.Collection
 }
 
 func InitMongoDB() (*MongoStorage, error) {
@@ -70,9 +76,12 @@ func InitMongoDB() (*MongoStorage, error) {
 	db := client.Database(dbName)
 
 	storage := &MongoStorage{
-		Client:        client,
-		Database:      db,
-		RefreshTokens: db.Collection("refresh_tokens"),
+		Client:                  client,
+		Database:                db,
+		RefreshTokens:           db.Collection("refresh_tokens"),
+		AppointmentReservations: db.Collection("appointment_reservations"),
+		StatusHistories:         db.Collection("status_histories"),
+		FCMTokens:               db.Collection("fcm_tokens"),
 	}
 
 	if err := ensureIndexes(ctx, storage); err != nil {
@@ -103,6 +112,39 @@ func ensureIndexes(ctx context.Context, s *MongoStorage) error {
 				{Key: "ttl_expiry", Value: 1},
 			},
 			Options: options.Index().SetExpireAfterSeconds(0),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Indexes for AppointmentReservations
+	_, err = s.AppointmentReservations.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "appointment_id", Value: 1}},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Indexes for StatusHistories
+	_, err = s.StatusHistories.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "appointment_id", Value: 1}},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Indexes for FCMTokens
+	_, err = s.FCMTokens.Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "token", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{
+				{Key: "user_type", Value: 1},
+				{Key: "user_id", Value: 1},
+			},
 		},
 	})
 	return err
