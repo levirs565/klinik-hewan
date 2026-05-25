@@ -71,7 +71,7 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 			AppointmentDate:        datatypes.Date(appointmentDate),
 			OwnerNotes:             req.OwnerNotes,
 			PreviousMedicalHistory: req.PreviousMedicalHistory,
-			CurrentState:           "Menunggu Konfirmasi",
+			CurrentState:           models.StateWaitingConfirmation,
 		}
 
 		if err := gorm.G[models.Appointment](tx).Create(ctx, &appointment); err != nil {
