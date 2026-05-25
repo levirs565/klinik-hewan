@@ -43,6 +43,7 @@ type MongoStorage struct {
 	Database                *mongo.Database
 	RefreshTokens           *mongo.Collection
 	AppointmentReservations *mongo.Collection
+	StatusHistories         *mongo.Collection
 }
 
 func InitMongoDB() (*MongoStorage, error) {
@@ -76,6 +77,7 @@ func InitMongoDB() (*MongoStorage, error) {
 		Database:                db,
 		RefreshTokens:           db.Collection("refresh_tokens"),
 		AppointmentReservations: db.Collection("appointment_reservations"),
+		StatusHistories:         db.Collection("status_histories"),
 	}
 
 	if err := ensureIndexes(ctx, storage); err != nil {
@@ -114,6 +116,14 @@ func ensureIndexes(ctx context.Context, s *MongoStorage) error {
 
 	// Indexes for AppointmentReservations
 	_, err = s.AppointmentReservations.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "appointment_id", Value: 1}},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Indexes for StatusHistories
+	_, err = s.StatusHistories.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{{Key: "appointment_id", Value: 1}},
 	})
 	return err

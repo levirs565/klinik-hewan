@@ -82,6 +82,18 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 			return err
 		}
 
+		statusLog := models.StatusHistory{
+			AppointmentID: appointmentID.String(),
+			State:         models.StateWaitingConfirmation,
+			ActorID:       ownerID,
+			ActorRole:     string(models.RoleOwner),
+			ChangedAt:     time.Now(),
+		}
+
+		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {
+			return err
+		}
+
 		return nil
 	})
 
