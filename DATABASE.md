@@ -87,7 +87,32 @@ erDiagram
 
 ## MongoDB
 
-### 1. medical_records
+### 1. appointment_reservations
+Menyimpan data awal yang diinputkan oleh pemilik hewan saat melakukan reservasi. Data ini akan menjadi acuan awal bagi dokter sebelum mengisi rekam medis lengkap.
+
+```json
+{
+  "_id": "ObjectId",
+  "appointment_id": "UUID",
+  "service_type": "string (vaccine | checkup | treatment)",
+  "details": {
+    // Jika service_type == checkup
+    "purpose": "string",
+    "focus_area": "string",
+
+    // Jika service_type == treatment
+    "observed_symptoms": ["string"],
+    "symptom_duration": "string",
+    "home_care_received": "boolean",
+
+    // Jika service_type == vaccine
+    "vaccine_type": "string"
+  },
+  "created_at": "datetime"
+}
+```
+
+### 2. medical_records
 Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu dokumen per rekam medis dengan sub-dokumen untuk data spesifik layanan.
 
 ```json

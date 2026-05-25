@@ -48,7 +48,7 @@ For non-relational data such as audit logs, medical records, and session managem
 - **Session Retrieval:** Use `core.GetUserSession(c)` in controllers to safely retrieve the current user's session data. This is a **custom function** that extracts session information from the Echo context after it has been populated by the Session Middleware.
 
 ## 5. Development Workflow
-1. Define the GORM database model in server/models/.
+1. Define the GORM and MongoDB database model in server/models/.
 2. Register the model in db.AutoMigrate in main.go.
 3. Implement the Service logic.
 4. Implement the Controller and DTOs.

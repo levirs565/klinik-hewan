@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"vetconnect-server/appointment"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
 	"vetconnect-server/pet"
@@ -66,6 +67,9 @@ func main() {
 	petService := pet.NewService(db, s3Helper)
 	petController := pet.NewController(petService)
 
+	appointmentService := appointment.NewService(db, mongoClient)
+	appointmentController := appointment.NewController(appointmentService)
+
 	// Routes
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "VetConnect API")
@@ -76,6 +80,7 @@ func main() {
 	api.Use(core.NewSessionMiddleware(tokenHelper))
 	authController.RegisterRoutes(api)
 	petController.RegisterRoutes(api)
+	appointmentController.RegisterRoutes(api)
 
 	if err := e.Start(":1323"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
