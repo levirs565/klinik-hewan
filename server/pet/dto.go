@@ -4,6 +4,8 @@ import (
 	"time"
 	"vetconnect-server/core"
 	"vetconnect-server/models"
+
+	"github.com/google/uuid"
 )
 
 type GetPresignedURLRequest struct {
@@ -47,4 +49,11 @@ type MyPetResponse struct {
 	AvatarURL string    `json:"avatar_url,omitempty"`
 	Species   string    `json:"species"`
 	BirthDate core.Date `json:"birth_date"`
+}
+
+type PetReminderResponse struct {
+	ID          uuid.UUID          `json:"id"`
+	ServiceType models.ServiceType `json:"service_type"`
+	Date        core.Date          `json:"date"`
+	Description string             `json:"description"`
 }

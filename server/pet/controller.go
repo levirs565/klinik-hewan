@@ -21,6 +21,7 @@ func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	petGroup.Use(core.NewGuardRoleMiddleware(core.GuardRoleOwner))
 	petGroup.GET("", ctrl.GetMyPets)
 	petGroup.GET("/:id", ctrl.GetPetDetail)
+	petGroup.GET("/:id/reminders", ctrl.GetPetReminders)
 	petGroup.PUT("/:id", ctrl.UpdatePet)
 	petGroup.POST("", ctrl.CreatePet)
 	petGroup.POST("/avatar/presigned-url", ctrl.GetPresignedURL)
@@ -46,6 +47,25 @@ func (ctrl *Controller) GetPetDetail(c *echo.Context) error {
 	}
 
 	res, err := ctrl.service.GetPetDetail((*c).Request().Context(), session.ID, id)
+	if err != nil {
+		if errors.Is(err, ErrPetNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) GetPetReminders(c *echo.Context) error {
+	session := core.GetUserSession(c)
+
+	id, err := echo.PathParam[uint](c, "id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid pet id")
+	}
+
+	res, err := ctrl.service.GetPetReminders((*c).Request().Context(), session.ID, id)
 	if err != nil {
 		if errors.Is(err, ErrPetNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
