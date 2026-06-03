@@ -90,7 +90,7 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 			AppointmentID: appointmentID.String(),
 			State:         models.StateWaitingConfirmation,
 			ActorID:       ownerID,
-			ActorRole:     string(models.RoleOwner),
+			ActorRole:     models.RoleOwner,
 			ChangedAt:     time.Now(),
 		}
 
@@ -144,7 +144,7 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 				Breed:     app.Pet.Breed,
 				AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
 			},
-			Status:          string(app.CurrentState),
+			Status:          app.CurrentState,
 			ServiceType:     app.ServiceType,
 			AppointmentDate: core.Date(app.AppointmentDate),
 		}
@@ -155,7 +155,7 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 	}, nil
 }
 
-func (s *Service) GetAllAppointments(ctx context.Context, status string, date string) ([]AppointmentListItem, error) {
+func (s *Service) GetAllAppointments(ctx context.Context, status models.AppointmentState, date string) ([]AppointmentListItem, error) {
 	query := gorm.G[models.Appointment](s.db).
 		Select("id", "current_state", "service_type", "appointment_date", "pet_id").
 		Preload("Pet", func(db gorm.PreloadBuilder) error {
@@ -187,7 +187,7 @@ func (s *Service) GetAllAppointments(ctx context.Context, status string, date st
 				Breed:     app.Pet.Breed,
 				AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
 			},
-			Status:          string(app.CurrentState),
+			Status:          app.CurrentState,
 			ServiceType:     app.ServiceType,
 			AppointmentDate: core.Date(app.AppointmentDate),
 		}
@@ -231,7 +231,7 @@ func (s *Service) GetInternalAppointmentDetail(ctx context.Context, appointmentI
 				BirthDate: core.Date(app.Pet.BirthDate),
 				AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
 			},
-			Status:                 string(app.CurrentState),
+			Status:                 app.CurrentState,
 			ServiceType:            app.ServiceType,
 			AppointmentDate:        core.Date(app.AppointmentDate),
 			OwnerNotes:             app.OwnerNotes,
@@ -284,7 +284,7 @@ func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appoin
 			BirthDate: core.Date(app.Pet.BirthDate),
 			AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
 		},
-		Status:                 string(app.CurrentState),
+		Status:                 app.CurrentState,
 		ServiceType:            app.ServiceType,
 		AppointmentDate:        core.Date(app.AppointmentDate),
 		OwnerNotes:             app.OwnerNotes,

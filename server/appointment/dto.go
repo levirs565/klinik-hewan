@@ -2,19 +2,20 @@ package appointment
 
 import (
 	"vetconnect-server/core"
+	"vetconnect-server/models"
 
 	"github.com/google/uuid"
 )
 
 type CreateAppointmentRequest struct {
-	PetID                  uint              `json:"pet_id" validate:"required"`
-	ServiceType            string            `json:"service_type" validate:"required,oneof=vaccine checkup treatment"`
-	AppointmentDate        core.Date         `json:"appointment_date" validate:"required"`
-	OwnerNotes             string            `json:"owner_notes"`
-	PreviousMedicalHistory string            `json:"previous_medical_history"`
-	Checkup                *CheckupDetails   `json:"checkup" validate:"required_if=ServiceType checkup,excluded_unless=ServiceType checkup"`
-	Treatment              *TreatmentDetails `json:"treatment" validate:"required_if=ServiceType treatment,excluded_unless=ServiceType treatment"`
-	Vaccine                *VaccineDetails   `json:"vaccine" validate:"required_if=ServiceType vaccine,excluded_unless=ServiceType vaccine"`
+	PetID                  uint               `json:"pet_id" validate:"required"`
+	ServiceType            models.ServiceType `json:"service_type" validate:"required,oneof=vaccine checkup treatment"`
+	AppointmentDate        core.Date          `json:"appointment_date" validate:"required"`
+	OwnerNotes             string             `json:"owner_notes"`
+	PreviousMedicalHistory string             `json:"previous_medical_history"`
+	Checkup                *CheckupDetails    `json:"checkup" validate:"required_if=ServiceType checkup,excluded_unless=ServiceType checkup"`
+	Treatment              *TreatmentDetails  `json:"treatment" validate:"required_if=ServiceType treatment,excluded_unless=ServiceType treatment"`
+	Vaccine                *VaccineDetails    `json:"vaccine" validate:"required_if=ServiceType vaccine,excluded_unless=ServiceType vaccine"`
 }
 
 type CheckupDetails struct {
@@ -43,11 +44,11 @@ type AppointmentPetSummary struct {
 }
 
 type AppointmentListItem struct {
-	ID              uuid.UUID             `json:"id"`
-	Pet             AppointmentPetSummary `json:"pet"`
-	Status          string                `json:"status"`
-	ServiceType     string                `json:"service_type"`
-	AppointmentDate core.Date             `json:"appointment_date"`
+	ID              uuid.UUID               `json:"id"`
+	Pet             AppointmentPetSummary   `json:"pet"`
+	Status          models.AppointmentState `json:"status"`
+	ServiceType     models.ServiceType      `json:"service_type"`
+	AppointmentDate core.Date               `json:"appointment_date"`
 }
 
 type GetOwnerAppointmentsResponse struct {
@@ -77,8 +78,8 @@ type AppointmentDetailResponse struct {
 	ID                     uuid.UUID                 `json:"id"`
 	Pet                    AppointmentDetailPet      `json:"pet"`
 	Doctor                 *AppointmentDoctorSummary `json:"doctor,omitempty"`
-	Status                 string                    `json:"status"`
-	ServiceType            string                    `json:"service_type"`
+	Status                 models.AppointmentState   `json:"status"`
+	ServiceType            models.ServiceType        `json:"service_type"`
 	AppointmentDate        core.Date                 `json:"appointment_date"`
 	OwnerNotes             string                    `json:"owner_notes"`
 	PreviousMedicalHistory string                    `json:"previous_medical_history"`

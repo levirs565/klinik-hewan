@@ -21,13 +21,21 @@ const (
 	StateAdminFinished       AppointmentState = "Selesai Administrasi"
 )
 
+type ServiceType string
+
+const (
+	ServiceTypeVaccine   ServiceType = "vaccine"
+	ServiceTypeCheckup   ServiceType = "checkup"
+	ServiceTypeTreatment ServiceType = "treatment"
+)
+
 type Appointment struct {
 	ID                     uuid.UUID        `gorm:"type:char(36);primaryKey"`
 	PetID                  uint             `gorm:"not null"`
 	Pet                    Pet              `gorm:"foreignKey:PetID"`
 	DoctorID               *uint            `gorm:"default:null"`
 	Doctor                 *DoctorProfile   `gorm:"foreignKey:DoctorID"`
-	ServiceType            string           `gorm:"type:enum('vaccine','checkup','treatment');not null"`
+	ServiceType            ServiceType      `gorm:"type:enum('vaccine','checkup','treatment');not null"`
 	AppointmentDate        datatypes.Date   `gorm:"type:date;not null"`
 	QueueNumber            *int             `gorm:"default:null"`
 	OwnerNotes             string           `gorm:"type:text"`

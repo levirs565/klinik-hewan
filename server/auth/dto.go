@@ -1,5 +1,7 @@
 package auth
 
+import "vetconnect-server/models"
+
 type LoginOwnerRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
@@ -46,11 +48,11 @@ type LogoutRequest struct {
 }
 
 type MeResponse struct {
-	ID       uint   `json:"id"`
-	FullName string `json:"full_name"`
-	Email    string `json:"email,omitempty"`
-	Username string `json:"username,omitempty"`
-	Role     string `json:"role"`
+	ID       uint               `json:"id"`
+	FullName string             `json:"full_name"`
+	Email    string             `json:"email,omitempty"`
+	Username string             `json:"username,omitempty"`
+	Role     models.AccountRole `json:"role"`
 }
 
 type SaveFCMTokenRequest struct {

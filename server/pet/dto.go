@@ -3,6 +3,7 @@ package pet
 import (
 	"time"
 	"vetconnect-server/core"
+	"vetconnect-server/models"
 )
 
 type GetPresignedURLRequest struct {
@@ -18,26 +19,26 @@ type GetPresignedURLResponse struct {
 }
 
 type CreatePetRequest struct {
-	Name                  string    `json:"name" validate:"required"`
-	Species               string    `json:"species" validate:"required"`
-	Breed                 string    `json:"breed" validate:"required"`
-	Gender                string    `json:"gender" validate:"required,oneof=male female"`
-	BirthDate             core.Date `json:"birth_date" validate:"required"`
-	InitialMedicalHistory string    `json:"initial_medical_history"`
-	AvatarUploadID        string    `json:"avatar_upload_id"`
+	Name                  string        `json:"name" validate:"required"`
+	Species               string        `json:"species" validate:"required"`
+	Breed                 string        `json:"breed" validate:"required"`
+	Gender                models.Gender `json:"gender" validate:"required,oneof=male female"`
+	BirthDate             core.Date     `json:"birth_date" validate:"required"`
+	InitialMedicalHistory string        `json:"initial_medical_history"`
+	AvatarUploadID        string        `json:"avatar_upload_id"`
 }
 
 type PetResponse struct {
-	ID                    uint      `json:"id"`
-	OwnerID               uint      `json:"owner_id"`
-	Name                  string    `json:"name"`
-	Species               string    `json:"species"`
-	Breed                 string    `json:"breed"`
-	Gender                string    `json:"gender"`
-	BirthDate             core.Date `json:"birth_date"`
-	InitialMedicalHistory string    `json:"initial_medical_history,omitempty"`
-	AvatarURL             string    `json:"avatar_url,omitempty"`
-	CreatedAt             time.Time `json:"created_at"`
+	ID                    uint          `json:"id"`
+	OwnerID               uint          `json:"owner_id"`
+	Name                  string        `json:"name"`
+	Species               string        `json:"species"`
+	Breed                 string        `json:"breed"`
+	Gender                models.Gender `json:"gender"`
+	BirthDate             core.Date     `json:"birth_date"`
+	InitialMedicalHistory string        `json:"initial_medical_history,omitempty"`
+	AvatarURL             string        `json:"avatar_url,omitempty"`
+	CreatedAt             time.Time     `json:"created_at"`
 }
 
 type MyPetResponse struct {

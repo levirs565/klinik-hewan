@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"vetconnect-server/models"
 
 	"github.com/labstack/echo/v5"
 )
@@ -33,7 +34,7 @@ func NewSessionMiddleware(tokenHelper *TokenHelper) echo.MiddlewareFunc {
 				if err == nil {
 					session.IsLoggedIn = true
 					session.ID = uint(id)
-					session.Role = string(claims.Role)
+					session.Role = claims.Role
 				}
 
 			}
@@ -56,7 +57,7 @@ func GetUserSession(c *echo.Context) UserSession {
 type UserSession struct {
 	IsLoggedIn bool
 	ID         uint
-	Role       string
+	Role       models.AccountRole
 }
 
 type GuardRoleRule string
@@ -85,7 +86,7 @@ func GuardRole(session UserSession, rule GuardRoleRule) error {
 	if rule == GuardRoleLoggedIn {
 		return nil
 	}
-	if session.Role == string(rule) {
+	if session.Role == models.AccountRole(rule) {
 		return nil
 	}
 

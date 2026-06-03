@@ -40,9 +40,9 @@ const Timeout = time.Hour
 
 type AccessTokenClaims struct {
 	jwt.RegisteredClaims
-	Scope string `json:"scope,omitempty"`
-	Type  string `json:"type,omitempty"`
-	Role  string `json:"role,omitempty"`
+	Scope string             `json:"scope,omitempty"`
+	Type  string             `json:"type,omitempty"`
+	Role  models.AccountRole `json:"role,omitempty"`
 }
 
 func (t *TokenHelper) HashToken(token string) string {
@@ -59,7 +59,7 @@ func (t *TokenHelper) GenerateAccessToken(userId uint, role models.AccountRole) 
 			IssuedAt:  jwt.NewNumericDate(now),
 			Subject:   strconv.FormatUint(uint64(userId), 10),
 		},
-		Role: string(role),
+		Role: role,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

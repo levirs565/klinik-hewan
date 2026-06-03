@@ -242,7 +242,7 @@ func (s *Service) Logout(ctx context.Context, req LogoutRequest) error {
 }
 
 func (s *Service) GetMe(ctx context.Context, session core.UserSession) (*MeResponse, error) {
-	if session.Role == string(models.RoleOwner) {
+	if session.Role == models.RoleOwner {
 		user, err := gorm.G[models.ExternalUser](s.db).
 			Select("id", "full_name", "email").
 			Where("id = ?", session.ID).
@@ -295,7 +295,7 @@ func (s *Service) CreateInternalUser(ctx context.Context, username, password, fu
 
 func (s *Service) SaveFCMToken(ctx context.Context, session core.UserSession, req SaveFCMTokenRequest) error {
 	userType := models.UserTypeInternal
-	if session.Role == string(models.RoleOwner) {
+	if session.Role == models.RoleOwner {
 		userType = models.UserTypeExternal
 	}
 
@@ -318,7 +318,7 @@ func (s *Service) SaveFCMToken(ctx context.Context, session core.UserSession, re
 
 func (s *Service) DeleteFCMToken(ctx context.Context, session core.UserSession, req DeleteFCMTokenRequest) error {
 	userType := models.UserTypeInternal
-	if session.Role == string(models.RoleOwner) {
+	if session.Role == models.RoleOwner {
 		userType = models.UserTypeExternal
 	}
 

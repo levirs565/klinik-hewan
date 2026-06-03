@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"vetconnect-server/core"
+	"vetconnect-server/models"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
@@ -54,7 +55,7 @@ func (ctrl *Controller) GetAllAppointments(c *echo.Context) error {
 	status := c.QueryParam("status")
 	date := c.QueryParam("date")
 
-	res, err := ctrl.service.GetAllAppointments(c.Request().Context(), status, date)
+	res, err := ctrl.service.GetAllAppointments(c.Request().Context(), models.AppointmentState(status), date)
 	if err != nil {
 		return err
 	}
