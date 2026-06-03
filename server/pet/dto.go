@@ -57,3 +57,10 @@ type PetReminderResponse struct {
 	Date        core.Date          `json:"date"`
 	Description string             `json:"description"`
 }
+
+type PetAppointmentResponse struct {
+	ID              uuid.UUID               `json:"id"`
+	ServiceType     models.ServiceType      `json:"service_type"`
+	AppointmentDate core.Date               `json:"appointment_date"`
+	Status          models.AppointmentState `json:"status"`
+}
