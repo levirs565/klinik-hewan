@@ -202,9 +202,9 @@ func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
 	}
 
 	session := core.GetUserSession(c)
-	res, err := ctrl.service.CreateAppointment(c.Request().Context(), session.ID, req)
+	res, err := ctrl.service.CreateAppointment((*c).Request().Context(), session.ID, req)
 	if err != nil {
-		if errors.Is(err, ErrPetNotFound) {
+		if errors.Is(err, ErrPetNotFound) || errors.Is(err, ErrReminderNotFound) || errors.Is(err, ErrReminderTypeMismatch) {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return err

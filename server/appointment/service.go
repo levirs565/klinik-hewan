@@ -20,6 +20,8 @@ var (
 	ErrAppointmentNotFound     = errors.New("appointment not found or does not belong to you")
 	ErrInvalidAppointmentState = errors.New("appointment is not in waiting confirmation state")
 	ErrDoctorNotFound          = errors.New("doctor not found")
+	ErrReminderNotFound        = errors.New("reminder not found or already fulfilled")
+	ErrReminderTypeMismatch    = errors.New("reminder service type does not match appointment service type")
 )
 
 type Service struct {
@@ -100,12 +102,37 @@ func (s *Service) getMedicalRecordDTO(ctx context.Context, appointmentID string)
 }
 
 func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req CreateAppointmentRequest) (*CreateAppointmentResponse, error) {
-	_, err := gorm.G[models.Pet](s.db).Where("id = ? AND owner_id = ?", req.PetID, ownerID).First(ctx)
+	_, err := gorm.G[models.Pet](s.db).
+		Select("id").
+		Where("id = ? AND owner_id = ?", req.PetID, ownerID).
+		First(ctx)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrPetNotFound
 		}
 		return nil, err
+	}
+
+	if req.ReminderID != nil {
+		reminder, err := gorm.G[models.Reminder](s.db).
+			Select("id", "service_type", "fulfilling_appointment_id").
+			Where("id = ? AND pet_id = ?", *req.ReminderID, req.PetID).
+			First(ctx)
+
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrReminderNotFound
+			}
+			return nil, err
+		}
+
+		if reminder.FulfillingAppointmentID != nil {
+			return nil, ErrReminderNotFound
+		}
+
+		if reminder.ServiceType != req.ServiceType {
+			return nil, ErrReminderTypeMismatch
+		}
 	}
 
 	appointmentID := uuid.New()
@@ -147,6 +174,15 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 
 		if err := gorm.G[models.Appointment](tx).Create(ctx, &appointment); err != nil {
 			return err
+		}
+
+		if req.ReminderID != nil {
+			_, err := gorm.G[models.Reminder](tx).
+				Where("id = ?", *req.ReminderID).
+				Update(ctx, "fulfilling_appointment_id", appointmentID)
+			if err != nil {
+				return err
+			}
 		}
 
 		if _, err := s.mongo.AppointmentReservations.InsertOne(ctx, reservationDoc); err != nil {

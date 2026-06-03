@@ -9,6 +9,7 @@ import (
 
 type CreateAppointmentRequest struct {
 	PetID                  uint               `json:"pet_id" validate:"required"`
+	ReminderID             *uuid.UUID         `json:"reminder_id"`
 	ServiceType            models.ServiceType `json:"service_type" validate:"required,oneof=vaccine checkup treatment"`
 	AppointmentDate        core.Date          `json:"appointment_date" validate:"required"`
 	OwnerNotes             string             `json:"owner_notes"`
