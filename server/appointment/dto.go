@@ -67,6 +67,12 @@ type AppointmentDoctorSummary struct {
 	Name string `json:"name"`
 }
 
+type AppointmentOwnerSummary struct {
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	AvatarURL string `json:"avatar_url,omitempty"`
+}
+
 type AppointmentDetailResponse struct {
 	ID                     uuid.UUID                 `json:"id"`
 	Pet                    AppointmentDetailPet      `json:"pet"`
@@ -76,4 +82,9 @@ type AppointmentDetailResponse struct {
 	AppointmentDate        core.Date                 `json:"appointment_date"`
 	OwnerNotes             string                    `json:"owner_notes"`
 	PreviousMedicalHistory string                    `json:"previous_medical_history"`
+}
+
+type InternalAppointmentDetailResponse struct {
+	AppointmentDetailResponse
+	Owner AppointmentOwnerSummary `json:"owner"`
 }

@@ -18,6 +18,7 @@ type ExternalUser struct {
 	FullName    string `gorm:"not null"`
 	Address     string
 	PhoneNumber string
+	AvatarID    string `gorm:"size:255"`
 }
 
 type InternalUser struct {

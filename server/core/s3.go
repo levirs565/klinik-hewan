@@ -136,6 +136,23 @@ func (s *S3Helper) GetPetAvatarURL(ctx context.Context, petID uint, avatarID str
 	return url
 }
 
+func (s *S3Helper) GetPermanentOwnerAvatarKey(ownerID uint, uploadID string) string {
+	return fmt.Sprintf("owners/%d/avatar/%s", ownerID, uploadID)
+}
+
+func (s *S3Helper) GetOwnerAvatarURL(ctx context.Context, ownerID uint, avatarID string) string {
+	if avatarID == "" {
+		return ""
+	}
+	key := s.GetPermanentOwnerAvatarKey(ownerID, avatarID)
+	url, err := s.GeneratePresignedGetURL(ctx, key, 1*time.Hour)
+	if err != nil {
+		fmt.Printf("warning: failed to generate presigned GET url for owner %d: %v\n", ownerID, err)
+		return ""
+	}
+	return url
+}
+
 func (s *S3Helper) GetTempStaffAvatarKey(userID uint, uploadID string) string {
 	return fmt.Sprintf("temp/staff/avatar/%d/%s", userID, uploadID)
 }

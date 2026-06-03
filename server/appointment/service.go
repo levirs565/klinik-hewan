@@ -157,8 +157,8 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 
 func (s *Service) GetAllAppointments(ctx context.Context, status string, date string) ([]AppointmentListItem, error) {
 	query := gorm.G[models.Appointment](s.db).
-		Select("appointments.id", "current_state", "service_type", "appointment_date").
-		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+		Select("id", "current_state", "service_type", "appointment_date", "pet_id").
+		Preload("Pet", func(db gorm.PreloadBuilder) error {
 			db.Select("id", "name", "breed", "avatar_id")
 			return nil
 		})
@@ -171,7 +171,7 @@ func (s *Service) GetAllAppointments(ctx context.Context, status string, date st
 	}
 
 	appointments, err := query.
-		Order("appointments.appointment_date DESC, appointments.created_at DESC").
+		Order("appointment_date DESC, created_at DESC").
 		Find(ctx)
 
 	if err != nil {
@@ -194,6 +194,64 @@ func (s *Service) GetAllAppointments(ctx context.Context, status string, date st
 	}
 
 	return items, nil
+}
+
+func (s *Service) GetInternalAppointmentDetail(ctx context.Context, appointmentID uuid.UUID) (*InternalAppointmentDetailResponse, error) {
+	app, err := gorm.G[models.Appointment](s.db).
+		Select("id", "pet_id", "doctor_id", "current_state", "service_type", "appointment_date", "owner_notes", "previous_medical_history").
+		Preload("Pet", func(db gorm.PreloadBuilder) error {
+			db.Select("id", "name", "breed", "avatar_id", "birth_date", "owner_id")
+			return nil
+		}).
+		Preload("Pet.Owner", func(db gorm.PreloadBuilder) error {
+			db.Select("id", "full_name", "avatar_id")
+			return nil
+		}).
+		Preload("Doctor.InternalUser", func(db gorm.PreloadBuilder) error {
+			db.Select("id", "full_name")
+			return nil
+		}).
+		Where("id = ?", appointmentID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrAppointmentNotFound
+		}
+		return nil, err
+	}
+
+	response := &InternalAppointmentDetailResponse{
+		AppointmentDetailResponse: AppointmentDetailResponse{
+			ID: app.ID,
+			Pet: AppointmentDetailPet{
+				ID:        app.Pet.ID,
+				Name:      app.Pet.Name,
+				Breed:     app.Pet.Breed,
+				BirthDate: core.Date(app.Pet.BirthDate),
+				AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
+			},
+			Status:                 string(app.CurrentState),
+			ServiceType:            app.ServiceType,
+			AppointmentDate:        core.Date(app.AppointmentDate),
+			OwnerNotes:             app.OwnerNotes,
+			PreviousMedicalHistory: app.PreviousMedicalHistory,
+		},
+		Owner: AppointmentOwnerSummary{
+			ID:        app.Pet.Owner.ID,
+			Name:      app.Pet.Owner.FullName,
+			AvatarURL: s.s3.GetOwnerAvatarURL(ctx, app.Pet.Owner.ID, app.Pet.Owner.AvatarID),
+		},
+	}
+
+	if app.Doctor != nil && app.Doctor.InternalUser.ID != 0 {
+		response.Doctor = &AppointmentDoctorSummary{
+			ID:   app.Doctor.InternalUser.ID,
+			Name: app.Doctor.InternalUser.FullName,
+		}
+	}
+
+	return response, nil
 }
 
 func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {

@@ -29,6 +29,25 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	internal := g.Group("/internal/appointments")
 	internal.Use(core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
 	internal.GET("", ctrl.GetAllAppointments)
+	internal.GET("/:id", ctrl.GetInternalAppointmentDetail)
+}
+
+func (ctrl *Controller) GetInternalAppointmentDetail(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	res, err := ctrl.service.GetInternalAppointmentDetail(c.Request().Context(), appointmentID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (ctrl *Controller) GetAllAppointments(c *echo.Context) error {

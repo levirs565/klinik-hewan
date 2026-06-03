@@ -17,6 +17,7 @@ erDiagram
         string full_name
         string address
         string phone_number
+        string avatar_id
     }
 
     INTERNAL_USER ||--|| DOCTOR_PROFILE : is
