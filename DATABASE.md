@@ -74,6 +74,7 @@ erDiagram
         uint pet_id FK
         uuid source_appointment_id FK
         uuid fulfilling_appointment_id FK
+        string service_type "vaccine, checkup, treatment"
         string description
         date reminder_date
         boolean is_handled "computed"
@@ -97,25 +98,25 @@ Menyimpan data awal yang diinputkan oleh pemilik hewan saat melakukan reservasi.
   "_id": "ObjectId",
   "appointment_id": "UUID",
   "service_type": "string (vaccine | checkup | treatment)",
-  "details": {
-    // Jika service_type == checkup
+  // Hanya satu dari field di bawah ini yang akan terisi sesuai 'service_type'
+  "vaccine": {
+    "vaccine_type": "string"
+  },
+  "checkup": {
     "purpose": "string",
-    "focus_area": "string",
-
-    // Jika service_type == treatment
+    "focus_area": "string"
+  },
+  "treatment": {
     "observed_symptoms": ["string"],
     "symptom_duration": "string",
-    "home_care_received": "boolean",
-
-    // Jika service_type == vaccine
-    "vaccine_type": "string"
+    "home_care_received": "boolean"
   },
   "created_at": "datetime"
 }
 ```
 
 ### 2. medical_records
-Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu dokumen per rekam medis dengan sub-dokumen untuk data spesifik layanan.
+Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu dokumen per rekam medis dengan sub-dokumen untuk data pemeriksaan fisik dan data spesifik layanan.
 
 ```json
 {
@@ -128,31 +129,35 @@ Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu doku
     "heart_rate": "string",
     "respiratory_rate": "string"
   },
-  "service_data": {
-    "type": "string (vaccine | checkup | treatment)",
-    "details": {
-      // Jika type == vaccine
-      "vaccine_type": "string",
-      "brand": "string",
-      "batch_number": "string",
-      "administration_date": "date",
-      "pre_vaccine_condition": "text",
-      "post_vaccine_reaction": "text",
-      
-      // Jika type == checkup
-      "palpation": "text",
-      "cleanliness_notes": "text",
-      "nutrition_recommendations": "text",
-      "periodic_care_recommendations": "text",
-
-      // Jika type == treatment
-      "clinical_symptoms": "text",
-      "diagnosis": "text",
-      "medical_actions": "text",
-      "prescription": "text",
-      "home_care_notes": "text",
-      "estimated_cost": "decimal"
-    }
+  "type": "string (vaccine | checkup | treatment)",
+  // Hanya satu dari field di bawah ini yang akan terisi sesuai 'type'
+  "vaccine": {
+    "vaccine_type": "string",
+    "brand": "string",
+    "batch_number": "string",
+    "administration_date": "date",
+    "pre_vaccine_condition": "text",
+    "post_vaccine_reaction": "text"
+  },
+  "checkup": {
+    "palpation": "text",
+    "cleanliness_notes": "text",
+    "nutrition_recommendations": "text",
+    "periodic_care_recommendations": "text"
+  },
+  "treatment": {
+    "clinical_symptoms": "text",
+    "diagnosis": "text",
+    "medical_actions": "text",
+    "prescriptions": [
+      {
+        "name": "string",
+        "dosage": "string",
+        "frequency": "string"
+      }
+    ],
+    "home_care_notes": "text",
+    "estimated_cost": "decimal"
   },
   "created_at": "datetime"
 }

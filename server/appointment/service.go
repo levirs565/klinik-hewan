@@ -581,3 +581,132 @@ func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appoin
 
 	return response, nil
 }
+
+func (s *Service) SaveMedicalRecord(ctx context.Context, internalUserID uint, appointmentID uuid.UUID, req SaveMedicalRecordRequest) error {
+	// 1. Get Appointment
+	app, err := gorm.G[models.Appointment](s.db).
+		Select("id", "current_state", "doctor_id", "service_type", "pet_id").
+		Where("id = ?", appointmentID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrAppointmentNotFound
+		}
+		return err
+	}
+
+	// 2. Validate State
+	if app.CurrentState != models.StateInTreatment {
+		return errors.New("appointment is not in treatment state")
+	}
+
+	// 3. Validate Doctor
+	if app.DoctorID == nil || *app.DoctorID != internalUserID {
+		return errors.New("appointment is not assigned to you")
+	}
+
+	// 4. Validate Service Data match with Service Type
+	medicalRecordDoc := models.MedicalRecord{
+		AppointmentID: appointmentID.String(),
+		PhysicalExamination: models.PhysicalExamination{
+			Weight:            req.PhysicalExamination.Weight,
+			Temperature:       req.PhysicalExamination.Temperature,
+			PhysicalCondition: req.PhysicalExamination.PhysicalCondition,
+			HeartRate:         req.PhysicalExamination.HeartRate,
+			RespiratoryRate:   req.PhysicalExamination.RespiratoryRate,
+		},
+		Type:      app.ServiceType,
+		CreatedAt: time.Now(),
+	}
+
+	switch app.ServiceType {
+	case models.ServiceTypeVaccine:
+		if req.Vaccine == nil {
+			return errors.New("vaccine data is required for vaccine service")
+		}
+		medicalRecordDoc.Vaccine = &models.VaccineMedicalData{
+			VaccineType:         req.Vaccine.VaccineType,
+			Brand:               req.Vaccine.Brand,
+			BatchNumber:         req.Vaccine.BatchNumber,
+			AdministrationDate:  req.Vaccine.AdministrationDate.Time(),
+			PreVaccineCondition: req.Vaccine.PreVaccineCondition,
+			PostVaccineReaction: req.Vaccine.PostVaccineReaction,
+		}
+	case models.ServiceTypeCheckup:
+		if req.Checkup == nil {
+			return errors.New("checkup data is required for checkup service")
+		}
+		medicalRecordDoc.Checkup = &models.CheckupMedicalData{
+			Palpation:                   req.Checkup.Palpation,
+			CleanlinessNotes:            req.Checkup.CleanlinessNotes,
+			NutritionRecommendations:    req.Checkup.NutritionRecommendations,
+			PeriodicCareRecommendations: req.Checkup.PeriodicCareRecommendations,
+		}
+	case models.ServiceTypeTreatment:
+		if req.Treatment == nil {
+			return errors.New("treatment data is required for treatment service")
+		}
+		prescriptions := make([]models.Prescription, len(req.Treatment.Prescriptions))
+		for i, p := range req.Treatment.Prescriptions {
+			prescriptions[i] = models.Prescription{
+				Name:      p.Name,
+				Dosage:    p.Dosage,
+				Frequency: p.Frequency,
+			}
+		}
+		medicalRecordDoc.Treatment = &models.TreatmentMedicalData{
+			ClinicalSymptoms: req.Treatment.ClinicalSymptoms,
+			Diagnosis:        req.Treatment.Diagnosis,
+			MedicalActions:   req.Treatment.MedicalActions,
+			Prescriptions:    prescriptions,
+			HomeCareNotes:    req.Treatment.HomeCareNotes,
+			EstimatedCost:    req.Treatment.EstimatedCost,
+		}
+	}
+
+	// 5. Transaction
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		// a. Save Medical Record to Mongo
+		if _, err := s.mongo.MedicalRecords.InsertOne(ctx, medicalRecordDoc); err != nil {
+			return err
+		}
+
+		// b. Save Reminders to MySQL
+		for _, r := range req.Reminders {
+			reminder := models.Reminder{
+				ID:                  uuid.New(),
+				PetID:               app.PetID,
+				SourceAppointmentID: appointmentID,
+				ServiceType:         r.ServiceType,
+				Description:         r.Description,
+				ReminderDate:        datatypes.Date(r.ReminderDate.Time()),
+			}
+			if err := gorm.G[models.Reminder](tx).Create(ctx, &reminder); err != nil {
+				return err
+			}
+		}
+
+		// c. Update Appointment State to Finished
+		_, err := gorm.G[models.Appointment](tx).
+			Where("id = ?", appointmentID).
+			Update(ctx, "current_state", models.StateFinished)
+		if err != nil {
+			return err
+		}
+
+		// d. Log Status History
+		statusLog := models.StatusHistory{
+			AppointmentID: appointmentID.String(),
+			State:         models.StateFinished,
+			ActorID:       internalUserID,
+			ActorRole:     models.RoleDoctor,
+			ChangedAt:     time.Now(),
+		}
+		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

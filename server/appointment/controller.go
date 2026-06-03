@@ -35,6 +35,7 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	internal.POST("/:id/select-doctor", ctrl.SelectDoctor, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
 	internal.POST("/:id/doctor-reject", ctrl.DoctorRejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
 	internal.POST("/:id/doctor-approve", ctrl.DoctorApproveAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+	internal.POST("/:id/medical-record", ctrl.SaveMedicalRecord, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
 }
 
 func (ctrl *Controller) DoctorApproveAppointment(c *echo.Context) error {
@@ -240,4 +241,28 @@ func (ctrl *Controller) GetAppointmentDetail(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) SaveMedicalRecord(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req SaveMedicalRecordRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.SaveMedicalRecord(c.Request().Context(), session.ID, appointmentID, req)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }
