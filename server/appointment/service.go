@@ -405,6 +405,71 @@ func (s *Service) SelectDoctor(ctx context.Context, receptionistID uint, appoint
 	})
 }
 
+func (s *Service) DoctorRejectAppointment(ctx context.Context, internalUserID uint, appointmentID uuid.UUID, reason string) error {
+	// Need to find the DoctorProfile ID for the internal user
+	doctorProfile, err := gorm.G[models.DoctorProfile](s.db).
+		Select("internal_user_id").
+		Where("internal_user_id = ?", internalUserID).
+		First(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("doctor profile not found")
+		}
+		return err
+	}
+
+	app, err := gorm.G[models.Appointment](s.db).
+		Select("id", "current_state", "doctor_id").
+		Where("id = ?", appointmentID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrAppointmentNotFound
+		}
+		return err
+	}
+
+	if app.CurrentState != models.StateWaitingDoctor {
+		return errors.New("appointment is not in waiting doctor state")
+	}
+
+	if app.DoctorID == nil || *app.DoctorID != doctorProfile.InternalUserID {
+		return errors.New("appointment is not assigned to you")
+	}
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		// Update appointment state back to Accepted (so receptionist can re-assign)
+		// and clear the doctor id
+		_, err := gorm.G[models.Appointment](tx).
+			Where("id = ?", appointmentID).
+			Updates(ctx, models.Appointment{
+				CurrentState: models.StateAccepted,
+				DoctorID:     nil,
+			})
+
+		if err != nil {
+			return err
+		}
+
+		// Log status history with reason
+		statusLog := models.StatusHistory{
+			AppointmentID: appointmentID.String(),
+			State:         models.StateAccepted, // We move it back to accepted
+			ActorID:       internalUserID,
+			ActorRole:     models.RoleDoctor,
+			ChangedAt:     time.Now(),
+			Reason:        reason,
+		}
+
+		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {
 	app, err := gorm.G[models.Appointment](s.db).
 		Select("appointments.id", "current_state", "service_type", "appointment_date", "owner_notes", "previous_medical_history").

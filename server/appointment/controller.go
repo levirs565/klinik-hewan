@@ -28,12 +28,36 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	appointments.GET("/:id", ctrl.GetAppointmentDetail)
 
 	internal := g.Group("/internal/appointments")
-	internal.Use(core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
-	internal.GET("", ctrl.GetAllAppointments)
-	internal.GET("/:id", ctrl.GetInternalAppointmentDetail)
-	internal.POST("/:id/approve", ctrl.ApproveAppointment)
-	internal.POST("/:id/reject", ctrl.RejectAppointment)
-	internal.POST("/:id/select-doctor", ctrl.SelectDoctor)
+	internal.GET("", ctrl.GetAllAppointments, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.GET("/:id", ctrl.GetInternalAppointmentDetail, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/approve", ctrl.ApproveAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/reject", ctrl.RejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/select-doctor", ctrl.SelectDoctor, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/doctor-reject", ctrl.DoctorRejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+}
+
+func (ctrl *Controller) DoctorRejectAppointment(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req RejectAppointmentRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.DoctorRejectAppointment(c.Request().Context(), session.ID, appointmentID, req.Reason)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }
 
 func (ctrl *Controller) SelectDoctor(c *echo.Context) error {
