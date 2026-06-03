@@ -34,3 +34,16 @@ type CreateDoctorResponse struct {
 	Username string `json:"username"`
 	FullName string `json:"full_name"`
 }
+
+type CreateReceptionistRequest struct {
+	Username string `json:"username" validate:"required,min=4,max=100"`
+	Password string `json:"password" validate:"required,min=6"`
+	FullName string `json:"full_name" validate:"required,max=255"`
+	IsActive bool   `json:"is_active"`
+}
+
+type CreateReceptionistResponse struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	FullName string `json:"full_name"`
+}

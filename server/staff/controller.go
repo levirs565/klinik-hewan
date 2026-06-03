@@ -19,6 +19,7 @@ func NewController(service *Service) *Controller {
 func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	group.GET("", ctrl.GetStaffList, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.POST("/doctor", ctrl.CreateDoctor, core.NewGuardRoleMiddleware(core.GuardRoleManager))
+	group.POST("/receptionist", ctrl.CreateReceptionist, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 }
 
 func (ctrl *Controller) GetStaffList(c *echo.Context) error {
@@ -42,6 +43,23 @@ func (ctrl *Controller) CreateDoctor(c *echo.Context) error {
 	}
 
 	res, err := ctrl.service.CreateDoctor((*c).Request().Context(), req)
+	if err != nil {
+		if errors.Is(err, ErrUsernameAlreadyExists) {
+			return echo.NewHTTPError(http.StatusConflict, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, res)
+}
+
+func (ctrl *Controller) CreateReceptionist(c *echo.Context) error {
+	var req CreateReceptionistRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	res, err := ctrl.service.CreateReceptionist((*c).Request().Context(), req)
 	if err != nil {
 		if errors.Is(err, ErrUsernameAlreadyExists) {
 			return echo.NewHTTPError(http.StatusConflict, err.Error())

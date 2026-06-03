@@ -113,3 +113,34 @@ func (s *Service) CreateDoctor(ctx context.Context, req CreateDoctorRequest) (*C
 		FullName: user.FullName,
 	}, nil
 }
+
+func (s *Service) CreateReceptionist(ctx context.Context, req CreateReceptionistRequest) (*CreateReceptionistResponse, error) {
+	// Check if username already exists
+	_, err := gorm.G[models.InternalUser](s.db).Where("username = ?", req.Username).First(ctx)
+	if err == nil {
+		return nil, ErrUsernameAlreadyExists
+	}
+
+	hashedPassword, err := core.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	user := models.InternalUser{
+		Username: req.Username,
+		Password: hashedPassword,
+		FullName: req.FullName,
+		Role:     models.RoleReceptionist,
+		IsActive: req.IsActive,
+	}
+
+	if err := gorm.G[models.InternalUser](s.db).Create(ctx, &user); err != nil {
+		return nil, err
+	}
+
+	return &CreateReceptionistResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		FullName: user.FullName,
+	}, nil
+}
