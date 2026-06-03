@@ -7,9 +7,12 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"vetconnect-server/appointment"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
 	"vetconnect-server/pet"
+
+	"vetconnect-server/models"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
@@ -21,13 +24,6 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		slog.Warn("Error loading .env file, using environment variables")
 	}
-
-	e := echo.New()
-	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
-
-	// Initialize Validator
-	e.Validator = core.NewValidator()
 
 	// Initialize Database
 	db, err := core.InitDB()
@@ -47,8 +43,39 @@ func main() {
 	}
 	tokenHelper := core.NewTokenHelper(jwtKey)
 
-	// Initialize Layers
+	// Initialize Service
 	authService := auth.NewService(db, mongoClient, tokenHelper)
+
+	// Check for CLI commands
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "create-manager":
+			if len(os.Args) < 5 {
+				fmt.Println("Usage: create-manager <username> <password> <full_name>")
+				return
+			}
+			username := os.Args[2]
+			password := os.Args[3]
+			fullName := os.Args[4]
+
+			err := authService.CreateInternalUser(context.Background(), username, password, fullName, models.RoleManager)
+			if err != nil {
+				fmt.Printf("Error creating manager: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("Manager account created successfully")
+			return
+		}
+	}
+
+	e := echo.New()
+	e.Use(middleware.RequestLogger())
+	e.Use(middleware.Recover())
+
+	// Initialize Validator
+	e.Validator = core.NewValidator()
+
+	// Initialize Layers
 	authController := auth.NewController(authService)
 
 	s3Helper, err := core.NewS3Helper()
@@ -66,6 +93,9 @@ func main() {
 	petService := pet.NewService(db, s3Helper)
 	petController := pet.NewController(petService)
 
+	appointmentService := appointment.NewService(db, mongoClient, s3Helper)
+	appointmentController := appointment.NewController(appointmentService)
+
 	// Routes
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "VetConnect API")
@@ -76,6 +106,7 @@ func main() {
 	api.Use(core.NewSessionMiddleware(tokenHelper))
 	authController.RegisterRoutes(api)
 	petController.RegisterRoutes(api)
+	appointmentController.RegisterRoutes(api)
 
 	if err := e.Start(":1323"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
