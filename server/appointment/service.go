@@ -8,6 +8,8 @@ import (
 	"vetconnect-server/models"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -32,6 +34,69 @@ func NewService(db *gorm.DB, mongo *core.MongoStorage, s3 *core.S3Helper) *Servi
 		mongo: mongo,
 		s3:    s3,
 	}
+}
+
+func (s *Service) getMedicalRecordDTO(ctx context.Context, appointmentID string) (*MedicalRecordResponse, error) {
+	var medicalRecord models.MedicalRecord
+	err := s.mongo.MedicalRecords.FindOne(ctx, bson.M{"appointment_id": appointmentID}).Decode(&medicalRecord)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	response := &MedicalRecordResponse{
+		PhysicalExamination: PhysicalExaminationDTO{
+			Weight:            medicalRecord.PhysicalExamination.Weight,
+			Temperature:       medicalRecord.PhysicalExamination.Temperature,
+			PhysicalCondition: medicalRecord.PhysicalExamination.PhysicalCondition,
+			HeartRate:         medicalRecord.PhysicalExamination.HeartRate,
+			RespiratoryRate:   medicalRecord.PhysicalExamination.RespiratoryRate,
+		},
+		Type: medicalRecord.Type,
+	}
+
+	if medicalRecord.Vaccine != nil {
+		response.Vaccine = &VaccineMedicalDataDTO{
+			VaccineType:         medicalRecord.Vaccine.VaccineType,
+			Brand:               medicalRecord.Vaccine.Brand,
+			BatchNumber:         medicalRecord.Vaccine.BatchNumber,
+			AdministrationDate:  core.Date(datatypes.Date(medicalRecord.Vaccine.AdministrationDate)),
+			PreVaccineCondition: medicalRecord.Vaccine.PreVaccineCondition,
+			PostVaccineReaction: medicalRecord.Vaccine.PostVaccineReaction,
+		}
+	}
+
+	if medicalRecord.Checkup != nil {
+		response.Checkup = &CheckupMedicalDataDTO{
+			Palpation:                   medicalRecord.Checkup.Palpation,
+			CleanlinessNotes:            medicalRecord.Checkup.CleanlinessNotes,
+			NutritionRecommendations:    medicalRecord.Checkup.NutritionRecommendations,
+			PeriodicCareRecommendations: medicalRecord.Checkup.PeriodicCareRecommendations,
+		}
+	}
+
+	if medicalRecord.Treatment != nil {
+		prescriptions := make([]PrescriptionDTO, len(medicalRecord.Treatment.Prescriptions))
+		for i, p := range medicalRecord.Treatment.Prescriptions {
+			prescriptions[i] = PrescriptionDTO{
+				Name:      p.Name,
+				Dosage:    p.Dosage,
+				Frequency: p.Frequency,
+			}
+		}
+		response.Treatment = &TreatmentMedicalDataDTO{
+			ClinicalSymptoms: medicalRecord.Treatment.ClinicalSymptoms,
+			Diagnosis:        medicalRecord.Treatment.Diagnosis,
+			MedicalActions:   medicalRecord.Treatment.MedicalActions,
+			Prescriptions:    prescriptions,
+			HomeCareNotes:    medicalRecord.Treatment.HomeCareNotes,
+			EstimatedCost:    medicalRecord.Treatment.EstimatedCost,
+		}
+	}
+
+	return response, nil
 }
 
 func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req CreateAppointmentRequest) (*CreateAppointmentResponse, error) {
@@ -255,6 +320,12 @@ func (s *Service) GetInternalAppointmentDetail(ctx context.Context, appointmentI
 			Name: app.Doctor.InternalUser.FullName,
 		}
 	}
+
+	medicalRecord, err := s.getMedicalRecordDTO(ctx, appointmentID.String())
+	if err != nil {
+		return nil, err
+	}
+	response.MedicalRecord = medicalRecord
 
 	return response, nil
 }
@@ -578,6 +649,12 @@ func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appoin
 			Name: app.Doctor.InternalUser.FullName,
 		}
 	}
+
+	medicalRecord, err := s.getMedicalRecordDTO(ctx, appointmentID.String())
+	if err != nil {
+		return nil, err
+	}
+	response.MedicalRecord = medicalRecord
 
 	return response, nil
 }

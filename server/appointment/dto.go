@@ -83,6 +83,15 @@ type AppointmentDetailResponse struct {
 	AppointmentDate        core.Date                 `json:"appointment_date"`
 	OwnerNotes             string                    `json:"owner_notes"`
 	PreviousMedicalHistory string                    `json:"previous_medical_history"`
+	MedicalRecord          *MedicalRecordResponse    `json:"medical_record,omitempty"`
+}
+
+type MedicalRecordResponse struct {
+	PhysicalExamination PhysicalExaminationDTO   `json:"physical_examination"`
+	Type                models.ServiceType       `json:"type"`
+	Vaccine             *VaccineMedicalDataDTO   `json:"vaccine,omitempty"`
+	Checkup             *CheckupMedicalDataDTO   `json:"checkup,omitempty"`
+	Treatment           *TreatmentMedicalDataDTO `json:"treatment,omitempty"`
 }
 
 type InternalAppointmentDetailResponse struct {
