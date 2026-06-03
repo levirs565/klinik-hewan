@@ -15,6 +15,7 @@ import (
 var (
 	ErrUsernameAlreadyExists = errors.New("username already exists")
 	ErrDoctorNotFound        = errors.New("doctor not found")
+	ErrReceptionistNotFound  = errors.New("receptionist not found")
 )
 
 type Service struct {
@@ -182,4 +183,27 @@ func (s *Service) GetDoctorDetail(ctx context.Context, id uint) (*DoctorDetailRe
 	}
 
 	return res, nil
+}
+
+func (s *Service) GetReceptionistDetail(ctx context.Context, id uint) (*ReceptionistDetailResponse, error) {
+	user, err := gorm.G[models.InternalUser](s.db).
+		Select("id", "username", "full_name", "role", "avatar_id", "is_active").
+		Where("id = ? AND role = ?", id, models.RoleReceptionist).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrReceptionistNotFound
+		}
+		return nil, err
+	}
+
+	return &ReceptionistDetailResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Role:      user.Role,
+		IsActive:  user.IsActive,
+		AvatarURL: s.s3.GetStaffAvatarURL(ctx, user.ID, user.AvatarID),
+	}, nil
 }

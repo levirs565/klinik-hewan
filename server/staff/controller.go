@@ -21,6 +21,7 @@ func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	group.POST("/doctor", ctrl.CreateDoctor, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.POST("/receptionist", ctrl.CreateReceptionist, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.GET("/doctor/:id", ctrl.GetDoctorDetail, core.NewGuardRoleMiddleware(core.GuardRoleManager))
+	group.GET("/receptionist/:id", ctrl.GetReceptionistDetail, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 }
 
 func (ctrl *Controller) GetStaffList(c *echo.Context) error {
@@ -80,6 +81,23 @@ func (ctrl *Controller) GetDoctorDetail(c *echo.Context) error {
 	res, err := ctrl.service.GetDoctorDetail((*c).Request().Context(), id)
 	if err != nil {
 		if errors.Is(err, ErrDoctorNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) GetReceptionistDetail(c *echo.Context) error {
+	id, err := echo.PathParam[uint](c, "id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid receptionist id")
+	}
+
+	res, err := ctrl.service.GetReceptionistDetail((*c).Request().Context(), id)
+	if err != nil {
+		if errors.Is(err, ErrReceptionistNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 		return err
