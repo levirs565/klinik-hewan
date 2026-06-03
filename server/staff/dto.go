@@ -47,3 +47,17 @@ type CreateReceptionistResponse struct {
 	Username string `json:"username"`
 	FullName string `json:"full_name"`
 }
+
+type DoctorDetailResponse struct {
+	ID                      uint               `json:"id"`
+	Username                string             `json:"username"`
+	FullName                string             `json:"full_name"`
+	Role                    models.AccountRole `json:"role"`
+	IsActive                bool               `json:"is_active"`
+	AvatarURL               string             `json:"avatar_url,omitempty"`
+	BirthDate               core.Date          `json:"birth_date"`
+	EducationHistory        string             `json:"education_history"`
+	PracticeStartDate       core.Date          `json:"practice_start_date"`
+	JoinDate                core.Date          `json:"join_date"`
+	PracticeLocationHistory string             `json:"practice_location_history"`
+}

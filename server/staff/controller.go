@@ -20,6 +20,7 @@ func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	group.GET("", ctrl.GetStaffList, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.POST("/doctor", ctrl.CreateDoctor, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.POST("/receptionist", ctrl.CreateReceptionist, core.NewGuardRoleMiddleware(core.GuardRoleManager))
+	group.GET("/doctor/:id", ctrl.GetDoctorDetail, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 }
 
 func (ctrl *Controller) GetStaffList(c *echo.Context) error {
@@ -68,4 +69,21 @@ func (ctrl *Controller) CreateReceptionist(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, res)
+}
+
+func (ctrl *Controller) GetDoctorDetail(c *echo.Context) error {
+	id, err := echo.PathParam[uint](c, "id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid doctor id")
+	}
+
+	res, err := ctrl.service.GetDoctorDetail((*c).Request().Context(), id)
+	if err != nil {
+		if errors.Is(err, ErrDoctorNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }

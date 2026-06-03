@@ -9,10 +9,12 @@ import (
 	"github.com/samber/lo"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
 	ErrUsernameAlreadyExists = errors.New("username already exists")
+	ErrDoctorNotFound        = errors.New("doctor not found")
 )
 
 type Service struct {
@@ -143,4 +145,41 @@ func (s *Service) CreateReceptionist(ctx context.Context, req CreateReceptionist
 		Username: user.Username,
 		FullName: user.FullName,
 	}, nil
+}
+
+func (s *Service) GetDoctorDetail(ctx context.Context, id uint) (*DoctorDetailResponse, error) {
+	user, err := gorm.G[models.InternalUser](s.db).
+		Select("internal_users.id", "username", "full_name", "role", "avatar_id", "is_active").
+		Joins(clause.JoinTarget{Association: "DoctorProfile"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+			db.Select("birth_date", "education_history", "practice_start_date", "join_date", "practice_location_history")
+			return nil
+		}).
+		Where("internal_users.id = ? AND role = ?", id, models.RoleDoctor).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrDoctorNotFound
+		}
+		return nil, err
+	}
+
+	res := &DoctorDetailResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Role:      user.Role,
+		IsActive:  user.IsActive,
+		AvatarURL: s.s3.GetStaffAvatarURL(ctx, user.ID, user.AvatarID),
+	}
+
+	if user.DoctorProfile != nil {
+		res.BirthDate = core.Date(user.DoctorProfile.BirthDate)
+		res.EducationHistory = user.DoctorProfile.EducationHistory
+		res.PracticeStartDate = core.Date(user.DoctorProfile.PracticeStartDate)
+		res.JoinDate = core.Date(user.DoctorProfile.JoinDate)
+		res.PracticeLocationHistory = user.DoctorProfile.PracticeLocationHistory
+	}
+
+	return res, nil
 }
