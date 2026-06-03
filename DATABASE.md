@@ -26,6 +26,7 @@ erDiagram
         string password
         string role "manager, receptionist, doctor"
         string full_name
+        string avatar_id
         boolean is_active
     }
 
@@ -81,7 +82,7 @@ erDiagram
 ```
 
 1. **EXTERNAL_USER**: Menyimpan data login dan profil untuk Pemilik Hewan pada aplikasi eksternal.
-2. **INTERNAL_USER**: Menyimpan data login dan peran staf klinik (Manajer, Resepsionis, Dokter) pada aplikasi internal.
+2. **INTERNAL_USER**: Menyimpan data login, peran staf klinik (Manajer, Resepsionis, Dokter), dan referensi avatar pada aplikasi internal.
 3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal.
 4. **PET**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER). Menyimpan informasi medis dasar dan referensi avatar.
 5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini. Data riwayat status dan rekam medis disimpan di MongoDB.

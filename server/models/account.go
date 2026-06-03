@@ -26,6 +26,7 @@ type InternalUser struct {
 	Password      string         `gorm:"not null"`
 	Role          AccountRole    `gorm:"type:enum('manager','receptionist','doctor');not null"`
 	FullName      string         `gorm:"size:255;not null"`
+	AvatarID      string         `gorm:"size:255"`
 	IsActive      bool           `gorm:"default:true"`
 	DoctorProfile *DoctorProfile `gorm:"foreignKey:InternalUserID"`
 }
