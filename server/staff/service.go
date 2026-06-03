@@ -65,7 +65,10 @@ func (s *Service) GetStaffList(ctx context.Context, req GetStaffListRequest) ([]
 
 func (s *Service) CreateDoctor(ctx context.Context, req CreateDoctorRequest) (*CreateDoctorResponse, error) {
 	// Check if username already exists
-	_, err := gorm.G[models.InternalUser](s.db).Where("username = ?", req.Username).First(ctx)
+	_, err := gorm.G[models.InternalUser](s.db).
+		Select("id").
+		Where("username = ?", req.Username).
+		First(ctx)
 	if err == nil {
 		return nil, ErrUsernameAlreadyExists
 	}
@@ -119,7 +122,10 @@ func (s *Service) CreateDoctor(ctx context.Context, req CreateDoctorRequest) (*C
 
 func (s *Service) CreateReceptionist(ctx context.Context, req CreateReceptionistRequest) (*CreateReceptionistResponse, error) {
 	// Check if username already exists
-	_, err := gorm.G[models.InternalUser](s.db).Where("username = ?", req.Username).First(ctx)
+	_, err := gorm.G[models.InternalUser](s.db).
+		Select("id").
+		Where("username = ?", req.Username).
+		First(ctx)
 	if err == nil {
 		return nil, ErrUsernameAlreadyExists
 	}
@@ -195,6 +201,48 @@ func (s *Service) GetReceptionistDetail(ctx context.Context, id uint) (*Receptio
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrReceptionistNotFound
 		}
+		return nil, err
+	}
+
+	return &ReceptionistDetailResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Role:      user.Role,
+		IsActive:  user.IsActive,
+		AvatarURL: s.s3.GetStaffAvatarURL(ctx, user.ID, user.AvatarID),
+	}, nil
+}
+
+func (s *Service) UpdateReceptionist(ctx context.Context, id uint, req UpdateReceptionistRequest) (*ReceptionistDetailResponse, error) {
+	user, err := gorm.G[models.InternalUser](s.db).
+		Select("id", "username", "full_name", "role", "avatar_id", "is_active").
+		Where("id = ? AND role = ?", id, models.RoleReceptionist).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrReceptionistNotFound
+		}
+		return nil, err
+	}
+
+	user.FullName = req.FullName
+	user.IsActive = req.IsActive
+
+	query := gorm.G[models.InternalUser](s.db).
+		Select("full_name", "is_active")
+
+	if req.Password != "" {
+		hashedPassword, err := core.HashPassword(req.Password)
+		if err != nil {
+			return nil, err
+		}
+		user.Password = hashedPassword
+		query = query.Select("full_name", "is_active", "password")
+	}
+
+	if _, err := query.Updates(ctx, user); err != nil {
 		return nil, err
 	}
 

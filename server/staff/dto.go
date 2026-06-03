@@ -48,6 +48,12 @@ type CreateReceptionistResponse struct {
 	FullName string `json:"full_name"`
 }
 
+type UpdateReceptionistRequest struct {
+	FullName string `json:"full_name" validate:"required,max=255"`
+	Password string `json:"password" validate:"omitempty,min=6"`
+	IsActive bool   `json:"is_active"`
+}
+
 type DoctorDetailResponse struct {
 	ID                      uint               `json:"id"`
 	Username                string             `json:"username"`
