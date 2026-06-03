@@ -89,3 +89,7 @@ type InternalAppointmentDetailResponse struct {
 	AppointmentDetailResponse
 	Owner AppointmentOwnerSummary `json:"owner"`
 }
+
+type RejectAppointmentRequest struct {
+	Reason string `json:"reason" validate:"required"`
+}

@@ -299,6 +299,51 @@ func (s *Service) ApproveAppointment(ctx context.Context, receptionistID uint, a
 	})
 }
 
+func (s *Service) RejectAppointment(ctx context.Context, receptionistID uint, appointmentID uuid.UUID, reason string) error {
+	app, err := gorm.G[models.Appointment](s.db).
+		Select("id", "current_state").
+		Where("id = ?", appointmentID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrAppointmentNotFound
+		}
+		return err
+	}
+
+	if app.CurrentState != models.StateWaitingConfirmation {
+		return ErrInvalidAppointmentState
+	}
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		// Update appointment state
+		_, err := gorm.G[models.Appointment](tx).
+			Where("id = ?", appointmentID).
+			Update(ctx, "current_state", models.StateRejected)
+
+		if err != nil {
+			return err
+		}
+
+		// Log status history
+		statusLog := models.StatusHistory{
+			AppointmentID: appointmentID.String(),
+			State:         models.StateRejected,
+			ActorID:       receptionistID,
+			ActorRole:     models.RoleReceptionist,
+			ChangedAt:     time.Now(),
+			Reason:        reason,
+		}
+
+		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {
 	app, err := gorm.G[models.Appointment](s.db).
 		Select("appointments.id", "current_state", "service_type", "appointment_date", "owner_notes", "previous_medical_history").
