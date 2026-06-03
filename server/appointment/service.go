@@ -157,7 +157,7 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 	}, nil
 }
 
-func (s *Service) GetAllAppointments(ctx context.Context, status models.AppointmentState, date string) ([]AppointmentListItem, error) {
+func (s *Service) GetAllAppointments(ctx context.Context, status models.AppointmentState, date string, doctorID *uint) ([]AppointmentListItem, error) {
 	query := gorm.G[models.Appointment](s.db).
 		Select("id", "current_state", "service_type", "appointment_date", "pet_id").
 		Preload("Pet", func(db gorm.PreloadBuilder) error {
@@ -170,6 +170,9 @@ func (s *Service) GetAllAppointments(ctx context.Context, status models.Appointm
 	}
 	if date != "" {
 		query = query.Where("appointment_date = ?", date)
+	}
+	if doctorID != nil {
+		query = query.Where("doctor_id = ?", *doctorID)
 	}
 
 	appointments, err := query.

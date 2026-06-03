@@ -177,8 +177,16 @@ func (ctrl *Controller) GetInternalAppointmentDetail(c *echo.Context) error {
 func (ctrl *Controller) GetAllAppointments(c *echo.Context) error {
 	status := c.QueryParam("status")
 	date := c.QueryParam("date")
+	isMyAppointments := c.QueryParam("my_appointments") == "true"
 
-	res, err := ctrl.service.GetAllAppointments(c.Request().Context(), models.AppointmentState(status), date)
+	session := core.GetUserSession(c)
+	var doctorID *uint
+	if isMyAppointments && session.Role == models.RoleDoctor {
+		id := session.ID
+		doctorID = &id
+	}
+
+	res, err := ctrl.service.GetAllAppointments(c.Request().Context(), models.AppointmentState(status), date, doctorID)
 	if err != nil {
 		return err
 	}
