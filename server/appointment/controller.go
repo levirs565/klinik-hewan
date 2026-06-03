@@ -33,6 +33,34 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	internal.GET("/:id", ctrl.GetInternalAppointmentDetail)
 	internal.POST("/:id/approve", ctrl.ApproveAppointment)
 	internal.POST("/:id/reject", ctrl.RejectAppointment)
+	internal.POST("/:id/select-doctor", ctrl.SelectDoctor)
+}
+
+func (ctrl *Controller) SelectDoctor(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req SelectDoctorRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.SelectDoctor(c.Request().Context(), session.ID, appointmentID, req.DoctorID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) || errors.Is(err, ErrDoctorNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if err.Error() == "appointment must be in accepted state to select a doctor" {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }
 
 func (ctrl *Controller) RejectAppointment(c *echo.Context) error {

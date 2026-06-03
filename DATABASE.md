@@ -33,8 +33,7 @@ erDiagram
 
     DOCTOR_PROFILE ||--o{ APPOINTMENT : has
     DOCTOR_PROFILE {
-        uint id PK
-        uint internal_user_id FK
+        uint internal_user_id PK FK
         date birth_date
         text education_history
         date practice_start_date
@@ -83,7 +82,7 @@ erDiagram
 
 1. **EXTERNAL_USER**: Menyimpan data login dan profil untuk Pemilik Hewan pada aplikasi eksternal.
 2. **INTERNAL_USER**: Menyimpan data login, peran staf klinik (Manajer, Resepsionis, Dokter), dan referensi avatar pada aplikasi internal.
-3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal. (Catatan: Field `special_services_history` telah dihapus).
+3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal. Menggunakan `internal_user_id` sebagai Primary Key dan Foreign Key untuk relasi *one-to-one*. (Catatan: Field `special_services_history` telah dihapus).
 4. **PET**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER). Menyimpan informasi medis dasar dan referensi avatar.
 5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini. Data riwayat status dan rekam medis disimpan di MongoDB.
 6. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak keterkaitan dengan janji temu asal dan janji temu baru yang menanganinya.

@@ -93,3 +93,7 @@ type InternalAppointmentDetailResponse struct {
 type RejectAppointmentRequest struct {
 	Reason string `json:"reason" validate:"required"`
 }
+
+type SelectDoctorRequest struct {
+	DoctorID uint `json:"doctor_id" validate:"required"`
+}

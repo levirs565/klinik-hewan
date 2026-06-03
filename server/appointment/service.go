@@ -17,6 +17,7 @@ var (
 	ErrPetNotFound             = errors.New("pet not found or does not belong to you")
 	ErrAppointmentNotFound     = errors.New("appointment not found or does not belong to you")
 	ErrInvalidAppointmentState = errors.New("appointment is not in waiting confirmation state")
+	ErrDoctorNotFound          = errors.New("doctor not found")
 )
 
 type Service struct {
@@ -334,6 +335,66 @@ func (s *Service) RejectAppointment(ctx context.Context, receptionistID uint, ap
 			ActorRole:     models.RoleReceptionist,
 			ChangedAt:     time.Now(),
 			Reason:        reason,
+		}
+
+		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (s *Service) SelectDoctor(ctx context.Context, receptionistID uint, appointmentID uuid.UUID, doctorID uint) error {
+	app, err := gorm.G[models.Appointment](s.db).
+		Select("id", "current_state").
+		Where("id = ?", appointmentID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrAppointmentNotFound
+		}
+		return err
+	}
+
+	if app.CurrentState != models.StateAccepted {
+		return errors.New("appointment must be in accepted state to select a doctor")
+	}
+
+	// Verify doctor exists
+	_, err = gorm.G[models.DoctorProfile](s.db).
+		Select("internal_user_id").
+		Where("internal_user_id = ?", doctorID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrDoctorNotFound
+		}
+		return err
+	}
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		// Update appointment doctor and state
+		_, err := gorm.G[models.Appointment](tx).
+			Where("id = ?", appointmentID).
+			Updates(ctx, models.Appointment{
+				DoctorID:     &doctorID,
+				CurrentState: models.StateDoctorAllocation,
+			})
+
+		if err != nil {
+			return err
+		}
+
+		// Log status history
+		statusLog := models.StatusHistory{
+			AppointmentID: appointmentID.String(),
+			State:         models.StateDoctorAllocation,
+			ActorID:       receptionistID,
+			ActorRole:     models.RoleReceptionist,
+			ChangedAt:     time.Now(),
 		}
 
 		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {

@@ -33,8 +33,7 @@ type InternalUser struct {
 }
 
 type DoctorProfile struct {
-	ID                      uint         `gorm:"primaryKey"`
-	InternalUserID          uint         `gorm:"not null"`
+	InternalUserID          uint         `gorm:"primaryKey"`
 	InternalUser            InternalUser `gorm:"foreignKey:InternalUserID"`
 	BirthDate               datatypes.Date
 	EducationHistory        string `gorm:"type:text"`
