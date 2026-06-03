@@ -34,6 +34,26 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	internal.POST("/:id/reject", ctrl.RejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
 	internal.POST("/:id/select-doctor", ctrl.SelectDoctor, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
 	internal.POST("/:id/doctor-reject", ctrl.DoctorRejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+	internal.POST("/:id/doctor-approve", ctrl.DoctorApproveAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+}
+
+func (ctrl *Controller) DoctorApproveAppointment(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.DoctorApproveAppointment(c.Request().Context(), session.ID, appointmentID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }
 
 func (ctrl *Controller) DoctorRejectAppointment(c *echo.Context) error {
