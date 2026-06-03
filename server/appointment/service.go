@@ -155,6 +155,47 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 	}, nil
 }
 
+func (s *Service) GetAllAppointments(ctx context.Context, status string, date string) ([]AppointmentListItem, error) {
+	query := gorm.G[models.Appointment](s.db).
+		Select("appointments.id", "current_state", "service_type", "appointment_date").
+		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
+			db.Select("id", "name", "breed", "avatar_id")
+			return nil
+		})
+
+	if status != "" {
+		query = query.Where("current_state = ?", status)
+	}
+	if date != "" {
+		query = query.Where("appointment_date = ?", date)
+	}
+
+	appointments, err := query.
+		Order("appointments.appointment_date DESC, appointments.created_at DESC").
+		Find(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]AppointmentListItem, len(appointments))
+	for i, app := range appointments {
+		items[i] = AppointmentListItem{
+			ID: app.ID,
+			Pet: AppointmentPetSummary{
+				Name:      app.Pet.Name,
+				Breed:     app.Pet.Breed,
+				AvatarURL: s.s3.GetPetAvatarURL(ctx, app.Pet.ID, app.Pet.AvatarID),
+			},
+			Status:          string(app.CurrentState),
+			ServiceType:     app.ServiceType,
+			AppointmentDate: core.Date(app.AppointmentDate),
+		}
+	}
+
+	return items, nil
+}
+
 func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {
 	app, err := gorm.G[models.Appointment](s.db).
 		Select("appointments.id", "current_state", "service_type", "appointment_date", "owner_notes", "previous_medical_history").

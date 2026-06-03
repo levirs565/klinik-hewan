@@ -25,6 +25,22 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	appointments.POST("", ctrl.CreateAppointment)
 	appointments.GET("", ctrl.GetOwnerAppointments)
 	appointments.GET("/:id", ctrl.GetAppointmentDetail)
+
+	internal := g.Group("/internal/appointments")
+	internal.Use(core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.GET("", ctrl.GetAllAppointments)
+}
+
+func (ctrl *Controller) GetAllAppointments(c *echo.Context) error {
+	status := c.QueryParam("status")
+	date := c.QueryParam("date")
+
+	res, err := ctrl.service.GetAllAppointments(c.Request().Context(), status, date)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
