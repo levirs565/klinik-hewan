@@ -22,6 +22,7 @@ func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	group.POST("/receptionist", ctrl.CreateReceptionist, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.GET("/doctor/:id", ctrl.GetDoctorDetail, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.GET("/receptionist/:id", ctrl.GetReceptionistDetail, core.NewGuardRoleMiddleware(core.GuardRoleManager))
+	group.PUT("/doctor/:id", ctrl.UpdateDoctor, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.PUT("/receptionist/:id", ctrl.UpdateReceptionist, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 }
 
@@ -80,6 +81,28 @@ func (ctrl *Controller) GetDoctorDetail(c *echo.Context) error {
 	}
 
 	res, err := ctrl.service.GetDoctorDetail((*c).Request().Context(), id)
+	if err != nil {
+		if errors.Is(err, ErrDoctorNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) UpdateDoctor(c *echo.Context) error {
+	id, err := echo.PathParam[uint](c, "id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid doctor id")
+	}
+
+	var req UpdateDoctorRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	res, err := ctrl.service.UpdateDoctor((*c).Request().Context(), id, req)
 	if err != nil {
 		if errors.Is(err, ErrDoctorNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())

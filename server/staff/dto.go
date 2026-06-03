@@ -29,6 +29,17 @@ type CreateDoctorRequest struct {
 	PracticeLocationHistory string    `json:"practice_location_history" validate:"required"`
 }
 
+type UpdateDoctorRequest struct {
+	FullName                string    `json:"full_name" validate:"required,max=255"`
+	Password                string    `json:"password" validate:"omitempty,min=6"`
+	IsActive                bool      `json:"is_active"`
+	BirthDate               core.Date `json:"birth_date" validate:"required"`
+	EducationHistory        string    `json:"education_history" validate:"required"`
+	PracticeStartDate       core.Date `json:"practice_start_date" validate:"required"`
+	JoinDate                core.Date `json:"join_date" validate:"required"`
+	PracticeLocationHistory string    `json:"practice_location_history" validate:"required"`
+}
+
 type CreateDoctorResponse struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`

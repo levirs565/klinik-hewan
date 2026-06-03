@@ -191,6 +191,64 @@ func (s *Service) GetDoctorDetail(ctx context.Context, id uint) (*DoctorDetailRe
 	return res, nil
 }
 
+func (s *Service) UpdateDoctor(ctx context.Context, id uint, req UpdateDoctorRequest) (*DoctorDetailResponse, error) {
+	user, err := gorm.G[models.InternalUser](s.db).
+		Select("id", "username", "full_name", "role", "avatar_id", "is_active").
+		Where("id = ? AND role = ?", id, models.RoleDoctor).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrDoctorNotFound
+		}
+		return nil, err
+	}
+
+	err = s.db.Transaction(func(tx *gorm.DB) error {
+		// Update InternalUser
+		user.FullName = req.FullName
+		user.IsActive = req.IsActive
+
+		query := gorm.G[models.InternalUser](tx).Select("full_name", "is_active")
+		if req.Password != "" {
+			hashedPassword, err := core.HashPassword(req.Password)
+			if err != nil {
+				return err
+			}
+			user.Password = hashedPassword
+			query = query.Select("full_name", "is_active", "password")
+		}
+
+		if _, err := query.Where("id = ?", id).Updates(ctx, user); err != nil {
+			return err
+		}
+
+		// Update DoctorProfile
+		profile := models.DoctorProfile{
+			BirthDate:               datatypes.Date(req.BirthDate.Time()),
+			EducationHistory:        req.EducationHistory,
+			PracticeStartDate:       datatypes.Date(req.PracticeStartDate.Time()),
+			JoinDate:                datatypes.Date(req.JoinDate.Time()),
+			PracticeLocationHistory: req.PracticeLocationHistory,
+		}
+
+		if _, err := gorm.G[models.DoctorProfile](tx).
+			Select("birth_date", "education_history", "practice_start_date", "join_date", "practice_location_history").
+			Where("internal_user_id = ?", id).
+			Updates(ctx, profile); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetDoctorDetail(ctx, id)
+}
+
 func (s *Service) GetReceptionistDetail(ctx context.Context, id uint) (*ReceptionistDetailResponse, error) {
 	user, err := gorm.G[models.InternalUser](s.db).
 		Select("id", "username", "full_name", "role", "avatar_id", "is_active").
