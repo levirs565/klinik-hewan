@@ -69,6 +69,7 @@ const (
 	GuardRoleReceptionist GuardRoleRule = "receptionist"
 	GuardRoleDoctor       GuardRoleRule = "doctor"
 	GuardRoleOwner        GuardRoleRule = "owner"
+	GuardRoleInternal     GuardRoleRule = "internal"
 )
 
 func GuardRole(session UserSession, rule GuardRoleRule) error {
@@ -86,6 +87,14 @@ func GuardRole(session UserSession, rule GuardRoleRule) error {
 	if rule == GuardRoleLoggedIn {
 		return nil
 	}
+
+	if rule == GuardRoleInternal {
+		if session.Role == models.RoleManager || session.Role == models.RoleReceptionist || session.Role == models.RoleDoctor {
+			return nil
+		}
+		return echo.NewHTTPError(http.StatusForbidden, "this resource is for internal staff only")
+	}
+
 	if session.Role == models.AccountRole(rule) {
 		return nil
 	}

@@ -28,8 +28,8 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	appointments.GET("/:id", ctrl.GetAppointmentDetail)
 
 	internal := g.Group("/internal/appointments")
-	internal.GET("", ctrl.GetAllAppointments, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
-	internal.GET("/:id", ctrl.GetInternalAppointmentDetail, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.GET("", ctrl.GetAllAppointments, core.NewGuardRoleMiddleware(core.GuardRoleInternal))
+	internal.GET("/:id", ctrl.GetInternalAppointmentDetail, core.NewGuardRoleMiddleware(core.GuardRoleInternal))
 	internal.POST("/:id/approve", ctrl.ApproveAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
 	internal.POST("/:id/reject", ctrl.RejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
 	internal.POST("/:id/select-doctor", ctrl.SelectDoctor, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
