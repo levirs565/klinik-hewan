@@ -13,12 +13,12 @@ const (
 	StateWaitingConfirmation AppointmentState = "Menunggu Konfirmasi"
 	StateAccepted            AppointmentState = "Diterima"
 	StateRejected            AppointmentState = "Ditolak"
-	StateCheckIn             AppointmentState = "Check-In"
-	StateDoctorAllocation    AppointmentState = "Alokasi Dokter"
-	StateWaitingDoctor       AppointmentState = "Menunggu Dokter"
-	StateInTreatment         AppointmentState = "Dalam Penanganan"
-	StateFinished            AppointmentState = "Selesai"
-	StateAdminFinished       AppointmentState = "Selesai Administrasi"
+	// StateCheckIn             AppointmentState = "Check-In"
+	// StateDoctorAllocation    AppointmentState = "Alokasi Dokter"
+	StateWaitingDoctor AppointmentState = "Menunggu Dokter"
+	StateInTreatment   AppointmentState = "Dalam Penanganan"
+	StateFinished      AppointmentState = "Selesai"
+	StateAdminFinished AppointmentState = "Selesai Administrasi"
 )
 
 type ServiceType string

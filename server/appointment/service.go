@@ -381,7 +381,7 @@ func (s *Service) SelectDoctor(ctx context.Context, receptionistID uint, appoint
 			Where("id = ?", appointmentID).
 			Updates(ctx, models.Appointment{
 				DoctorID:     &doctorID,
-				CurrentState: models.StateDoctorAllocation,
+				CurrentState: models.StateWaitingDoctor,
 			})
 
 		if err != nil {
@@ -391,7 +391,7 @@ func (s *Service) SelectDoctor(ctx context.Context, receptionistID uint, appoint
 		// Log status history
 		statusLog := models.StatusHistory{
 			AppointmentID: appointmentID.String(),
-			State:         models.StateDoctorAllocation,
+			State:         models.StateWaitingDoctor,
 			ActorID:       receptionistID,
 			ActorRole:     models.RoleReceptionist,
 			ChangedAt:     time.Now(),
