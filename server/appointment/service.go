@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	ErrPetNotFound         = errors.New("pet not found or does not belong to you")
-	ErrAppointmentNotFound = errors.New("appointment not found or does not belong to you")
+	ErrPetNotFound             = errors.New("pet not found or does not belong to you")
+	ErrAppointmentNotFound     = errors.New("appointment not found or does not belong to you")
+	ErrInvalidAppointmentState = errors.New("appointment is not in waiting confirmation state")
 )
 
 type Service struct {
@@ -252,6 +253,50 @@ func (s *Service) GetInternalAppointmentDetail(ctx context.Context, appointmentI
 	}
 
 	return response, nil
+}
+
+func (s *Service) ApproveAppointment(ctx context.Context, receptionistID uint, appointmentID uuid.UUID) error {
+	app, err := gorm.G[models.Appointment](s.db).
+		Select("id", "current_state").
+		Where("id = ?", appointmentID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrAppointmentNotFound
+		}
+		return err
+	}
+
+	if app.CurrentState != models.StateWaitingConfirmation {
+		return ErrInvalidAppointmentState
+	}
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		// Update appointment state
+		_, err := gorm.G[models.Appointment](tx).
+			Where("id = ?", appointmentID).
+			Update(ctx, "current_state", models.StateAccepted)
+
+		if err != nil {
+			return err
+		}
+
+		// Log status history
+		statusLog := models.StatusHistory{
+			AppointmentID: appointmentID.String(),
+			State:         models.StateAccepted,
+			ActorID:       receptionistID,
+			ActorRole:     models.RoleReceptionist,
+			ChangedAt:     time.Now(),
+		}
+
+		if _, err := s.mongo.StatusHistories.InsertOne(ctx, statusLog); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 func (s *Service) GetAppointmentDetail(ctx context.Context, ownerID uint, appointmentID uuid.UUID) (*AppointmentDetailResponse, error) {
