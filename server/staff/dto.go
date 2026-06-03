@@ -17,10 +17,6 @@ type StaffResponse struct {
 	AvatarURL string             `json:"avatar_url,omitempty"`
 }
 
-type GetStaffListResponse struct {
-	Data []StaffResponse `json:"data"`
-}
-
 type CreateDoctorRequest struct {
 	Username                string    `json:"username" validate:"required,min=4,max=100"`
 	Password                string    `json:"password" validate:"required,min=6"`

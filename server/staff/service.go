@@ -27,7 +27,7 @@ func NewService(db *gorm.DB, s3 *core.S3Helper) *Service {
 	}
 }
 
-func (s *Service) GetStaffList(ctx context.Context, req GetStaffListRequest) (*GetStaffListResponse, error) {
+func (s *Service) GetStaffList(ctx context.Context, req GetStaffListRequest) ([]StaffResponse, error) {
 	var roles []models.AccountRole
 	if req.Role != "" {
 		roles = []models.AccountRole{req.Role}
@@ -57,9 +57,7 @@ func (s *Service) GetStaffList(ctx context.Context, req GetStaffListRequest) (*G
 		}
 	})
 
-	return &GetStaffListResponse{
-		Data: staffList,
-	}, nil
+	return staffList, nil
 }
 
 func (s *Service) CreateDoctor(ctx context.Context, req CreateDoctorRequest) (*CreateDoctorResponse, error) {
