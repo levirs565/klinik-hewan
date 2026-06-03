@@ -11,6 +11,7 @@ import (
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
 	"vetconnect-server/pet"
+	"vetconnect-server/reminder"
 	"vetconnect-server/staff"
 
 	"vetconnect-server/models"
@@ -100,6 +101,9 @@ func main() {
 	staffService := staff.NewService(db, s3Helper)
 	staffController := staff.NewController(staffService)
 
+	reminderService := reminder.NewService(db, s3Helper)
+	reminderController := reminder.NewController(reminderService)
+
 	// Routes
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "VetConnect API")
@@ -111,6 +115,7 @@ func main() {
 	authController.RegisterRoutes(api)
 	petController.RegisterRoutes(api)
 	appointmentController.RegisterRoutes(api)
+	reminderController.RegisterRoutes(api)
 	staffController.RegisterRoutes(api.Group("/staff"))
 
 	if err := e.Start(":1323"); err != nil {
