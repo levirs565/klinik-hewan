@@ -2,11 +2,17 @@ package staff
 
 import (
 	"context"
+	"errors"
 	"vetconnect-server/core"
 	"vetconnect-server/models"
 
 	"github.com/samber/lo"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrUsernameAlreadyExists = errors.New("username already exists")
 )
 
 type Service struct {
@@ -53,5 +59,59 @@ func (s *Service) GetStaffList(ctx context.Context, req GetStaffListRequest) (*G
 
 	return &GetStaffListResponse{
 		Data: staffList,
+	}, nil
+}
+
+func (s *Service) CreateDoctor(ctx context.Context, req CreateDoctorRequest) (*CreateDoctorResponse, error) {
+	// Check if username already exists
+	_, err := gorm.G[models.InternalUser](s.db).Where("username = ?", req.Username).First(ctx)
+	if err == nil {
+		return nil, ErrUsernameAlreadyExists
+	}
+
+	hashedPassword, err := core.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	user := models.InternalUser{
+		Username: req.Username,
+		Password: hashedPassword,
+		FullName: req.FullName,
+		Role:     models.RoleDoctor,
+		IsActive: req.IsActive,
+	}
+
+	err = s.db.Transaction(func(tx *gorm.DB) error {
+		// Create InternalUser
+		if err := gorm.G[models.InternalUser](tx).Create(ctx, &user); err != nil {
+			return err
+		}
+
+		// Create DoctorProfile
+		profile := models.DoctorProfile{
+			InternalUserID:          user.ID,
+			BirthDate:               datatypes.Date(req.BirthDate.Time()),
+			EducationHistory:        req.EducationHistory,
+			PracticeStartDate:       datatypes.Date(req.PracticeStartDate.Time()),
+			JoinDate:                datatypes.Date(req.JoinDate.Time()),
+			PracticeLocationHistory: req.PracticeLocationHistory,
+		}
+
+		if err := gorm.G[models.DoctorProfile](tx).Create(ctx, &profile); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &CreateDoctorResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		FullName: user.FullName,
 	}, nil
 }

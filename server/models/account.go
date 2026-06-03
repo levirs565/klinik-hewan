@@ -40,5 +40,4 @@ type DoctorProfile struct {
 	PracticeStartDate       datatypes.Date
 	JoinDate                datatypes.Date
 	PracticeLocationHistory string `gorm:"type:text"`
-	SpecialServicesHistory  string `gorm:"type:text"`
 }

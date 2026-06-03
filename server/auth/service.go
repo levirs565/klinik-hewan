@@ -2,19 +2,13 @@ package auth
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/subtle"
-	"encoding/base64"
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 	"vetconnect-server/core"
 	"vetconnect-server/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"golang.org/x/crypto/argon2"
 	"gorm.io/gorm"
 )
 
@@ -39,22 +33,6 @@ func NewService(db *gorm.DB, mongo *core.MongoStorage, tokenHelper *core.TokenHe
 	}
 }
 
-type argon2Params struct {
-	memory      uint32
-	iterations  uint32
-	parallelism uint8
-	saltLength  uint32
-	keyLength   uint32
-}
-
-var params = argon2Params{
-	memory:      64 * 1024,
-	iterations:  3,
-	parallelism: 2,
-	saltLength:  16,
-	keyLength:   32,
-}
-
 func (s *Service) RegisterOwner(ctx context.Context, req RegisterOwnerRequest) (*RegisterOwnerResponse, error) {
 	// Check if email exists
 	_, err := gorm.G[models.ExternalUser](s.db).Where("email = ?", req.Email).First(ctx)
@@ -62,7 +40,7 @@ func (s *Service) RegisterOwner(ctx context.Context, req RegisterOwnerRequest) (
 		return nil, ErrEmailAlreadyRegistered
 	}
 
-	hashedPassword, err := s.hashPassword(req.Password)
+	hashedPassword, err := core.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +74,7 @@ func (s *Service) LoginOwner(ctx context.Context, req LoginOwnerRequest) (*Login
 		return nil, err
 	}
 
-	match, err := s.ComparePassword(req.Password, user.Password)
+	match, err := core.ComparePassword(req.Password, user.Password)
 	if err != nil || !match {
 		return nil, ErrInvalidCredentials
 	}
@@ -142,7 +120,7 @@ func (s *Service) LoginInternal(ctx context.Context, req LoginInternalRequest) (
 		return nil, errors.New("account is inactive")
 	}
 
-	match, err := s.ComparePassword(req.Password, user.Password)
+	match, err := core.ComparePassword(req.Password, user.Password)
 	if err != nil || !match {
 		return nil, ErrInvalidCredentials
 	}
@@ -299,7 +277,7 @@ func (s *Service) GetMe(ctx context.Context, session core.UserSession) (*MeRespo
 }
 
 func (s *Service) CreateInternalUser(ctx context.Context, username, password, fullName string, role models.AccountRole) error {
-	hashedPassword, err := s.hashPassword(password)
+	hashedPassword, err := core.HashPassword(password)
 	if err != nil {
 		return err
 	}
@@ -350,53 +328,4 @@ func (s *Service) DeleteFCMToken(ctx context.Context, session core.UserSession, 
 		"user_type": userType,
 	})
 	return err
-}
-
-func (s *Service) hashPassword(password string) (string, error) {
-	salt := make([]byte, params.saltLength)
-	if _, err := rand.Read(salt); err != nil {
-		return "", err
-	}
-
-	hash := argon2.IDKey([]byte(password), salt, params.iterations, params.memory, params.parallelism, params.keyLength)
-
-	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
-	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
-
-	encoded := fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, params.memory, params.iterations, params.parallelism, b64Salt, b64Hash)
-	return encoded, nil
-}
-
-func (s *Service) ComparePassword(password, encodedHash string) (bool, error) {
-	parts := strings.Split(encodedHash, "$")
-	if len(parts) != 6 {
-		return false, errors.New("invalid hash format")
-	}
-
-	var version int
-	_, err := fmt.Sscanf(parts[2], "v=%d", &version)
-	if err != nil {
-		return false, err
-	}
-
-	var memory, iterations uint32
-	var parallelism uint8
-	_, err = fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &iterations, &parallelism)
-	if err != nil {
-		return false, err
-	}
-
-	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
-	if err != nil {
-		return false, err
-	}
-
-	hash, err := base64.RawStdEncoding.DecodeString(parts[5])
-	if err != nil {
-		return false, err
-	}
-
-	comparisonHash := argon2.IDKey([]byte(password), salt, iterations, memory, parallelism, uint32(len(hash)))
-
-	return subtle.ConstantTimeCompare(hash, comparisonHash) == 1, nil
 }
