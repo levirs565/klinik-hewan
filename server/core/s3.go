@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -16,6 +18,15 @@ import (
 type S3Helper struct {
 	Client *s3.Client
 	Bucket string
+}
+
+type gcsHttpSigner struct {
+	wrapped s3.HTTPSignerV4
+}
+
+func (s *gcsHttpSigner) SignHTTP(ctx context.Context, credentials aws.Credentials, req *http.Request, payloadHash string, service string, region string, signingTime time.Time, optFns ...func(*v4.SignerOptions)) error {
+	req.Header.Del("Accept-Encoding")
+	return s.wrapped.SignHTTP(ctx, credentials, req, payloadHash, service, region, signingTime, optFns...)
 }
 
 func NewS3Helper() (*S3Helper, error) {
@@ -37,6 +48,10 @@ func NewS3Helper() (*S3Helper, error) {
 	client := s3.NewFromConfig(s3AwsConfig, func(o *s3.Options) {
 		o.BaseEndpoint = &endpoint
 		o.UsePathStyle = true
+		if endpoint == "https://storage.googleapis.com" {
+			o.HTTPSignerV4 = &gcsHttpSigner{wrapped: o.HTTPSignerV4}
+			s3AwsConfig.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+		}
 	})
 
 	return &S3Helper{
