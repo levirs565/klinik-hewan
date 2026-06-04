@@ -1,0 +1,24 @@
+substitutions:
+  _VITE_API_URL: "http://localhost:8080"
+
+steps:
+  - name: "node:22"
+    entrypoint: npm
+    args: ["install"]
+    dir: "client-internal"
+
+  - name: "node:22"
+    entrypoint: npm
+    args: ["run", "build"]
+    dir: "client-internal"
+    env:
+      - "VITE_API_URL=${_VITE_API_URL}"
+      - "NODE_ENV=production"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "gcloud"
+    args: ["app", "deploy", "client-internal/app.yaml"]
+
+timeout: "1200s"
+options:
+  logging: CLOUD_LOGGING_ONLY
