@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { Avatar, BottomNavigation } from "../components";
 import { useAppointmentDetail } from "../hooks/useAppointments";
-import type { Appointment, AppointmentDetail } from "../types";
+import type { Appointment } from "../types";
 
 const serviceConfig: Record<
   Appointment["service_type"],
@@ -56,7 +56,6 @@ export const AppointmentDetailPage = () => {
   const pet = appointment.pet;
   const doctor = appointment.doctor;
   const service = serviceConfig[appointment.service_type];
-  const appointmentDate = new Date(appointment.appointment_date);
   const medicalRecord = appointment.medical_record;
 
   return (
