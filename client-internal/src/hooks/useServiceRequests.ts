@@ -77,3 +77,23 @@ export const useAssignDoctor = (id?: string) => {
     },
   );
 };
+
+export const useDoctorApproveAppointment = (id?: string) => {
+  return useSWRMutation(
+    id ? `/internal/appointments/${id}` : null,
+    async (url) => {
+      const response = await client.post(`${url}/doctor-approve`);
+      return response.data;
+    },
+  );
+};
+
+export const useDoctorRejectAppointment = (id?: string) => {
+  return useSWRMutation(
+    id ? `/internal/appointments/${id}` : null,
+    async (url, { arg }: { arg: { reason: string } }) => {
+      const response = await client.post(`${url}/doctor-reject`, arg);
+      return response.data;
+    },
+  );
+};
