@@ -5,3 +5,4 @@ export { StaffCard } from "./StaffCard";
 export { StaffAccountFields } from "./StaffAccountFields";
 export { DoctorProfessionalFields } from "./DoctorProfessionalFields";
 export { RejectionDialog } from "./RejectionDialog";
+export { SelectDoctorDialog } from "./SelectDoctorDialog";

@@ -102,11 +102,50 @@ func GuardRole(session UserSession, rule GuardRoleRule) error {
 	return echo.NewHTTPError(http.StatusForbidden, "role do not match")
 }
 
+func GuardRoles(session UserSession, rules []GuardRoleRule) error {
+	if !session.IsLoggedIn {
+		return echo.NewHTTPError(http.StatusForbidden, "you are not logged in")
+	}
+
+	for _, rule := range rules {
+		if rule == GuardRoleLoggedIn {
+			return nil
+		}
+
+		if rule == GuardRoleInternal {
+			if session.Role == models.RoleManager || session.Role == models.RoleReceptionist || session.Role == models.RoleDoctor {
+				return nil
+			}
+			continue
+		}
+
+		if session.Role == models.AccountRole(rule) {
+			return nil
+		}
+	}
+
+	return echo.NewHTTPError(http.StatusForbidden, "role do not match")
+}
+
 func NewGuardRoleMiddleware(rule GuardRoleRule) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
 			session := GetUserSession(c)
 			err := GuardRole(session, rule)
+			if err != nil {
+				return err
+			}
+
+			return next(c)
+		}
+	}
+}
+
+func NewGuardRolesMiddleware(rules ...GuardRoleRule) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			session := GetUserSession(c)
+			err := GuardRoles(session, rules)
 			if err != nil {
 				return err
 			}

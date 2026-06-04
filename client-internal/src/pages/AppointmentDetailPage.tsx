@@ -5,6 +5,7 @@ import {
   useAppointmentDetail,
   useApproveAppointment,
   useRejectAppointment,
+  useAssignDoctor,
 } from "../hooks/useServiceRequests";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -12,7 +13,7 @@ import {
   statusLabel,
   getStatusClass,
 } from "../utils/serviceRequest";
-import { RejectionDialog } from "../components";
+import { RejectionDialog, SelectDoctorDialog } from "../components";
 import type { RequestStatus } from "../types";
 
 export function AppointmentDetailPage() {
@@ -24,8 +25,11 @@ export function AppointmentDetailPage() {
     useApproveAppointment(id);
   const { trigger: rejectTrigger, isMutating: isRejecting } =
     useRejectAppointment(id);
+  const { trigger: assignTrigger, isMutating: isAssigning } =
+    useAssignDoctor(id);
 
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
+  const [isDoctorDialogOpen, setIsDoctorDialogOpen] = useState(false);
 
   const confirmRequest = async () => {
     try {
@@ -41,6 +45,15 @@ export function AppointmentDetailPage() {
       setIsRejectionDialogOpen(false);
     } catch (error) {
       console.error("Failed to reject request:", error);
+    }
+  };
+
+  const handleAssignDoctor = async (doctorId: number) => {
+    try {
+      await assignTrigger({ doctor_id: doctorId });
+      setIsDoctorDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to assign doctor:", error);
     }
   };
 
@@ -63,7 +76,7 @@ export function AppointmentDetailPage() {
     );
   }
 
-  const isProcessing = isApproving || isRejecting;
+  const isProcessing = isApproving || isRejecting || isAssigning;
 
   return (
     <main className="app">
@@ -165,19 +178,33 @@ export function AppointmentDetailPage() {
                   </button>
                 </>
               )}
+
+            {appointment.status === "Diterima" &&
+              user?.role === "receptionist" && (
+                <button
+                  className="primary-button strong"
+                  onClick={() => setIsDoctorDialogOpen(true)}
+                  disabled={isProcessing}
+                  type="button"
+                >
+                  {isAssigning ? "Menugaskan..." : "Pilih Dokter"}
+                </button>
+              )}
+
             {(appointment.status === "Diterima" ||
-              appointment.status === "Dalam Penanganan") && (
-              <button
-                className="primary-button strong"
-                onClick={() =>
-                  navigate(`/appointments/${appointment.id}/medical-record`)
-                }
-                disabled={isProcessing}
-                type="button"
-              >
-                Isi Rekam Medis
-              </button>
-            )}
+              appointment.status === "Dalam Penanganan") &&
+              user?.role === "doctor" && (
+                <button
+                  className="primary-button strong"
+                  onClick={() =>
+                    navigate(`/appointments/${appointment.id}/medical-record`)
+                  }
+                  disabled={isProcessing}
+                  type="button"
+                >
+                  Isi Rekam Medis
+                </button>
+              )}
           </div>
         </section>
 
@@ -223,6 +250,13 @@ export function AppointmentDetailPage() {
         onClose={() => setIsRejectionDialogOpen(false)}
         onConfirm={handleReject}
         isSubmitting={isRejecting}
+      />
+
+      <SelectDoctorDialog
+        isOpen={isDoctorDialogOpen}
+        onClose={() => setIsDoctorDialogOpen(false)}
+        onConfirm={handleAssignDoctor}
+        isSubmitting={isAssigning}
       />
     </main>
   );

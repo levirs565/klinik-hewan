@@ -16,6 +16,20 @@ export const useStaffMembers = (enabled: boolean = true) => {
   };
 };
 
+export const useDoctors = (enabled: boolean = true) => {
+  const { data, error, isLoading, mutate } = useSWR<StaffMember[]>(
+    enabled ? "/staff/doctors" : null,
+    apiClient,
+  );
+
+  return {
+    doctors: data || [],
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
 export const useDoctorDetail = (id?: string | number) => {
   const { data, error, isLoading, mutate } = useSWR<StaffDetail>(
     id ? `/staff/doctor/${id}` : null,

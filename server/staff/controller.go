@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"vetconnect-server/core"
+	"vetconnect-server/models"
 
 	"github.com/labstack/echo/v5"
 )
@@ -18,6 +19,7 @@ func NewController(service *Service) *Controller {
 
 func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	group.GET("", ctrl.GetStaffList, core.NewGuardRoleMiddleware(core.GuardRoleManager))
+	group.GET("/doctors", ctrl.GetDoctorList, core.NewGuardRolesMiddleware(core.GuardRoleManager, core.GuardRoleReceptionist))
 	group.POST("/doctor", ctrl.CreateDoctor, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.POST("/receptionist", ctrl.CreateReceptionist, core.NewGuardRoleMiddleware(core.GuardRoleManager))
 	group.GET("/doctor/:id", ctrl.GetDoctorDetail, core.NewGuardRoleMiddleware(core.GuardRoleManager))
@@ -30,6 +32,19 @@ func (ctrl *Controller) GetStaffList(c *echo.Context) error {
 	var req GetStaffListRequest
 	if err := core.BindAndValidate(c, &req); err != nil {
 		return err
+	}
+
+	res, err := ctrl.service.GetStaffList((*c).Request().Context(), req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) GetDoctorList(c *echo.Context) error {
+	req := GetStaffListRequest{
+		Role: models.RoleDoctor,
 	}
 
 	res, err := ctrl.service.GetStaffList((*c).Request().Context(), req)
