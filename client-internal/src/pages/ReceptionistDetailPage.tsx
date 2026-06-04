@@ -36,6 +36,12 @@ export function ReceptionistDetailPage() {
             <h1>{receptionist.full_name}</h1>
           </div>
         </div>
+        <Link
+          className="primary-button toolbar-action"
+          to={`/staff/receptionist/${id}/edit`}
+        >
+          Edit Resepsionis
+        </Link>
       </header>
 
       <section className="staff-detail-hero">
@@ -63,12 +69,12 @@ export function ReceptionistDetailPage() {
           </div>
 
           <div className="detail-card-grid">
-            <DetailTile icon="person" label="Username" value={receptionist.username} />
             <DetailTile
-              icon="badge"
-              label="Role"
-              value="Receptionist"
+              icon="person"
+              label="Username"
+              value={receptionist.username}
             />
+            <DetailTile icon="badge" label="Role" value="Receptionist" />
             <DetailTile
               icon="task_alt"
               label="Status Akun"

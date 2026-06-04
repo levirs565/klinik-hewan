@@ -43,6 +43,12 @@ export function DoctorDetailPage() {
             <h1>{doctor.full_name}</h1>
           </div>
         </div>
+        <Link
+          className="primary-button toolbar-action"
+          to={`/staff/doctor/${id}/edit`}
+        >
+          Edit Dokter
+        </Link>
       </header>
 
       <section className="staff-detail-hero">

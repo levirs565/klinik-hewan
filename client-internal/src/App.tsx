@@ -8,6 +8,8 @@ import {
   AddReceptionistPage,
   DashboardPage,
   DoctorDetailPage,
+  EditDoctorPage,
+  EditReceptionistPage,
   LoginPage,
   MedicalRecordPage,
   PetDetailPage,
@@ -90,10 +92,26 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/staff/doctor/:id/edit"
+        element={
+          <ProtectedRoute>
+            <EditDoctorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/staff/receptionist/:id"
         element={
           <ProtectedRoute>
             <ReceptionistDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/receptionist/:id/edit"
+        element={
+          <ProtectedRoute>
+            <EditReceptionistPage />
           </ProtectedRoute>
         }
       />

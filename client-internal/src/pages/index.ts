@@ -11,3 +11,5 @@ export { DoctorDetailPage } from "./DoctorDetailPage";
 export { ReceptionistDetailPage } from "./ReceptionistDetailPage";
 export { AddDoctorPage } from "./AddDoctorPage";
 export { AddReceptionistPage } from "./AddReceptionistPage";
+export { EditDoctorPage } from "./EditDoctorPage";
+export { EditReceptionistPage } from "./EditReceptionistPage";
