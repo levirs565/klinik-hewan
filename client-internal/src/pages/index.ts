@@ -7,6 +7,7 @@ export { PetDetailPage } from "./PetDetailPage";
 export { ReceptionistDashboardPage } from "./ReceptionistDashboardPage";
 export { ServiceDetailPage } from "./ServiceDetailPage";
 export { StaffDirectoryPage } from "./StaffDirectoryPage";
-export { AddStaffPage } from "./AddStaffPage";
 export { DoctorDetailPage } from "./DoctorDetailPage";
 export { ReceptionistDetailPage } from "./ReceptionistDetailPage";
+export { AddDoctorPage } from "./AddDoctorPage";
+export { AddReceptionistPage } from "./AddReceptionistPage";

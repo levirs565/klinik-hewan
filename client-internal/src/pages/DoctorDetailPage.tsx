@@ -84,6 +84,11 @@ export function DoctorDetailPage() {
               label="Username"
               value={doctor.username}
             />
+            <DetailTile
+              icon="task_alt"
+              label="Status Akun"
+              value={doctor.is_active ? "Active" : "Inactive"}
+            />
             {doctor.birth_date && (
               <DetailTile
                 icon="calendar_today"

@@ -4,7 +4,8 @@ import { ProtectedRoute } from "./components";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ServiceRequestProvider } from "./context/ServiceRequestContext";
 import {
-  AddStaffPage,
+  AddDoctorPage,
+  AddReceptionistPage,
   DashboardPage,
   DoctorDetailPage,
   LoginPage,
@@ -65,10 +66,18 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/staff/new"
+        path="/staff/new/doctor"
         element={
           <ProtectedRoute>
-            <AddStaffPage />
+            <AddDoctorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/new/receptionist"
+        element={
+          <ProtectedRoute>
+            <AddReceptionistPage />
           </ProtectedRoute>
         }
       />

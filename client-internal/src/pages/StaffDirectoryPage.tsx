@@ -29,13 +29,22 @@ export function StaffDirectoryPage() {
             <h1>Staff Directory</h1>
           </div>
         </div>
-        <button
-          className="primary-button toolbar-action"
-          onClick={() => navigate("/staff/new")}
-          type="button"
-        >
-          Tambah Staff
-        </button>
+        <div className="button-row">
+          <button
+            className="secondary-button toolbar-action"
+            onClick={() => navigate("/staff/new/receptionist")}
+            type="button"
+          >
+            + Resepsionis
+          </button>
+          <button
+            className="primary-button toolbar-action"
+            onClick={() => navigate("/staff/new/doctor")}
+            type="button"
+          >
+            + Dokter
+          </button>
+        </div>
       </header>
 
       <section className="column staff-page">
