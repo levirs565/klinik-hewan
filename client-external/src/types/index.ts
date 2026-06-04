@@ -121,3 +121,17 @@ export interface Reminder {
     avatar_url?: string;
   };
 }
+
+export interface PetReminder {
+  id: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  date: string;
+  description: string;
+}
+
+export interface PetAppointment {
+  id: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  appointment_date: string;
+  status: string;
+}
