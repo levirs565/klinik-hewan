@@ -1,0 +1,42 @@
+substitutions:
+  _REPO_NAME: "levirs565"
+  _IMAGE_NAME: "vetconnect-server"
+  _SERVICE_NAME: "vetconnect-server"
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    id: "Build Image"
+    args:
+      - "build"
+      - "--target"
+      - "runner"
+      - "-t"
+      - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+      - "./server"
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "Push Image"
+    args:
+      - "push"
+      - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: "Deploy to Cloud Run"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "${_SERVICE_NAME}"
+      - "--image"
+      - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+      - "--region"
+      - "asia-southeast1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+
+images:
+  - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
