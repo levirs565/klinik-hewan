@@ -188,6 +188,74 @@ func (s *Service) GetMyPets(ctx context.Context, ownerID uint) ([]MyPetResponse,
 	return responses, nil
 }
 
+func (s *Service) GetPetReminders(ctx context.Context, ownerID uint, petID uint) ([]PetReminderResponse, error) {
+	// Validate pet ownership first
+	_, err := gorm.G[models.Pet](s.db).
+		Select("id").
+		Where("id = ? AND owner_id = ?", petID, ownerID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPetNotFound
+		}
+		return nil, err
+	}
+
+	reminders, err := gorm.G[models.Reminder](s.db).
+		Select("id", "service_type", "reminder_date", "description").
+		Where("pet_id = ? AND fulfilling_appointment_id IS NULL", petID).
+		Order("reminder_date ASC").
+		Find(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(reminders, func(r models.Reminder, _ int) PetReminderResponse {
+		return PetReminderResponse{
+			ID:          r.ID,
+			ServiceType: r.ServiceType,
+			Date:        core.Date(r.ReminderDate),
+			Description: r.Description,
+		}
+	}), nil
+}
+
+func (s *Service) GetPetAppointments(ctx context.Context, ownerID uint, petID uint) ([]PetAppointmentResponse, error) {
+	// Validate pet ownership first
+	_, err := gorm.G[models.Pet](s.db).
+		Select("id").
+		Where("id = ? AND owner_id = ?", petID, ownerID).
+		First(ctx)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPetNotFound
+		}
+		return nil, err
+	}
+
+	appointments, err := gorm.G[models.Appointment](s.db).
+		Select("id", "service_type", "appointment_date", "current_state").
+		Where("pet_id = ?", petID).
+		Order("appointment_date DESC, created_at DESC").
+		Find(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(appointments, func(a models.Appointment, _ int) PetAppointmentResponse {
+		return PetAppointmentResponse{
+			ID:              a.ID,
+			ServiceType:     a.ServiceType,
+			AppointmentDate: core.Date(a.AppointmentDate),
+			Status:          a.CurrentState,
+		}
+	}), nil
+}
+
 func (s *Service) MapToResponse(ctx context.Context, pet models.Pet) *PetResponse {
 	res := &PetResponse{
 		ID:                    pet.ID,

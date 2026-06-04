@@ -9,7 +9,7 @@ import (
 type AppointmentReservation struct {
 	ID            primitive.ObjectID           `bson:"_id,omitempty"`
 	AppointmentID string                       `bson:"appointment_id"`
-	ServiceType   string                       `bson:"service_type"`
+	ServiceType   ServiceType                  `bson:"service_type"`
 	Checkup       *CheckupReservationDetails   `bson:"checkup,omitempty"`
 	Treatment     *TreatmentReservationDetails `bson:"treatment,omitempty"`
 	Vaccine       *VaccineReservationDetails   `bson:"vaccine,omitempty"`

@@ -40,6 +40,21 @@ For non-relational data such as audit logs, medical records, and session managem
 - **Authentication:** JWT-based with a **Refresh Token Rotation** strategy. Refresh tokens are stored in the database with replaced_by_id tracking for security auditing.
 - **Authorization:** Role-Based Access Control (RBAC) is enforced via core.NewGuardRoleMiddleware.
 
+### Data Types & Serialization
+- **Enum Handling:** Always define custom types for fields with fixed values (e.g., `AccountRole`, `AppointmentState`, `ServiceType`, `Gender`).
+    - **In DTOs:** MUST use the custom enum type directly. NEVER use a generic `string` type for enums in request or response structures.
+    - **No Conversion:** Avoid explicit casting to `string` when assigning enum values to DTOs in the Service layer.
+- **Date Handling:** For all date-only fields (without time component) in JSON request/response:
+    - **DTOs:** MUST use `core.Date` as the data type. This ensures consistent formatting (`YYYY-MM-DD`) and validation during JSON serialization/deserialization.
+    - **Models:** Database models use `datatypes.Date` (for GORM) or `time.Time` (for MongoDB), but these must be converted to `core.Date` when mapping to DTOs.
+    - **Example:**
+      ```go
+      type PetResponse struct {
+          ID        uint      `json:"id"`
+          BirthDate core.Date `json:"birth_date"` // Required for consistent JSON format
+      }
+      ```
+
 ### Request & Error Handling
 - **Request Processing:** Use `core.BindAndValidate` in Controllers to ensure consistent binding and validation logic.
 - **Action Responses:** For operations that do not return a specific resource (e.g., delete, logout, status updates), use `core.CreateActionResponse(success bool)` to provide a standardized JSON response: `{"success": true}`.

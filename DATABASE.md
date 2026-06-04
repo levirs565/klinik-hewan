@@ -17,6 +17,7 @@ erDiagram
         string full_name
         string address
         string phone_number
+        string avatar_id
     }
 
     INTERNAL_USER ||--|| DOCTOR_PROFILE : is
@@ -26,19 +27,18 @@ erDiagram
         string password
         string role "manager, receptionist, doctor"
         string full_name
+        string avatar_id
         boolean is_active
     }
 
     DOCTOR_PROFILE ||--o{ APPOINTMENT : has
     DOCTOR_PROFILE {
-        uint id PK
-        uint internal_user_id FK
+        uint internal_user_id PK FK
         date birth_date
         text education_history
         date practice_start_date
         date join_date
         text practice_location_history
-        text special_services_history
     }
 
     PET ||--o{ APPOINTMENT : has
@@ -74,6 +74,7 @@ erDiagram
         uint pet_id FK
         uuid source_appointment_id FK
         uuid fulfilling_appointment_id FK
+        string service_type "vaccine, checkup, treatment"
         string description
         date reminder_date
         boolean is_handled "computed"
@@ -81,8 +82,8 @@ erDiagram
 ```
 
 1. **EXTERNAL_USER**: Menyimpan data login dan profil untuk Pemilik Hewan pada aplikasi eksternal.
-2. **INTERNAL_USER**: Menyimpan data login dan peran staf klinik (Manajer, Resepsionis, Dokter) pada aplikasi internal.
-3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal.
+2. **INTERNAL_USER**: Menyimpan data login, peran staf klinik (Manajer, Resepsionis, Dokter), dan referensi avatar pada aplikasi internal.
+3. **DOCTOR_PROFILE**: Data tambahan khusus untuk dokter yang terhubung ke akun staf internal. Menggunakan `internal_user_id` sebagai Primary Key dan Foreign Key untuk relasi *one-to-one*. (Catatan: Field `special_services_history` telah dihapus).
 4. **PET**: Data hewan peliharaan yang terhubung ke Pemilik Hewan (EXTERNAL_USER). Menyimpan informasi medis dasar dan referensi avatar.
 5. **APPOINTMENT**: Inti dari sistem antrian. Menyimpan jenis layanan, nomor antrian, dan status saat ini. Data riwayat status dan rekam medis disimpan di MongoDB.
 6. **REMINDER**: Pengingat medis yang dibuat oleh dokter. Dapat melacak keterkaitan dengan janji temu asal dan janji temu baru yang menanganinya.
@@ -97,25 +98,25 @@ Menyimpan data awal yang diinputkan oleh pemilik hewan saat melakukan reservasi.
   "_id": "ObjectId",
   "appointment_id": "UUID",
   "service_type": "string (vaccine | checkup | treatment)",
-  "details": {
-    // Jika service_type == checkup
+  // Hanya satu dari field di bawah ini yang akan terisi sesuai 'service_type'
+  "vaccine": {
+    "vaccine_type": "string"
+  },
+  "checkup": {
     "purpose": "string",
-    "focus_area": "string",
-
-    // Jika service_type == treatment
+    "focus_area": "string"
+  },
+  "treatment": {
     "observed_symptoms": ["string"],
     "symptom_duration": "string",
-    "home_care_received": "boolean",
-
-    // Jika service_type == vaccine
-    "vaccine_type": "string"
+    "home_care_received": "boolean"
   },
   "created_at": "datetime"
 }
 ```
 
 ### 2. medical_records
-Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu dokumen per rekam medis dengan sub-dokumen untuk data spesifik layanan.
+Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu dokumen per rekam medis dengan sub-dokumen untuk data pemeriksaan fisik dan data spesifik layanan.
 
 ```json
 {
@@ -128,31 +129,35 @@ Menyimpan data medis lengkap untuk setiap janji temu. Menggunakan pola satu doku
     "heart_rate": "string",
     "respiratory_rate": "string"
   },
-  "service_data": {
-    "type": "string (vaccine | checkup | treatment)",
-    "details": {
-      // Jika type == vaccine
-      "vaccine_type": "string",
-      "brand": "string",
-      "batch_number": "string",
-      "administration_date": "date",
-      "pre_vaccine_condition": "text",
-      "post_vaccine_reaction": "text",
-      
-      // Jika type == checkup
-      "palpation": "text",
-      "cleanliness_notes": "text",
-      "nutrition_recommendations": "text",
-      "periodic_care_recommendations": "text",
-
-      // Jika type == treatment
-      "clinical_symptoms": "text",
-      "diagnosis": "text",
-      "medical_actions": "text",
-      "prescription": "text",
-      "home_care_notes": "text",
-      "estimated_cost": "decimal"
-    }
+  "type": "string (vaccine | checkup | treatment)",
+  // Hanya satu dari field di bawah ini yang akan terisi sesuai 'type'
+  "vaccine": {
+    "vaccine_type": "string",
+    "brand": "string",
+    "batch_number": "string",
+    "administration_date": "date",
+    "pre_vaccine_condition": "text",
+    "post_vaccine_reaction": "text"
+  },
+  "checkup": {
+    "palpation": "text",
+    "cleanliness_notes": "text",
+    "nutrition_recommendations": "text",
+    "periodic_care_recommendations": "text"
+  },
+  "treatment": {
+    "clinical_symptoms": "text",
+    "diagnosis": "text",
+    "medical_actions": "text",
+    "prescriptions": [
+      {
+        "name": "string",
+        "dosage": "string",
+        "frequency": "string"
+      }
+    ],
+    "home_care_notes": "text",
+    "estimated_cost": "decimal"
   },
   "created_at": "datetime"
 }

@@ -1,20 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // Pages
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { AddPetPage } from './pages/AddPetPage';
-import { PetsPage } from './pages/PetsPage';
-import { PetDetailPage } from './pages/PetDetailPage';
-import { AppointmentsPage } from './pages/AppointmentsPage';
-import { AppointmentDetailPage } from './pages/AppointmentDetailPage';
-import { DoctorProfilePage } from './pages/DoctorProfilePage';
-import { MedicalRecordPage } from './pages/MedicalRecordPage';
-import { BookingFormPage } from './pages/BookingFormPage';
-import { RemindersPage } from './pages/RemindersPage';
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { AddPetPage } from "./pages/AddPetPage";
+import { PetsPage } from "./pages/PetsPage";
+import { PetDetailPage } from "./pages/PetDetailPage";
+import { AppointmentsPage } from "./pages/AppointmentsPage";
+import { BookingFormPage } from "./pages/BookingFormPage";
+import { RemindersPage } from "./pages/RemindersPage";
 
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -99,23 +96,7 @@ function AppRoutes() {
         path="/appointments/:id"
         element={
           <ProtectedRoute>
-            <AppointmentDetailPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/appointments/:id/medical-record"
-        element={
-          <ProtectedRoute>
-            <MedicalRecordPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/doctors/:id"
-        element={
-          <ProtectedRoute>
-            <DoctorProfilePage />
+            <AppointmentsPage />
           </ProtectedRoute>
         }
       />

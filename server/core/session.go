@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"vetconnect-server/models"
 
 	"github.com/labstack/echo/v5"
 )
@@ -33,7 +34,7 @@ func NewSessionMiddleware(tokenHelper *TokenHelper) echo.MiddlewareFunc {
 				if err == nil {
 					session.IsLoggedIn = true
 					session.ID = uint(id)
-					session.Role = string(claims.Role)
+					session.Role = claims.Role
 				}
 
 			}
@@ -56,7 +57,7 @@ func GetUserSession(c *echo.Context) UserSession {
 type UserSession struct {
 	IsLoggedIn bool
 	ID         uint
-	Role       string
+	Role       models.AccountRole
 }
 
 type GuardRoleRule string
@@ -68,6 +69,7 @@ const (
 	GuardRoleReceptionist GuardRoleRule = "receptionist"
 	GuardRoleDoctor       GuardRoleRule = "doctor"
 	GuardRoleOwner        GuardRoleRule = "owner"
+	GuardRoleInternal     GuardRoleRule = "internal"
 )
 
 func GuardRole(session UserSession, rule GuardRoleRule) error {
@@ -85,7 +87,15 @@ func GuardRole(session UserSession, rule GuardRoleRule) error {
 	if rule == GuardRoleLoggedIn {
 		return nil
 	}
-	if session.Role == string(rule) {
+
+	if rule == GuardRoleInternal {
+		if session.Role == models.RoleManager || session.Role == models.RoleReceptionist || session.Role == models.RoleDoctor {
+			return nil
+		}
+		return echo.NewHTTPError(http.StatusForbidden, "this resource is for internal staff only")
+	}
+
+	if session.Role == models.AccountRole(rule) {
 		return nil
 	}
 

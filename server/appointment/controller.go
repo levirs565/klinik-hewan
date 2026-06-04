@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"vetconnect-server/core"
+	"vetconnect-server/models"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
@@ -25,6 +26,173 @@ func (ctrl *Controller) RegisterRoutes(g *echo.Group) {
 	appointments.POST("", ctrl.CreateAppointment)
 	appointments.GET("", ctrl.GetOwnerAppointments)
 	appointments.GET("/:id", ctrl.GetAppointmentDetail)
+
+	internal := g.Group("/internal/appointments")
+	internal.GET("", ctrl.GetAllAppointments, core.NewGuardRoleMiddleware(core.GuardRoleInternal))
+	internal.GET("/:id", ctrl.GetInternalAppointmentDetail, core.NewGuardRoleMiddleware(core.GuardRoleInternal))
+	internal.POST("/:id/approve", ctrl.ApproveAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/reject", ctrl.RejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/select-doctor", ctrl.SelectDoctor, core.NewGuardRoleMiddleware(core.GuardRoleReceptionist))
+	internal.POST("/:id/doctor-reject", ctrl.DoctorRejectAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+	internal.POST("/:id/doctor-approve", ctrl.DoctorApproveAppointment, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+	internal.POST("/:id/medical-record", ctrl.SaveMedicalRecord, core.NewGuardRoleMiddleware(core.GuardRoleDoctor))
+}
+
+func (ctrl *Controller) DoctorApproveAppointment(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.DoctorApproveAppointment(c.Request().Context(), session.ID, appointmentID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
+}
+
+func (ctrl *Controller) DoctorRejectAppointment(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req RejectAppointmentRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.DoctorRejectAppointment(c.Request().Context(), session.ID, appointmentID, req.Reason)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
+}
+
+func (ctrl *Controller) SelectDoctor(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req SelectDoctorRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.SelectDoctor(c.Request().Context(), session.ID, appointmentID, req.DoctorID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) || errors.Is(err, ErrDoctorNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if err.Error() == "appointment must be in accepted state to select a doctor" {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
+}
+
+func (ctrl *Controller) RejectAppointment(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req RejectAppointmentRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.RejectAppointment(c.Request().Context(), session.ID, appointmentID, req.Reason)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if errors.Is(err, ErrInvalidAppointmentState) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
+}
+
+func (ctrl *Controller) ApproveAppointment(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.ApproveAppointment(c.Request().Context(), session.ID, appointmentID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		if errors.Is(err, ErrInvalidAppointmentState) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
+}
+
+func (ctrl *Controller) GetInternalAppointmentDetail(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	res, err := ctrl.service.GetInternalAppointmentDetail(c.Request().Context(), appointmentID)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) GetAllAppointments(c *echo.Context) error {
+	status := c.QueryParam("status")
+	date := c.QueryParam("date")
+	isMyAppointments := c.QueryParam("my_appointments") == "true"
+
+	session := core.GetUserSession(c)
+	var doctorID *uint
+	if isMyAppointments && session.Role == models.RoleDoctor {
+		id := session.ID
+		doctorID = &id
+	}
+
+	res, err := ctrl.service.GetAllAppointments(c.Request().Context(), models.AppointmentState(status), date, doctorID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
@@ -34,9 +202,9 @@ func (ctrl *Controller) CreateAppointment(c *echo.Context) error {
 	}
 
 	session := core.GetUserSession(c)
-	res, err := ctrl.service.CreateAppointment(c.Request().Context(), session.ID, req)
+	res, err := ctrl.service.CreateAppointment((*c).Request().Context(), session.ID, req)
 	if err != nil {
-		if errors.Is(err, ErrPetNotFound) {
+		if errors.Is(err, ErrPetNotFound) || errors.Is(err, ErrReminderNotFound) || errors.Is(err, ErrReminderTypeMismatch) {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		return err
@@ -73,4 +241,28 @@ func (ctrl *Controller) GetAppointmentDetail(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) SaveMedicalRecord(c *echo.Context) error {
+	idParam := c.Param("id")
+	appointmentID, err := uuid.Parse(idParam)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid appointment id")
+	}
+
+	var req SaveMedicalRecordRequest
+	if err := core.BindAndValidate(c, &req); err != nil {
+		return err
+	}
+
+	session := core.GetUserSession(c)
+	err = ctrl.service.SaveMedicalRecord(c.Request().Context(), session.ID, appointmentID, req)
+	if err != nil {
+		if errors.Is(err, ErrAppointmentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }

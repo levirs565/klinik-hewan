@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Detail Dokter - Veterinary Clinic Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#bdcac1",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed": "#d9e6dd",
+                      "on-tertiary-fixed-variant": "#3e4943",
+                      "surface-container-highest": "#d3e4fe",
+                      "secondary": "#565e74",
+                      "outline-variant": "#bec9c2",
+                      "background": "#f8f9ff",
+                      "on-primary-container": "#8bd6b7",
+                      "on-primary": "#ffffff",
+                      "tertiary-container": "#4a564f",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#6f7973",
+                      "error-container": "#ffdad6",
+                      "surface-variant": "#d3e4fe",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#8bd6b6",
+                      "secondary-fixed": "#dae2fd",
+                      "error": "#ba1a1a",
+                      "tertiary": "#333f39",
+                      "surface-container-low": "#eff4ff",
+                      "on-primary-fixed": "#002116",
+                      "on-surface": "#0b1c30",
+                      "on-secondary-container": "#5c647a",
+                      "primary-container": "#065f46",
+                      "on-surface-variant": "#3f4944",
+                      "surface-bright": "#f8f9ff",
+                      "primary": "#004532",
+                      "inverse-surface": "#213145",
+                      "on-background": "#0b1c30",
+                      "on-error-container": "#93000a",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "surface-dim": "#cbdbf5",
+                      "secondary-container": "#dae2fd",
+                      "on-tertiary-container": "#becac2",
+                      "on-tertiary-fixed": "#131e19",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#8bd6b6",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "on-secondary-fixed": "#131b2e",
+                      "surface-container": "#e5eeff",
+                      "primary-fixed": "#a6f2d1",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface": "#f8f9ff",
+                      "on-primary-fixed-variant": "#00513b",
+                      "surface-tint": "#1b6b51"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "section-gap": "40px",
+                      "base": "8px",
+                      "gutter": "16px",
+                      "container-margin": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-sm": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+          .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased flex justify-center min-h-screen">
+<!-- Mobile Container Wrapper -->
+<div class="w-full max-w-md bg-surface-container-lowest min-h-screen relative shadow-lg overflow-x-hidden flex flex-col">
+<!-- TopAppBar (from JSON) -->
+<header class="fixed top-0 w-full max-w-md z-50 bg-surface dark:bg-on-background border-b border-outline-variant dark:border-outline flex items-center justify-between px-gutter h-16 transition-colors">
+<button class="text-primary dark:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors active:opacity-80 transition-all p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary dark:text-inverse-primary font-bold">Detail Dokter</h1>
+<button class="text-primary dark:text-inverse-primary hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors active:opacity-80 transition-all p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow pt-24 px-container-margin pb-section-gap flex flex-col gap-container-margin">
+<!-- Profile Hero Section -->
+<section class="flex flex-col items-center text-center">
+<div class="relative mb-4">
+<img alt="Dr. Sarah Wilson" class="w-32 h-32 rounded-full object-cover border-4 border-surface-container shadow-sm" data-alt="A professional studio portrait of a female veterinarian, wearing a crisp white lab coat over a dark green top. She has a warm, approachable smile, looking directly at the camera. The background is a soft, solid light grey to isolate the subject. The lighting is bright, even, and flattering, creating a clean, modern medical aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvYX8BpaN5hYXxNdB76u8ifFTMxG1KEKdcEaRhrPtKu3syIBPblA10oLqqSG9HzbYYO4paFzvtsfly0IFBnov7r0ki0ZswvOai8UK8-QD13LRahNIqAbwyaTfUn3XAQNHQELtrlNmwRrbr-UXk_a3TtR9W5fvZpmZ-DXCuVY_ckW1AfyoGFJGtkyhua4omOok3MU40AZ0HATEuTUC9CISkmidQYCwl_6X16BkJhEVC655rkRI62TIqGxFt5qvKW8-TBKGwnmkHExo"/>
+<!-- Status Badge -->
+<div class="absolute bottom-0 right-0 transform translate-x-1/4 -translate-y-1/4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-sm font-label-sm bg-primary-container text-on-primary-container border border-surface-container-lowest">
+                            Aktif
+                        </span>
+</div>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-1">Dr. Sarah Wilson</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Dokter Hewan Umum</p>
+</section>
+<!-- Section 1: Detailed Information -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-gutter shadow-sm">
+<h3 class="font-headline-sm text-headline-sm text-primary mb-4 pb-2 border-b border-outline-variant">Informasi Pribadi &amp; Profesional</h3>
+<dl class="space-y-4">
+<div class="flex flex-col md:flex-row md:justify-between md:items-center">
+<dt class="font-label-md text-label-md text-on-surface-variant mb-1 md:mb-0">Nama Dokter</dt>
+<dd class="font-body-md text-body-md text-on-surface font-medium">Dr. Sarah Wilson</dd>
+</div>
+<hr class="border-outline-variant/30"/>
+<div class="flex flex-col md:flex-row md:justify-between md:items-center">
+<dt class="font-label-md text-label-md text-on-surface-variant mb-1 md:mb-0">Tanggal Lahir</dt>
+<dd class="font-body-md text-body-md text-on-surface">15 Aug 1988</dd>
+</div>
+<hr class="border-outline-variant/30"/>
+<div class="flex flex-col md:flex-row md:justify-between md:items-start">
+<dt class="font-label-md text-label-md text-on-surface-variant mb-1 md:mb-0 md:w-1/3">Riwayat Pendidikan</dt>
+<dd class="font-body-md text-body-md text-on-surface md:w-2/3 md:text-right">DVM, University of Veterinary Medicine</dd>
+</div>
+<hr class="border-outline-variant/30"/>
+<div class="flex flex-col md:flex-row md:justify-between md:items-center">
+<dt class="font-label-md text-label-md text-on-surface-variant mb-1 md:mb-0">Tanggal Mulai Praktik</dt>
+<dd class="font-body-md text-body-md text-on-surface">01 Sep 2014</dd>
+</div>
+<hr class="border-outline-variant/30"/>
+<div class="flex flex-col md:flex-row md:justify-between md:items-center">
+<dt class="font-label-md text-label-md text-on-surface-variant mb-1 md:mb-0">Tanggal Masuk Klinik</dt>
+<dd class="font-body-md text-body-md text-on-surface">10 Jan 2020</dd>
+</div>
+<hr class="border-outline-variant/30"/>
+<div class="flex flex-col md:flex-row md:justify-between md:items-start">
+<dt class="font-label-md text-label-md text-on-surface-variant mb-1 md:mb-0 md:w-1/3">Riwayat Tempat Praktek</dt>
+<dd class="font-body-md text-body-md text-on-surface md:w-2/3 md:text-right">City Pet Hospital</dd>
+</div>
+</dl>
+</section>
+<!-- Section 2: Service History -->
+<section>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">Riwayat Pelayanan</h3>
+<div class="space-y-3">
+<!-- History Card 1 -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center gap-4 hover:bg-surface-container transition-colors">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-label-md text-label-md text-on-surface">Max</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Routine Checkup</p>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Oct 24</span>
+</div>
+</div>
+<!-- History Card 2 -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center gap-4 hover:bg-surface-container transition-colors">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="vaccines">vaccines</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-label-md text-label-md text-on-surface">Luna</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Vaccination</p>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Oct 22</span>
+</div>
+</div>
+<!-- History Card 3 -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center gap-4 hover:bg-surface-container transition-colors">
+<div class="w-12 h-12 rounded-full bg-tertiary-container text-on-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<div class="flex-grow">
+<h4 class="font-label-md text-label-md text-on-surface">Buddy</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Treatment</p>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Oct 20</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- No Bottom Navigation as per intent rules (Detail/Linear screen) -->
+</div>
+</body></html>

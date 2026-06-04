@@ -1,50 +1,39 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Button, Input } from '../components';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, Input } from "../components";
+import { useLogin } from "../hooks/useAuth";
 
 export const LoginPage = () => {
-  const navigate = useNavigate();
-  const { setUser } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { trigger: loginTrigger, isMutating: isLoading } = useLogin();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
 
     const newErrors: Record<string, string> = {};
-    if (!email) newErrors.email = 'Email is required';
-    if (!password) newErrors.password = 'Password is required';
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setIsLoading(false);
       return;
     }
 
-    // Dummy login mode: bypass backend and go directly to dashboard.
-    const dummyUser = {
-      id: 1,
-      email,
-      full_name: 'Demo User',
-      address: 'Jakarta, Indonesia',
-      phone_number: '+62 812 3456 7890',
-      role: 'owner' as const,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    localStorage.setItem('user', JSON.stringify(dummyUser));
-    localStorage.setItem('access_token', 'dummy-access-token');
-    localStorage.setItem('refresh_token', 'dummy-refresh-token');
-    setUser(dummyUser);
-    navigate('/');
-    setIsLoading(false);
+    try {
+      await loginTrigger({ email, password });
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 401) {
+        setErrors({ general: "Invalid email or password" });
+      } else {
+        setErrors({ general: "An error occurred. Please try again." });
+      }
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -63,7 +52,9 @@ export const LoginPage = () => {
 
           {/* Welcome Message */}
           <div className="text-center mb-8">
-            <h2 className="text-headline-md text-on-surface mb-2">Welcome back</h2>
+            <h2 className="text-headline-md text-on-surface mb-2">
+              Welcome back
+            </h2>
             <p className="text-body-md text-on-surface-variant">
               Please enter your details to access your portal.
             </p>
@@ -92,7 +83,7 @@ export const LoginPage = () => {
             <div className="relative">
               <Input
                 label="Password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -106,16 +97,10 @@ export const LoginPage = () => {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 <span className="material-symbols-outlined">
-                  {showPassword ? 'visibility' : 'visibility_off'}
+                  {showPassword ? "visibility" : "visibility_off"}
                 </span>
               </button>
             </div>
-
-            {/* Remember Me */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="rounded border-outline-variant" />
-              <span className="text-body-md text-on-surface">Remember me for 30 days</span>
-            </label>
 
             {/* Submit Button */}
             <Button
@@ -124,15 +109,18 @@ export const LoginPage = () => {
               fullWidth
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? "Logging in..." : "Login"}
               <span className="material-symbols-outlined">arrow_forward</span>
             </Button>
           </form>
 
           {/* Register Link */}
           <p className="text-center mt-6 text-body-md text-on-surface">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary font-600 hover:underline">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-primary font-600 hover:underline"
+            >
               Register for an account
             </Link>
           </p>
