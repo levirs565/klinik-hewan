@@ -1,46 +1,46 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, Input, Select, BottomNavigation } from '../components';
-import { apiClient } from '../services/api';
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, Input, Select, BottomNavigation } from "../components";
+import { useCreatePet } from "../hooks/usePets";
 
 const SPECIES_OPTIONS = [
-  { value: 'dog', label: 'Dog' },
-  { value: 'cat', label: 'Cat' },
-  { value: 'rabbit', label: 'Rabbit' },
-  { value: 'bird', label: 'Bird' },
-  { value: 'other', label: 'Other' },
+  { value: "dog", label: "Dog" },
+  { value: "cat", label: "Cat" },
+  { value: "rabbit", label: "Rabbit" },
+  { value: "bird", label: "Bird" },
+  { value: "other", label: "Other" },
 ];
 
 const BREED_OPTIONS = {
   dog: [
-    { value: 'labrador', label: 'Labrador Retriever' },
-    { value: 'golden', label: 'Golden Retriever' },
-    { value: 'german_shepherd', label: 'German Shepherd' },
-    { value: 'beagle', label: 'Beagle' },
+    { value: "labrador", label: "Labrador Retriever" },
+    { value: "golden", label: "Golden Retriever" },
+    { value: "german_shepherd", label: "German Shepherd" },
+    { value: "beagle", label: "Beagle" },
   ],
   cat: [
-    { value: 'persian', label: 'Persian' },
-    { value: 'siamese', label: 'Siamese' },
-    { value: 'bengal', label: 'Bengal' },
-    { value: 'mixed', label: 'Mixed' },
+    { value: "persian", label: "Persian" },
+    { value: "siamese", label: "Siamese" },
+    { value: "bengal", label: "Bengal" },
+    { value: "mixed", label: "Mixed" },
   ],
 };
 
 export const AddPetPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const { trigger: createPetTrigger, isCreating: isLoading } = useCreatePet();
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    species: '',
-    breed: '',
-    color: '',
-    gender: '',
-    date_of_birth: '',
+    name: "",
+    species: "",
+    breed: "",
+    color: "",
+    gender: "",
+    date_of_birth: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -58,7 +58,9 @@ export const AddPetPage = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -69,62 +71,43 @@ export const AddPetPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
 
     try {
       // Validation
       const newErrors: Record<string, string> = {};
-      if (!formData.name) newErrors.name = 'Pet name is required';
-      if (!formData.species) newErrors.species = 'Species is required';
-      if (!formData.breed) newErrors.breed = 'Breed is required';
-      if (!formData.gender) newErrors.gender = 'Gender is required';
-      if (!formData.date_of_birth) newErrors.date_of_birth = 'Date of birth is required';
+      if (!formData.name) newErrors.name = "Pet name is required";
+      if (!formData.species) newErrors.species = "Species is required";
+      if (!formData.breed) newErrors.breed = "Breed is required";
+      if (!formData.gender) newErrors.gender = "Gender is required";
+      if (!formData.date_of_birth)
+        newErrors.date_of_birth = "Date of birth is required";
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
-        setIsLoading(false);
         return;
       }
 
-      let avatarId = undefined;
-
-      // Upload avatar if provided
-      if (avatarFile) {
-        try {
-          const presignedResponse = await apiClient.getPresignedUrl(
-            avatarFile.type,
-            avatarFile.size
-          );
-          await apiClient.uploadFile(presignedResponse.url, avatarFile);
-          avatarId = presignedResponse.key;
-        } catch (uploadError) {
-          console.error('Avatar upload failed:', uploadError);
-          setErrors({ avatar: 'Failed to upload pet photo' });
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      await apiClient.createPet({
-        name: formData.name,
-        species: formData.species,
-        breed: formData.breed,
-        color: formData.color,
-        gender: formData.gender as 'male' | 'female',
-        date_of_birth: formData.date_of_birth,
-        avatar_id: avatarId,
+      await createPetTrigger({
+        data: {
+          name: formData.name,
+          species: formData.species,
+          breed: formData.breed,
+          color: formData.color,
+          gender: formData.gender as "male" | "female",
+          date_of_birth: formData.date_of_birth,
+        },
+        file: avatarFile || undefined,
       });
 
-      navigate('/pets');
+      navigate("/pets");
     } catch (error: unknown) {
-      console.error('Create pet error:', error);
-      setErrors({ general: 'Failed to create pet. Please try again.' });
-    } finally {
-      setIsLoading(false);
+      console.error("Create pet error:", error);
+      setErrors({ general: "Failed to create pet. Please try again." });
     }
   };
 
-  const breedOptions = BREED_OPTIONS[formData.species as keyof typeof BREED_OPTIONS] || [];
+  const breedOptions =
+    BREED_OPTIONS[formData.species as keyof typeof BREED_OPTIONS] || [];
 
   return (
     <div className="min-h-screen bg-surface pb-24">
@@ -135,9 +118,13 @@ export const AddPetPage = () => {
             onClick={() => navigate(-1)}
             className="p-2 hover:bg-surface-variant rounded-full transition-colors"
           >
-            <span className="material-symbols-outlined text-on-surface">arrow_back</span>
+            <span className="material-symbols-outlined text-on-surface">
+              arrow_back
+            </span>
           </button>
-          <h1 className="text-headline-md text-on-surface font-600">Add New Pet</h1>
+          <h1 className="text-headline-md text-on-surface font-600">
+            Add New Pet
+          </h1>
         </div>
       </header>
 
@@ -157,7 +144,7 @@ export const AddPetPage = () => {
                   flex items-center justify-center cursor-pointer
                   hover:border-primary hover:bg-primary-fixed/10 transition-all
                   overflow-hidden
-                  ${avatarPreview ? 'border-solid' : ''}
+                  ${avatarPreview ? "border-solid" : ""}
                 `}
               >
                 {avatarPreview ? (
@@ -194,11 +181,13 @@ export const AddPetPage = () => {
             </button>
           </div>
           <p className="text-center text-body-md text-on-surface-variant">
-            {avatarPreview ? 'Photo added' : 'No photo selected'}
+            {avatarPreview ? "Photo added" : "No photo selected"}
           </p>
 
           {errors.avatar && (
-            <p className="text-center text-label-sm text-error">{errors.avatar}</p>
+            <p className="text-center text-label-sm text-error">
+              {errors.avatar}
+            </p>
           )}
 
           {/* General Error */}
@@ -210,7 +199,9 @@ export const AddPetPage = () => {
 
           {/* Identity Section */}
           <div className="space-y-4">
-            <h2 className="text-headline-md text-on-surface font-600">Identity</h2>
+            <h2 className="text-headline-md text-on-surface font-600">
+              Identity
+            </h2>
 
             <Input
               label="Pet Name"
@@ -258,22 +249,24 @@ export const AddPetPage = () => {
 
           {/* Physical Details Section */}
           <div className="space-y-4">
-            <h2 className="text-headline-md text-on-surface font-600">Physical Details</h2>
+            <h2 className="text-headline-md text-on-surface font-600">
+              Physical Details
+            </h2>
 
             <div>
               <label className="block text-label-md text-on-surface mb-3">
                 Gender <span className="text-error">*</span>
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {['male', 'female'].map((option) => (
+                {["male", "female"].map((option) => (
                   <label
                     key={option}
                     className={`
                       p-4 rounded-xl border-2 cursor-pointer text-center transition-all
                       ${
                         formData.gender === option
-                          ? 'border-primary bg-primary-fixed/10'
-                          : 'border-surface-variant hover:border-primary'
+                          ? "border-primary bg-primary-fixed/10"
+                          : "border-surface-variant hover:border-primary"
                       }
                     `}
                   >
@@ -315,7 +308,7 @@ export const AddPetPage = () => {
               fullWidth
               disabled={isLoading}
             >
-              {isLoading ? 'Saving...' : 'Submit'}
+              {isLoading ? "Saving..." : "Submit"}
               <span className="material-symbols-outlined">arrow_forward</span>
             </Button>
           </div>

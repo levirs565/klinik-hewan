@@ -1,36 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Button, Card, Badge, Avatar, BottomNavigation } from '../components';
-import { apiClient } from '../services/api';
-import type { Pet } from '../types';
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Button, Card, Badge, Avatar, BottomNavigation } from "../components";
+import { usePets } from "../hooks/usePets";
 
 export const DashboardPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const loadPets = async () => {
-      try {
-        const data = await apiClient.getPets();
-        setPets(data);
-      } catch (err) {
-        console.error('Failed to load pets:', err);
-        setError('Failed to load pets');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPets();
-  }, []);
+  const { pets, isError: error, isLoading } = usePets();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (isLoading) {
@@ -59,14 +40,18 @@ export const DashboardPage = () => {
                 pets
               </span>
             </div>
-            <span className="text-headline-md text-on-surface font-600">VetConnect</span>
+            <span className="text-headline-md text-on-surface font-600">
+              VetConnect
+            </span>
           </div>
           <button
             onClick={handleLogout}
             className="p-2 hover:bg-surface-variant rounded-full transition-colors"
             title="Logout"
           >
-            <span className="material-symbols-outlined text-on-surface">logout</span>
+            <span className="material-symbols-outlined text-on-surface">
+              logout
+            </span>
           </button>
         </div>
       </header>
@@ -76,34 +61,42 @@ export const DashboardPage = () => {
         {/* Greeting */}
         <section>
           <h1 className="text-headline-lg text-on-surface mb-2">
-            Hello, {user?.full_name.split(' ')[0]}.
+            Hello, {user?.full_name.split(" ")[0]}.
           </h1>
           <p className="text-body-md text-on-surface-variant">
-            Here is the latest update on your companions. Everything looks good today.
+            Here is the latest update on your companions. Everything looks good
+            today.
           </p>
         </section>
 
         {error && (
           <div className="p-4 bg-error-container text-on-error-container rounded-lg">
-            {error}
+            Failed to load pets. Please try again.
           </div>
         )}
 
         {/* Book a Visit CTA */}
-        <Card variant="elevated" className="bg-gradient-to-br from-primary to-primary-container overflow-hidden">
+        <Card
+          variant="elevated"
+          className="bg-gradient-to-br from-primary to-primary-container overflow-hidden"
+        >
           <div className="flex items-start gap-4">
             <div className="text-white/20">
               <span className="material-symbols-outlined text-6xl">pets</span>
             </div>
             <div className="flex-1">
-              <h2 className="text-headline-md text-on-primary mb-2">Book a Visit</h2>
+              <h2 className="text-headline-md text-on-primary mb-2">
+                Book a Visit
+              </h2>
               <p className="text-body-md text-on-primary mb-4 opacity-90">
                 Schedule a checkup, vaccination, or grooming session.
               </p>
               <Link to="/appointments">
                 <Button variant="secondary" size="sm">
                   Book Now
-                  <span className="material-symbols-outlined">arrow_forward</span>
+                  <span className="material-symbols-outlined">
+                    arrow_forward
+                  </span>
                 </Button>
               </Link>
             </div>
@@ -113,7 +106,9 @@ export const DashboardPage = () => {
         {/* Active Appointment */}
         {pets.length > 0 && (
           <section>
-            <h2 className="text-headline-md text-on-surface mb-4">Active Appointment</h2>
+            <h2 className="text-headline-md text-on-surface mb-4">
+              Active Appointment
+            </h2>
             <Card>
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
@@ -150,7 +145,9 @@ export const DashboardPage = () => {
                     <p className="text-label-sm text-on-surface-variant mb-1">
                       QUEUE NUMBER
                     </p>
-                    <p className="text-body-md text-on-surface font-600">A-04</p>
+                    <p className="text-body-md text-on-surface font-600">
+                      A-04
+                    </p>
                   </div>
                 </div>
 
@@ -166,7 +163,9 @@ export const DashboardPage = () => {
 
         {/* Health Reminders */}
         <section>
-          <h2 className="text-headline-md text-on-surface mb-4">Health Reminders</h2>
+          <h2 className="text-headline-md text-on-surface mb-4">
+            Health Reminders
+          </h2>
           <div className="space-y-3">
             <Card className="bg-error-container/10 border-error-container/30">
               <div className="flex items-center gap-3">
@@ -181,7 +180,9 @@ export const DashboardPage = () => {
                     Max • In 5 days
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-error">close</span>
+                <span className="material-symbols-outlined text-error">
+                  close
+                </span>
               </div>
             </Card>
 
@@ -198,7 +199,9 @@ export const DashboardPage = () => {
                     Luna •
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-primary">done</span>
+                <span className="material-symbols-outlined text-primary">
+                  done
+                </span>
               </div>
             </Card>
           </div>
@@ -224,8 +227,10 @@ export const DashboardPage = () => {
                     {pet.name}
                   </h3>
                   <p className="text-label-sm text-on-surface-variant">
-                    {pet.species} • {new Date(pet.date_of_birth).getFullYear() === new Date().getFullYear()
-                      ? 'Young'
+                    {pet.species} •{" "}
+                    {new Date(pet.date_of_birth).getFullYear() ===
+                    new Date().getFullYear()
+                      ? "Young"
                       : `${new Date().getFullYear() - new Date(pet.date_of_birth).getFullYear()} yrs`}
                   </p>
                 </Card>
@@ -235,7 +240,9 @@ export const DashboardPage = () => {
               <Card className="flex items-center justify-center h-full cursor-pointer hover:shadow-lg transition-shadow border-2 border-dashed">
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center mx-auto mb-2">
-                    <span className="material-symbols-outlined text-primary">add</span>
+                    <span className="material-symbols-outlined text-primary">
+                      add
+                    </span>
                   </div>
                   <p className="text-label-md text-primary">Add Pet</p>
                 </div>

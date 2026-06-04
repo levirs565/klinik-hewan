@@ -1,27 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Avatar, BottomNavigation, Card } from '../components';
-import { apiClient } from '../services/api';
-import type { Pet } from '../types';
+import { Link } from "react-router-dom";
+import { Avatar, BottomNavigation, Card } from "../components";
+import { usePets } from "../hooks/usePets";
 
 export const PetsPage = () => {
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadPets = async () => {
-      try {
-        const data = await apiClient.getPets();
-        setPets(data);
-      } catch (error) {
-        console.error('Failed to load pets:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPets();
-  }, []);
+  const { pets, isLoading } = usePets();
 
   return (
     <div className="min-h-screen bg-surface pb-24">
@@ -48,7 +30,9 @@ export const PetsPage = () => {
             <span className="material-symbols-outlined text-6xl text-on-surface-variant mb-4 block">
               pets
             </span>
-            <h2 className="text-headline-md text-on-surface mb-2">No pets yet</h2>
+            <h2 className="text-headline-md text-on-surface mb-2">
+              No pets yet
+            </h2>
             <p className="text-body-md text-on-surface-variant mb-6">
               Add your first pet to get started
             </p>
@@ -78,8 +62,10 @@ export const PetsPage = () => {
                         {pet.species} • {pet.breed}
                       </p>
                       <p className="text-label-sm text-on-surface-variant mt-1">
-                        {pet.gender} •{' '}
-                        {new Date().getFullYear() - new Date(pet.date_of_birth).getFullYear()} years old
+                        {pet.gender} •{" "}
+                        {new Date().getFullYear() -
+                          new Date(pet.date_of_birth).getFullYear()}{" "}
+                        years old
                       </p>
                     </div>
                   </div>
@@ -92,7 +78,9 @@ export const PetsPage = () => {
                   <span className="material-symbols-outlined text-4xl text-primary block mb-2">
                     add
                   </span>
-                  <p className="text-body-md text-primary font-600">Add Another Pet</p>
+                  <p className="text-body-md text-primary font-600">
+                    Add Another Pet
+                  </p>
                 </div>
               </Card>
             </Link>
