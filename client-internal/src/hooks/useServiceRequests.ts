@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import { apiClient, client } from "../services/api";
-import type { ServiceRequest } from "../types";
+import type { ServiceRequest, AppointmentDetail } from "../types";
 
 export interface ServiceRequestFilter {
   status?: string;
@@ -35,7 +35,7 @@ export const useServiceRequests = (
 };
 
 export const useAppointmentDetail = (id?: string) => {
-  const { data, error, isLoading, mutate } = useSWR<any>(
+  const { data, error, isLoading, mutate } = useSWR<AppointmentDetail>(
     id ? `/internal/appointments/${id}` : null,
     apiClient,
   );

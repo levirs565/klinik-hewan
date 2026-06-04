@@ -1565,6 +1565,49 @@ input:checked + .slider:before {
     grid-column: span 2;
 }
 
+.record-details-card {
+    background: #f8f9ff;
+    border: 1px solid #dee5ff;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.info-list-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-list-vertical p {
+    margin: 0;
+    font-size: 15px;
+}
+
+.pill-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pill-list li {
+    background: #eff4ff;
+    border: 1px solid #dee5ff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #0b1c30;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.justify-start {
+    justify-content: flex-start;
+}
+
 @media (max-width: 1100px) {
     .hero-band,
     .workspace,

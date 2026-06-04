@@ -31,7 +31,8 @@ export type RequestStatus =
   | "Menunggu Dokter"
   | "Dalam Penanganan"
   | "Selesai"
-  | "Selesai Administrasi";
+  | "Selesai Administrasi"
+  | "Selesai"; // server/models/appointment.go has StateFinished = "Selesai"
 
 export type ServiceRequest = {
   id: string;
@@ -62,21 +63,75 @@ export type StaffDetail = StaffMember & {
   practice_location_history?: string;
 };
 
-export type CheckupData = {
-  bodyWeight: string;
-  temperature: string;
-  heartRate: string;
-  respiratoryRate: string;
-  capillaryRefillTime: string;
-  mucousMembrane: string;
-  bodyConditionScore: string;
-  hydration: string;
-  physicalExamNotes: string;
+export type PhysicalExamination = {
+  weight: number;
+  temperature: number;
+  physical_condition: string;
+  heart_rate?: string;
+  respiratory_rate?: string;
 };
 
-export type MedicalReport = {
-  checkup: CheckupData;
+export type Prescription = {
+  name: string;
+  dosage: string;
+  frequency: string;
+};
+
+export type VaccineMedicalData = {
+  vaccine_type: string;
+  brand: string;
+  batch_number: string;
+  administration_date: string;
+  pre_vaccine_condition: string;
+  post_vaccine_reaction?: string;
+};
+
+export type CheckupMedicalData = {
+  palpation: string;
+  cleanliness_notes: string;
+  nutrition_recommendations?: string;
+  periodic_care_recommendations?: string;
+};
+
+export type TreatmentMedicalData = {
+  clinical_symptoms: string;
   diagnosis: string;
-  treatment: string;
-  medication: string;
+  medical_actions: string;
+  prescriptions: Prescription[];
+  home_care_notes?: string;
+  estimated_cost: number;
+};
+
+export type MedicalRecord = {
+  physical_examination: PhysicalExamination;
+  type: string;
+  vaccine?: VaccineMedicalData;
+  checkup?: CheckupMedicalData;
+  treatment?: TreatmentMedicalData;
+};
+
+export type AppointmentDetail = {
+  id: string;
+  pet: {
+    id: number;
+    name: string;
+    breed: string;
+    birth_date: string;
+    avatar_url?: string;
+  };
+  doctor?: {
+    id: number;
+    name: string;
+  };
+  owner: {
+    id: number;
+    name: string;
+    avatar_url?: string;
+  };
+  status: RequestStatus;
+  service_type: string;
+  appointment_date: string;
+  owner_notes?: string;
+  previous_medical_history?: string;
+  medical_record?: MedicalRecord;
 };

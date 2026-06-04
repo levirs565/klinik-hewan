@@ -81,6 +81,8 @@ export function MedicalRecordPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!appointment) return;
+
     const payload: any = {
       physical_examination: {
         weight: parseFloat(weight),

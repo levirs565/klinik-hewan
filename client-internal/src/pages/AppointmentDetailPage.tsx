@@ -12,11 +12,11 @@ import {
 import { useAuth } from "../context/AuthContext";
 import {
   formatDate,
-  statusLabel,
   getStatusClass,
+  statusIcon,
+  statusLabel,
 } from "../utils/serviceRequest";
 import { RejectionDialog, SelectDoctorDialog } from "../components";
-import type { RequestStatus } from "../types";
 
 export function AppointmentDetailPage() {
   const { id } = useParams();
@@ -136,7 +136,10 @@ export function AppointmentDetailPage() {
             />
             <div>
               <span className={`status ${getStatusClass(appointment.status)}`}>
-                {statusLabel[appointment.status as RequestStatus]}
+                <span className="material-symbols-outlined">
+                  {statusIcon[appointment.status]}
+                </span>
+                {statusLabel[appointment.status]}
               </span>
               <h2>{appointment.pet.name}</h2>
               <p>{appointment.pet.breed}</p>
@@ -182,6 +185,192 @@ export function AppointmentDetailPage() {
               <h2>Riwayat Medis Sebelumnya</h2>
               <div className="notes">
                 {appointment.previous_medical_history}
+              </div>
+            </div>
+          )}
+
+          {appointment.medical_record && (
+            <div className="medical-record-section">
+              <div className="section-title detail-section-gap">
+                <div>
+                  <p>Rekam Medis</p>
+                  <h2>Hasil Pemeriksaan Medis</h2>
+                </div>
+              </div>
+
+              <div className="record-details-card">
+                <div className="subsection">
+                  <h3>Pemeriksaan Fisik</h3>
+                  <div className="detail-card-grid">
+                    <Info
+                      label="Berat Badan"
+                      value={`${appointment.medical_record.physical_examination.weight} kg`}
+                      icon="weight"
+                    />
+                    <Info
+                      label="Suhu Tubuh"
+                      value={`${appointment.medical_record.physical_examination.temperature} °C`}
+                      icon="thermostat"
+                    />
+                    <Info
+                      label="Kondisi Fisik"
+                      value={
+                        appointment.medical_record.physical_examination
+                          .physical_condition
+                      }
+                      icon="health_and_safety"
+                    />
+                    {appointment.medical_record.physical_examination
+                      .heart_rate && (
+                      <Info
+                        label="Detak Jantung"
+                        value={
+                          appointment.medical_record.physical_examination
+                            .heart_rate
+                        }
+                        icon="favorite"
+                      />
+                    )}
+                    {appointment.medical_record.physical_examination
+                      .respiratory_rate && (
+                      <Info
+                        label="Pernapasan"
+                        value={
+                          appointment.medical_record.physical_examination
+                            .respiratory_rate
+                        }
+                        icon="air"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {appointment.medical_record.vaccine && (
+                  <div className="subsection mt-6">
+                    <h3>Detail Vaksinasi</h3>
+                    <div className="info-list-vertical">
+                      <p>
+                        <strong>Jenis Vaksin:</strong>{" "}
+                        {appointment.medical_record.vaccine.vaccine_type}
+                      </p>
+                      <p>
+                        <strong>Brand:</strong>{" "}
+                        {appointment.medical_record.vaccine.brand}
+                      </p>
+                      <p>
+                        <strong>Batch:</strong>{" "}
+                        {appointment.medical_record.vaccine.batch_number}
+                      </p>
+                      <p>
+                        <strong>Tanggal Administrasi:</strong>{" "}
+                        {formatDate(
+                          appointment.medical_record.vaccine
+                            .administration_date,
+                        )}
+                      </p>
+                      <p>
+                        <strong>Kondisi Pra-Vaksin:</strong>{" "}
+                        {
+                          appointment.medical_record.vaccine
+                            .pre_vaccine_condition
+                        }
+                      </p>
+                      {appointment.medical_record.vaccine
+                        .post_vaccine_reaction && (
+                        <p>
+                          <strong>Reaksi Pasca-Vaksin:</strong>{" "}
+                          {
+                            appointment.medical_record.vaccine
+                              .post_vaccine_reaction
+                          }
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {appointment.medical_record.checkup && (
+                  <div className="subsection mt-6">
+                    <h3>Hasil Checkup</h3>
+                    <div className="info-list-vertical">
+                      <p>
+                        <strong>Palpasi:</strong>{" "}
+                        {appointment.medical_record.checkup.palpation}
+                      </p>
+                      <p>
+                        <strong>Kebersihan:</strong>{" "}
+                        {appointment.medical_record.checkup.cleanliness_notes}
+                      </p>
+                      {appointment.medical_record.checkup
+                        .nutrition_recommendations && (
+                        <p>
+                          <strong>Rekomendasi Nutrisi:</strong>{" "}
+                          {
+                            appointment.medical_record.checkup
+                              .nutrition_recommendations
+                          }
+                        </p>
+                      )}
+                      {appointment.medical_record.checkup
+                        .periodic_care_recommendations && (
+                        <p>
+                          <strong>Rekomendasi Perawatan Berkala:</strong>{" "}
+                          {
+                            appointment.medical_record.checkup
+                              .periodic_care_recommendations
+                          }
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {appointment.medical_record.treatment && (
+                  <div className="subsection mt-6">
+                    <h3>Penanganan Medis</h3>
+                    <div className="info-list-vertical">
+                      <p>
+                        <strong>Gejala Klinis:</strong>{" "}
+                        {appointment.medical_record.treatment.clinical_symptoms}
+                      </p>
+                      <p>
+                        <strong>Diagnosis:</strong>{" "}
+                        {appointment.medical_record.treatment.diagnosis}
+                      </p>
+                      <p>
+                        <strong>Tindakan:</strong>{" "}
+                        {appointment.medical_record.treatment.medical_actions}
+                      </p>
+                      {appointment.medical_record.treatment.home_care_notes && (
+                        <p>
+                          <strong>Catatan Perawatan Rumah:</strong>{" "}
+                          {appointment.medical_record.treatment.home_care_notes}
+                        </p>
+                      )}
+                      <p>
+                        <strong>Estimasi Biaya:</strong> Rp{" "}
+                        {appointment.medical_record.treatment.estimated_cost.toLocaleString(
+                          "id-ID",
+                        )}
+                      </p>
+                      {appointment.medical_record.treatment.prescriptions
+                        .length > 0 && (
+                        <div className="mt-4">
+                          <strong>Resep Obat:</strong>
+                          <ul className="pill-list mt-2">
+                            {appointment.medical_record.treatment.prescriptions.map(
+                              (p, i) => (
+                                <li key={i}>
+                                  {p.name} ({p.dosage} - {p.frequency})
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
