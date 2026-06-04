@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { Avatar, BottomNavigation } from "../components";
 import { useAppointmentDetail } from "../hooks/useAppointments";
-import type { Appointment } from "../types";
+import type { Appointment, AppointmentDetail } from "../types";
 
 const serviceConfig: Record<
   Appointment["service_type"],
@@ -57,6 +57,7 @@ export const AppointmentDetailPage = () => {
   const doctor = appointment.doctor;
   const service = serviceConfig[appointment.service_type];
   const appointmentDate = new Date(appointment.appointment_date);
+  const medicalRecord = appointment.medical_record;
 
   return (
     <div className="min-h-screen bg-surface pb-24">
@@ -81,6 +82,7 @@ export const AppointmentDetailPage = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-6 grid gap-6">
+        {/* Booking Summary */}
         <section className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="w-16 h-16 rounded-xl bg-primary-fixed text-primary flex items-center justify-center">
@@ -128,15 +130,11 @@ export const AppointmentDetailPage = () => {
                 label="Date"
                 value={formatDate(appointment.appointment_date)}
               />
-              <IconLine
-                icon="schedule"
-                label="Time"
-                value={formatTime(appointmentDate)}
-              />
             </div>
           </InfoPanel>
         </section>
 
+        {/* Doctor Assigned */}
         <section className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
           <div className="flex items-center justify-between gap-4 mb-5">
             <div>
@@ -176,26 +174,243 @@ export const AppointmentDetailPage = () => {
           )}
         </section>
 
-        <section className="grid gap-3">
-          {appointment.medical_record && (
-            <Link
-              to={`/appointments/${appointment.id}/medical-record`}
-              className="flex items-center justify-center gap-2 bg-primary text-on-primary rounded-full py-3 font-semibold"
-            >
-              <span className="material-symbols-outlined">description</span>
-              View Medical Record
-            </Link>
-          )}
-          {doctor ? (
-            <Link
-              to={`/doctors/${doctor.id}`}
-              className="flex items-center justify-center gap-2 border border-primary text-primary rounded-full py-3 font-semibold"
-            >
-              <span className="material-symbols-outlined">stethoscope</span>
-              View Doctor Profile
-            </Link>
-          ) : null}
-        </section>
+        {/* Medical Record Section */}
+        {medicalRecord && (
+          <section className="grid gap-6">
+            <div className="flex items-center gap-3 px-2">
+              <span className="material-symbols-outlined text-primary">
+                description
+              </span>
+              <h2 className="text-headline-md text-on-surface">
+                Medical Record
+              </h2>
+            </div>
+
+            {/* Physical Examination */}
+            <InfoPanel title="Physical Examination">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <ProfileStat
+                  label="Weight"
+                  value={`${medicalRecord.physical_examination.weight} kg`}
+                />
+                <ProfileStat
+                  label="Temp"
+                  value={`${medicalRecord.physical_examination.temperature} °C`}
+                />
+                <ProfileStat
+                  label="Heart Rate"
+                  value={medicalRecord.physical_examination.heart_rate || "-"}
+                />
+                <ProfileStat
+                  label="Resp. Rate"
+                  value={
+                    medicalRecord.physical_examination.respiratory_rate || "-"
+                  }
+                />
+              </div>
+              <div className="mt-4 pt-4 border-t border-outline-variant">
+                <p className="text-label-sm text-secondary mb-1">
+                  Physical Condition
+                </p>
+                <p className="text-body-md text-on-surface">
+                  {medicalRecord.physical_examination.physical_condition}
+                </p>
+              </div>
+            </InfoPanel>
+
+            {/* Service Specific Details */}
+            {medicalRecord.vaccine && (
+              <InfoPanel title="Vaccination Details">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <IconLine
+                    icon="vaccines"
+                    label="Vaccine Type"
+                    value={medicalRecord.vaccine.vaccine_type}
+                  />
+                  <IconLine
+                    icon="inventory_2"
+                    label="Brand"
+                    value={medicalRecord.vaccine.brand}
+                  />
+                  <IconLine
+                    icon="tag"
+                    label="Batch Number"
+                    value={medicalRecord.vaccine.batch_number}
+                  />
+                  <IconLine
+                    icon="event_available"
+                    label="Administered On"
+                    value={formatDate(
+                      medicalRecord.vaccine.administration_date,
+                    )}
+                  />
+                </div>
+                <div className="mt-4 pt-4 border-t border-outline-variant grid gap-4">
+                  <div>
+                    <p className="text-label-sm text-secondary mb-1">
+                      Pre-vaccine Condition
+                    </p>
+                    <p className="text-body-md text-on-surface">
+                      {medicalRecord.vaccine.pre_vaccine_condition}
+                    </p>
+                  </div>
+                  {medicalRecord.vaccine.post_vaccine_reaction && (
+                    <div>
+                      <p className="text-label-sm text-secondary mb-1">
+                        Post-vaccine Reaction
+                      </p>
+                      <p className="text-body-md text-on-surface">
+                        {medicalRecord.vaccine.post_vaccine_reaction}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </InfoPanel>
+            )}
+
+            {medicalRecord.checkup && (
+              <InfoPanel title="Checkup Findings">
+                <div className="grid gap-4">
+                  <div>
+                    <p className="text-label-sm text-secondary mb-1">
+                      Palpation
+                    </p>
+                    <p className="text-body-md text-on-surface">
+                      {medicalRecord.checkup.palpation}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-label-sm text-secondary mb-1">
+                      Cleanliness Notes
+                    </p>
+                    <p className="text-body-md text-on-surface">
+                      {medicalRecord.checkup.cleanliness_notes}
+                    </p>
+                  </div>
+                  {medicalRecord.checkup.nutrition_recommendations && (
+                    <div>
+                      <p className="text-label-sm text-secondary mb-1">
+                        Nutrition Recommendations
+                      </p>
+                      <p className="text-body-md text-on-surface">
+                        {medicalRecord.checkup.nutrition_recommendations}
+                      </p>
+                    </div>
+                  )}
+                  {medicalRecord.checkup.periodic_care_recommendations && (
+                    <div>
+                      <p className="text-label-sm text-secondary mb-1">
+                        Periodic Care Recommendations
+                      </p>
+                      <p className="text-body-md text-on-surface">
+                        {medicalRecord.checkup.periodic_care_recommendations}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </InfoPanel>
+            )}
+
+            {medicalRecord.treatment && (
+              <InfoPanel title="Treatment & Diagnosis">
+                <div className="grid gap-4">
+                  <div>
+                    <p className="text-label-sm text-secondary mb-1">
+                      Clinical Symptoms
+                    </p>
+                    <p className="text-body-md text-on-surface">
+                      {medicalRecord.treatment.clinical_symptoms}
+                    </p>
+                  </div>
+                  <div className="bg-primary-container/30 p-4 rounded-xl">
+                    <p className="text-label-sm text-primary mb-1 font-bold uppercase tracking-wider">
+                      Diagnosis
+                    </p>
+                    <p className="text-headline-sm text-on-primary-container font-bold">
+                      {medicalRecord.treatment.diagnosis}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-label-sm text-secondary mb-1">
+                      Medical Actions
+                    </p>
+                    <p className="text-body-md text-on-surface">
+                      {medicalRecord.treatment.medical_actions}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-label-sm text-secondary mb-3">
+                      Prescriptions
+                    </p>
+                    <div className="grid gap-2">
+                      {medicalRecord.treatment.prescriptions.map((p, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-outline-variant"
+                        >
+                          <div>
+                            <p className="text-body-md font-bold text-on-surface">
+                              {p.name}
+                            </p>
+                            <p className="text-label-sm text-on-surface-variant">
+                              {p.frequency}
+                            </p>
+                          </div>
+                          <span className="text-body-sm font-medium bg-secondary-container text-on-secondary-container px-2 py-1 rounded">
+                            {p.dosage}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {medicalRecord.treatment.home_care_notes && (
+                    <div>
+                      <p className="text-label-sm text-secondary mb-1">
+                        Home Care Notes
+                      </p>
+                      <p className="text-body-md text-on-surface italic">
+                        {medicalRecord.treatment.home_care_notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </InfoPanel>
+            )}
+          </section>
+        )}
+
+        {/* User Notes */}
+        {(appointment.owner_notes || appointment.previous_medical_history) && (
+          <section className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6">
+            <h2 className="text-headline-sm text-on-surface mb-4">
+              Owner Notes
+            </h2>
+            <div className="grid gap-4">
+              {appointment.owner_notes && (
+                <div>
+                  <p className="text-label-sm text-secondary mb-1">
+                    Note for Clinic
+                  </p>
+                  <p className="text-body-md text-on-surface">
+                    {appointment.owner_notes}
+                  </p>
+                </div>
+              )}
+              {appointment.previous_medical_history && (
+                <div>
+                  <p className="text-label-sm text-secondary mb-1">
+                    Previous History (Reported)
+                  </p>
+                  <p className="text-body-md text-on-surface">
+                    {appointment.previous_medical_history}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
       </main>
 
       <BottomNavigation />
@@ -240,18 +455,19 @@ function IconLine({
   );
 }
 
+function ProfileStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-label-sm text-secondary mb-1">{label}</p>
+      <p className="text-body-md text-on-surface font-medium">{value}</p>
+    </div>
+  );
+}
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
-  });
-}
-
-function formatTime(value: Date) {
-  return value.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
   });
 }

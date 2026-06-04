@@ -17,7 +17,6 @@ export interface Pet {
   initial_medical_history?: string;
   avatar_url?: string;
   created_at: string;
-  updated_at: string;
 }
 
 export interface User {
@@ -96,6 +95,7 @@ export interface CreateAppointmentRequest {
 export interface Appointment {
   id: string;
   pet: {
+    id: number;
     name: string;
     breed: string;
     avatar_url?: string;
