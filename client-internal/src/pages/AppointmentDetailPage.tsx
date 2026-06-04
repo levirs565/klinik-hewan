@@ -248,8 +248,7 @@ export function AppointmentDetailPage() {
               )}
 
             {/* Doctor: Medical Record Entry */}
-            {(appointment.status === "Diterima" ||
-              appointment.status === "Dalam Penanganan") &&
+            {appointment.status === "Dalam Penanganan" &&
               user?.role === "doctor" &&
               isAssignedDoctor && (
                 <button
