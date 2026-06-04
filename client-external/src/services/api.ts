@@ -28,7 +28,7 @@ const getAccessToken = () => localStorage.getItem("access_token");
 // Add token to requests
 client.interceptors.request.use((config) => {
   const token = getAccessToken();
-  if (token && config.headers) {
+  if (token && config.headers && config.url != "/token/refresh") {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
