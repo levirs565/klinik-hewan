@@ -1,80 +1,81 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import { createContext, useContext, useState } from "react";
+import type { ReactNode } from "react";
 
-import { internalApiClient } from '../services/api'
-import type { MedicalReport, RequestStatus, ServiceRequest } from '../types'
-import { useAuth } from './AuthContext'
+import { useServiceRequests as useServiceRequestsSWR } from "../hooks/useServiceRequests";
+import type { ServiceRequest } from "../types";
+import { useAuth } from "./AuthContext";
 
 type ServiceRequestContextValue = {
-  isLoading: boolean
-  requests: ServiceRequest[]
-  assignDoctor: (id: number, doctor: string) => void
-  confirmRequest: (id: number) => void
-  rejectRequest: (id: number, reason: string) => void
-  saveMedicalReport: (id: number, report: MedicalReport) => void
-}
+  isLoading: boolean;
+  requests: ServiceRequest[];
+  assignDoctor: (id: string, doctorID: number) => void;
+  confirmRequest: (id: string) => void;
+  rejectRequest: (id: string, reason: string) => void;
+  mutate: () => void;
+};
 
-const ServiceRequestContext = createContext<ServiceRequestContextValue | undefined>(undefined)
+const ServiceRequestContext = createContext<
+  ServiceRequestContextValue | undefined
+>(undefined);
 
 export function ServiceRequestProvider({ children }: { children: ReactNode }) {
-  const [requests, setRequests] = useState<ServiceRequest[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth();
+  const {
+    requests: swrRequests,
+    isLoading,
+    mutate,
+  } = useServiceRequestsSWR(isAuthenticated);
+  const [updatedRequests, setUpdatedRequests] = useState<
+    Record<string, Partial<ServiceRequest>>
+  >({});
+  const { user } = useAuth();
 
-  useEffect(() => {
-    internalApiClient
-      .getServiceRequests()
-      .then(setRequests)
-      .finally(() => setIsLoading(false))
-  }, [])
+  // Compute merged requests: SWR data + local updates
+  const requests = swrRequests.map((req) => ({
+    ...req,
+    ...(updatedRequests[req.id] || {}),
+  }));
 
-  const updateRequest = (id: number, updater: (request: ServiceRequest) => ServiceRequest) => {
-    setRequests((currentRequests) =>
-      currentRequests.map((request) => (request.id === id ? updater(request) : request)),
-    )
-  }
+  const updateRequestLocal = (id: string, update: Partial<ServiceRequest>) => {
+    setUpdatedRequests((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] || {}), ...update },
+    }));
+  };
 
-  const updateStatus = (id: number, status: RequestStatus, doctor?: string, rejectionReason?: string) => {
-    updateRequest(id, (request) => ({
-      ...request,
-      doctor: doctor ?? request.doctor,
-      rejectionReason,
-      status,
-    }))
-  }
+  const assignDoctor = (id: string, _doctorID: number) => {
+    if (user?.role === "doctor") return;
+    updateRequestLocal(id, { status: "doctor-pending" });
+  };
 
-  const assignDoctor = (id: number, doctor: string) => {
-    // Prevent staff with role 'doctor' from assigning doctors
-    if (user?.role === 'doctor') {
-      // silently ignore or optionally log for debugging
-      // console.warn('Assign action blocked: doctors cannot assign doctors')
-      return
-    }
+  const confirmRequest = (id: string) =>
+    updateRequestLocal(id, { status: "confirmed" });
 
-    updateStatus(id, 'doctor-pending', doctor)
-  }
-  const confirmRequest = (id: number) => updateStatus(id, 'confirmed')
-  const rejectRequest = (id: number, reason: string) => updateStatus(id, 'rejected', undefined, reason)
-  const saveMedicalReport = (id: number, report: MedicalReport) => {
-    updateRequest(id, (request) => ({
-      ...request,
-      medicalReport: report,
-    }))
-  }
+  const rejectRequest = (id: string, _reason: string) =>
+    updateRequestLocal(id, { status: "rejected" });
 
   return (
     <ServiceRequestContext.Provider
-      value={{ assignDoctor, confirmRequest, isLoading, rejectRequest, requests, saveMedicalReport }}
+      value={{
+        assignDoctor,
+        confirmRequest,
+        isLoading,
+        rejectRequest,
+        requests,
+        mutate,
+      }}
     >
       {children}
     </ServiceRequestContext.Provider>
-  )
+  );
 }
 
 export function useServiceRequests() {
-  const context = useContext(ServiceRequestContext)
+  const context = useContext(ServiceRequestContext);
   if (!context) {
-    throw new Error('useServiceRequests must be used inside ServiceRequestProvider')
+    throw new Error(
+      "useServiceRequests must be used inside ServiceRequestProvider",
+    );
   }
-  return context
+  return context;
 }

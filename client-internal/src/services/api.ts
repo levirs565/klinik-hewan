@@ -1,83 +1,111 @@
-import { API_BASE_URL, DUMMY_MODE } from '../config'
-import * as dummy from '../data/dummy'
-import type { AuthResponse, LoginRequest, ServiceRequest, StaffMember, StaffUser } from '../types'
+import axios from "axios";
+import type { AxiosInstance, AxiosRequestConfig } from "axios";
 
-class InternalAPIClient {
-  private accessToken: string | null = localStorage.getItem('internal_access_token')
+import { API_BASE_URL } from "../config";
+import type { AuthResponse } from "../types";
 
-  setTokens(accessToken: string, refreshToken: string) {
-    this.accessToken = accessToken
-    localStorage.setItem('internal_access_token', accessToken)
-    localStorage.setItem('internal_refresh_token', refreshToken)
+export const client: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Helper for tokens
+export const setTokens = (accessToken: string, refreshToken: string) => {
+  localStorage.setItem("internal_access_token", accessToken);
+  localStorage.setItem("internal_refresh_token", refreshToken);
+};
+
+export const clearTokens = () => {
+  localStorage.removeItem("internal_access_token");
+  localStorage.removeItem("internal_refresh_token");
+  localStorage.removeItem("internal_user");
+};
+
+const getAccessToken = () => localStorage.getItem("internal_access_token");
+
+// Add token to requests
+client.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token && config.headers && config.url !== "/token/refresh") {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
+});
 
-  clearTokens() {
-    this.accessToken = null
-    localStorage.removeItem('internal_access_token')
-    localStorage.removeItem('internal_refresh_token')
-    localStorage.removeItem('internal_user')
-  }
-
-  async loginStaff(data: LoginRequest): Promise<AuthResponse> {
-    if (DUMMY_MODE) {
-      const response = await dummy.loginDummy(data)
-      this.setTokens(response.access_token, response.refresh_token)
-      localStorage.setItem('internal_user', JSON.stringify(response.user))
-      return response
-    }
-
-    const response = await fetch(`${API_BASE_URL}/staff/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-
-    if (!response.ok) {
-      throw new Error('Login gagal')
-    }
-
-    const authResponse = (await response.json()) as AuthResponse
-    this.setTokens(authResponse.access_token, authResponse.refresh_token)
-    localStorage.setItem('internal_user', JSON.stringify(authResponse.user))
-    return authResponse
-  }
-
-  async logout() {
-    this.clearTokens()
-  }
-
-  async getMe(): Promise<StaffUser> {
-    if (DUMMY_MODE) return dummy.getMeDummy()
-
-    const response = await this.fetchWithAuth('/staff/me')
-    return (await response.json()) as StaffUser
-  }
-
-  async getServiceRequests(): Promise<ServiceRequest[]> {
-    if (DUMMY_MODE) return dummy.getServiceRequestsDummy()
-
-    const response = await this.fetchWithAuth('/internal/service-requests')
-    return (await response.json()) as ServiceRequest[]
-  }
-
-  async getStaffMembers(): Promise<StaffMember[]> {
-    if (DUMMY_MODE) return dummy.getStaffMembersDummy()
-
-    const response = await this.fetchWithAuth('/internal/staff')
-    return (await response.json()) as StaffMember[]
-  }
-
-  private async fetchWithAuth(path: string) {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      headers: this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : undefined,
-    })
-
-    if (!response.ok) {
-      throw new Error('Request gagal')
-    }
-
-    return response
-  }
+// Variables to handle multiple simultaneous 401s
+interface FailedQueueItem {
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
 }
 
-export const internalApiClient = new InternalAPIClient()
+let isRefreshing = false;
+let failedQueue: FailedQueueItem[] = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
+// Handle 401 responses (token expired)
+client.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return client(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem("internal_refresh_token");
+      if (refreshToken) {
+        try {
+          const res = await client.post<AuthResponse>("/token/refresh", {
+            refresh_token: refreshToken,
+          });
+          const { access_token, refresh_token } = res.data;
+
+          setTokens(access_token, refresh_token);
+          processQueue(null, access_token);
+
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          return client(originalRequest);
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          clearTokens();
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+// Generic Fetcher for SWR
+export const apiClient = async (url: string, config?: AxiosRequestConfig) => {
+  const response = await client.get(url, config);
+  return response.data;
+};

@@ -1,67 +1,45 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
-
-import { internalApiClient } from '../services/api'
-import type { LoginRequest, StaffUser } from '../types'
+import { createContext, useContext } from "react";
+import type { ReactNode } from "react";
+import { useMe, useLogin, useLogout } from "../hooks/useAuth";
+import type { LoginRequest, StaffUser } from "../types";
 
 type AuthContextValue = {
-  isAuthenticated: boolean
-  isLoading: boolean
-  user: StaffUser | null
-  login: (data: LoginRequest) => Promise<void>
-  logout: () => Promise<void>
-}
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: StaffUser | null;
+  login: (data: LoginRequest) => Promise<void>;
+  logout: () => Promise<void>;
+};
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined)
-
-function readSavedUser(): StaffUser | null {
-  const savedUser = localStorage.getItem('internal_user')
-  if (!savedUser) return null
-
-  try {
-    return JSON.parse(savedUser) as StaffUser
-  } catch {
-    localStorage.removeItem('internal_user')
-    return null
-  }
-}
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<StaffUser | null>(() => readSavedUser())
-  const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    const hasToken = Boolean(localStorage.getItem('internal_access_token'))
-    if (!hasToken || user) return
-
-    setIsLoading(true)
-    internalApiClient
-      .getMe()
-      .then(setUser)
-      .finally(() => setIsLoading(false))
-  }, [user])
+  const { user, isLoading, isAuthenticated, mutate } = useMe();
+  const { trigger: loginTrigger } = useLogin();
+  const { trigger: logoutTrigger } = useLogout();
 
   const login = async (data: LoginRequest) => {
-    const response = await internalApiClient.loginStaff(data)
-    setUser(response.user)
-  }
+    await loginTrigger(data);
+    await mutate();
+  };
 
   const logout = async () => {
-    await internalApiClient.logout()
-    setUser(null)
-  }
+    await logoutTrigger();
+  };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: Boolean(user), isLoading, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, isLoading, user: user || null, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used inside AuthProvider')
+    throw new Error("useAuth must be used inside AuthProvider");
   }
-  return context
+  return context;
 }

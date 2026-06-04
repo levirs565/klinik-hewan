@@ -1,19 +1,45 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
-import { Metric } from '../components'
-import { useAuth } from '../context/AuthContext'
-import { useServiceRequests } from '../context/ServiceRequestContext'
-import { staffMembers } from '../data/dummy'
-import { statusLabel } from '../utils/serviceRequest'
+import { Metric } from "../components";
+import { useAuth } from "../context/AuthContext";
+import { useServiceRequests } from "../context/ServiceRequestContext";
+import { useStaffMembers } from "../hooks/useStaff";
 
 export function ManagerDashboardPage() {
-  const { logout, user } = useAuth()
-  const { requests } = useServiceRequests()
+  const { logout, user, isAuthenticated } = useAuth();
+  const { requests } = useServiceRequests();
+  const { staffMembers } = useStaffMembers(isAuthenticated);
 
-  const doctors = staffMembers.filter((staff) => staff.role === 'doctor')
-  const receptionists = staffMembers.filter((staff) => staff.role === 'receptionist')
-  const rejected = requests.filter((request) => request.status === 'rejected')
-  const confirmed = requests.filter((request) => request.status === 'confirmed')
+  const doctors = staffMembers.filter((staff) => staff.role === "doctor");
+  const receptionists = staffMembers.filter(
+    (staff) => staff.role === "receptionist",
+  );
+
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case "Menunggu Konfirmasi":
+        return "new";
+      case "Diterima":
+      case "Dalam Penanganan":
+      case "Selesai":
+      case "Selesai Administrasi":
+        return "confirmed";
+      case "Ditolak":
+        return "rejected";
+      case "Menunggu Dokter":
+        return "doctor-pending";
+      default:
+        return status.toLowerCase().replace(/\s+/g, "-");
+    }
+  };
+
+  const confirmed = requests.filter(
+    (request) =>
+      request.status === "Diterima" ||
+      request.status === "Dalam Penanganan" ||
+      request.status === "Selesai" ||
+      request.status === "Selesai Administrasi",
+  );
 
   return (
     <main className="app">
@@ -28,13 +54,17 @@ export function ManagerDashboardPage() {
 
         <div className="profile">
           <Link className="text-button" to="/staff">
-            Pengelolaan Staf
+            Staf
           </Link>
           <div>
-            <strong>{user?.name ?? 'Manager'}</strong>
-            <small>{user?.title ?? 'Clinic Manager'}</small>
+            <strong>{user?.full_name ?? "Manager"}</strong>
           </div>
-          <button className="icon-button" onClick={() => void logout()} type="button" aria-label="Logout">
+          <button
+            className="icon-button"
+            onClick={() => void logout()}
+            type="button"
+            aria-label="Logout"
+          >
             <span className="material-symbols-outlined">logout</span>
           </button>
         </div>
@@ -43,12 +73,18 @@ export function ManagerDashboardPage() {
       <section className="hero-band manager-hero">
         <div>
           <p>Operational Overview</p>
-          <h2>Pantau layanan, dokter, resepsionis, dan keputusan permintaan klinik.</h2>
+          <h2>
+            Pantau layanan, dokter, resepsionis, dan status janji temu klinik.
+          </h2>
         </div>
         <div className="metric-grid">
           <Metric label="Dokter" value={doctors.length} icon="stethoscope" />
-          <Metric label="Resepsionis" value={receptionists.length} icon="support_agent" />
-          <Metric label="Confirmed" value={confirmed.length} icon="task_alt" />
+          <Metric
+            label="Resepsionis"
+            value={receptionists.length}
+            icon="support_agent"
+          />
+          <Metric label="Berhasil" value={confirmed.length} icon="task_alt" />
         </div>
       </section>
 
@@ -56,22 +92,32 @@ export function ManagerDashboardPage() {
         <article className="column">
           <div className="section-title">
             <div>
-              <p>Staff</p>
+              <p>Staf</p>
               <h2>Directory Preview</h2>
             </div>
-            <Link className="text-button" to="/staff">Lihat Semua</Link>
+            <Link className="text-button" to="/staff">
+              Lihat Semua
+            </Link>
           </div>
 
           <div className="staff-grid compact">
             {staffMembers.map((staff) => (
-              <Link className="staff-card staff-card-link" to={`/staff/${staff.id}`} key={staff.id}>
-                <img src={staff.image} alt={staff.name} />
+              <Link
+                className="staff-card staff-card-link"
+                to={`/staff/${staff.id}`}
+                key={staff.id}
+              >
+                <img
+                  src={
+                    staff.avatar_url ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(staff.full_name)}&background=random`
+                  }
+                  alt={staff.full_name}
+                />
                 <div>
-                  <h2>{staff.name}</h2>
-                  <p>{staff.specialization}</p>
+                  <h2>{staff.full_name}</h2>
                   <small>{staff.role}</small>
                 </div>
-                <span className="status confirmed">{staff.status}</span>
               </Link>
             ))}
           </div>
@@ -86,43 +132,24 @@ export function ManagerDashboardPage() {
           </div>
           <div className="stack-list">
             {requests.map((request) => (
-              <Link className="mini-row" to={`/requests/${request.id}`} key={request.id}>
-                <img src={request.image} alt={request.petName} />
+              <Link
+                className="mini-row"
+                to={`/requests/${request.id}`}
+                key={request.id}
+              >
+                <img src={request.pet.avatar_url} alt={request.pet.name} />
                 <div>
-                  <strong>{request.petName}</strong>
-                  <span>{request.service}</span>
+                  <strong>{request.pet.name}</strong>
+                  <span>{request.service_type}</span>
                 </div>
-                <span className={`status ${request.status}`}>{statusLabel[request.status]}</span>
+                <span className={`status ${getStatusClass(request.status)}`}>
+                  {request.status}
+                </span>
               </Link>
             ))}
           </div>
         </aside>
       </section>
-
-      {rejected.length > 0 ? (
-        <section className="date-section">
-          <div className="section-title">
-            <div>
-              <p>Audit</p>
-              <h2>Permintaan Ditolak</h2>
-            </div>
-          </div>
-          <div className="table">
-            {rejected.map((request) => (
-              <div className="table-row static" key={request.id}>
-                <img src={request.image} alt={request.petName} />
-                <div>
-                  <strong>{request.petName}</strong>
-                  <span>{request.owner}</span>
-                </div>
-                <span>{request.service}</span>
-                <span>{request.time}</span>
-                <span>{request.rejectionReason ?? 'Tidak ada alasan.'}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
     </main>
-  )
+  );
 }
