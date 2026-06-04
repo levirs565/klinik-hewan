@@ -99,8 +99,9 @@ func (s *Service) LoginOwner(ctx context.Context, req LoginOwnerRequest) (*Login
 	}
 
 	return &LoginOwnerResponse{
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
+		AccessToken:           tokens.AccessToken,
+		RefreshToken:          tokens.RefreshToken,
+		RefreshTokenExpiresAt: tokens.RefreshTokenExpiresAt,
 	}, nil
 }
 
@@ -146,8 +147,9 @@ func (s *Service) LoginInternal(ctx context.Context, req LoginInternalRequest) (
 	}
 
 	return &LoginInternalResponse{
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
+		AccessToken:           tokens.AccessToken,
+		RefreshToken:          tokens.RefreshToken,
+		RefreshTokenExpiresAt: tokens.RefreshTokenExpiresAt,
 	}, nil
 }
 
@@ -215,8 +217,9 @@ func (s *Service) RefreshToken(ctx context.Context, req RefreshTokenRequest) (*R
 	}
 
 	return &RefreshTokenResponse{
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
+		AccessToken:           tokens.AccessToken,
+		RefreshToken:          tokens.RefreshToken,
+		RefreshTokenExpiresAt: tokens.RefreshTokenExpiresAt,
 	}, nil
 }
 
