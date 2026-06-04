@@ -1,16 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // Pages
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { AddPetPage } from './pages/AddPetPage';
-import { PetsPage } from './pages/PetsPage';
-import { AppointmentsPage } from './pages/AppointmentsPage';
-import { BookingFormPage } from './pages/BookingFormPage';
-import { RemindersPage } from './pages/RemindersPage';
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { AddPetPage } from "./pages/AddPetPage";
+import { PetsPage } from "./pages/PetsPage";
+import { PetDetailPage } from "./pages/PetDetailPage";
+import { AppointmentsPage } from "./pages/AppointmentsPage";
+import { BookingFormPage } from "./pages/BookingFormPage";
+import { RemindersPage } from "./pages/RemindersPage";
 
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -71,7 +72,7 @@ function AppRoutes() {
         path="/pets/:id"
         element={
           <ProtectedRoute>
-            <PetsPage />
+            <PetDetailPage />
           </ProtectedRoute>
         }
       />

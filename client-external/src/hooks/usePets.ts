@@ -2,7 +2,7 @@ import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import axios from "axios";
 import { apiClient, client } from "../services/api";
-import type { MyPet, CreatePetRequest, CreatePetResponse } from "../types";
+import type { Pet, MyPet, CreatePetRequest, CreatePetResponse } from "../types";
 
 export const usePets = () => {
   const { data, error, isLoading, mutate } = useSWR<MyPet[]>(
@@ -12,6 +12,20 @@ export const usePets = () => {
 
   return {
     pets: data || [],
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+export const usePetDetail = (id?: string) => {
+  const { data, error, isLoading, mutate } = useSWR<Pet>(
+    id ? `/pets/${id}` : null,
+    apiClient,
+  );
+
+  return {
+    pet: data,
     isLoading,
     isError: error,
     mutate,
