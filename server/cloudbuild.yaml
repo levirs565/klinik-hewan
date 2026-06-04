@@ -8,8 +8,6 @@ steps:
     id: "Build Image"
     args:
       - "build"
-      - "--target"
-      - "runner"
       - "-t"
       - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
       - "./server"
