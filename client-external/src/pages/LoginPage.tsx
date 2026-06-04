@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button, Input } from "../components";
-import { useAuth } from "../context/AuthContext";
 import { useLogin } from "../hooks/useAuth";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
   const { trigger: loginTrigger, isMutating: isLoading } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,8 +25,7 @@ export const LoginPage = () => {
     }
 
     try {
-      const response = await loginTrigger({ email, password });
-      setUser(response.user);
+      await loginTrigger({ email, password });
       navigate("/");
     } catch (error: unknown) {
       const err = error as { response?: { status?: number } };
@@ -106,17 +103,6 @@ export const LoginPage = () => {
                 </span>
               </button>
             </div>
-
-            {/* Remember Me */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="rounded border-outline-variant"
-              />
-              <span className="text-body-md text-on-surface">
-                Remember me for 30 days
-              </span>
-            </label>
 
             {/* Submit Button */}
             <Button

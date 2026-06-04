@@ -18,10 +18,10 @@ export const useAppointments = () => {
 };
 
 export const useCreateAppointment = () => {
-  return useSWRMutation(
+  const { trigger, isMutating, error } = useSWRMutation(
     "/appointments",
     async (
-      url,
+      _,
       {
         arg,
       }: {
@@ -33,8 +33,14 @@ export const useCreateAppointment = () => {
         };
       },
     ): Promise<Appointment> => {
-      const response = await client.post<Appointment>(url, arg);
+      const response = await client.post<Appointment>("/appointments", arg);
       return response.data;
     },
   );
+
+  return {
+    trigger,
+    isCreating: isMutating,
+    error,
+  };
 };

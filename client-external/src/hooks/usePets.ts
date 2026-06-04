@@ -19,7 +19,7 @@ export const useCreatePet = () => {
   const { trigger, isMutating, error } = useSWRMutation(
     "/pets",
     async (
-      url,
+      _,
       { arg }: { arg: { data: CreatePetRequest; file?: File } },
     ): Promise<CreatePetResponse> => {
       let avatarId = arg.data.avatar_id;
@@ -35,10 +35,11 @@ export const useCreatePet = () => {
         avatarId = presignedRes.data.key;
       }
 
-      const response = await client.post<CreatePetResponse>(url, {
+      const response = await client.post<CreatePetResponse>("/pets", {
         ...arg.data,
         avatar_id: avatarId,
       });
+
       return response.data;
     },
   );

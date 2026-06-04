@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { useRegister } from "../hooks/useAuth";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
   const { trigger: registerTrigger, isMutating: isLoading } = useRegister();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,7 +35,7 @@ export const RegisterPage = () => {
     }
 
     try {
-      const response = await registerTrigger({
+      await registerTrigger({
         email,
         password,
         full_name: fullName,
@@ -45,7 +43,6 @@ export const RegisterPage = () => {
         address: "",
       });
 
-      setUser(response.user);
       navigate("/");
     } catch (error: unknown) {
       const err = error as { response?: { status?: number } };
