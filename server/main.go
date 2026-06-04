@@ -133,7 +133,12 @@ func main() {
 	reminderController.RegisterRoutes(api)
 	staffController.RegisterRoutes(api.Group("/staff"))
 
-	if err := e.Start(":1323"); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "1323"
+	}
+
+	if err := e.Start(":" + port); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
 }
