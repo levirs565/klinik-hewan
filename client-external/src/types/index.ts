@@ -7,6 +7,7 @@ export interface Pet {
   color: string;
   gender: string;
   date_of_birth: string;
+  weight?: string;
   avatar_url?: string;
   created_at: string;
   updated_at: string;
@@ -68,12 +69,62 @@ export interface Appointment {
   id: number;
   owner_id: number;
   pet_id: number;
+  doctor_id?: number;
   service_type: 'vaksin' | 'checkup' | 'pengobatan';
   status: 'menunggu_konfirmasi' | 'diterima' | 'ditolak' | 'check_in' | 'alokasi_dokter' | 'menunggu_dokter' | 'dalam_penanganan' | 'selesai' | 'selesai_administrasi';
   queue_number?: string;
   scheduled_date: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Doctor {
+  id: number;
+  name: string;
+  specialization: string;
+  phone: string;
+  email: string;
+  status: 'available' | 'busy' | 'offline';
+  schedule: string;
+  education?: string;
+  practice_start?: string;
+  joined_at?: string;
+  practice_history?: string[];
+  image_url?: string;
+}
+
+export interface MedicalRecord {
+  id: number;
+  appointment_id: number;
+  pet_id: number;
+  doctor_id?: number;
+  service_type: Appointment['service_type'];
+  record_number: string;
+  created_at: string;
+  diagnosis?: string;
+  summary: string;
+  checkup?: {
+    body_weight: string;
+    temperature: string;
+    heart_rate: string;
+    respiratory_rate: string;
+    bcs: string;
+    hydration: string;
+    physical_exam: string;
+  };
+  vaccine?: {
+    vaccine_name: string;
+    batch_number: string;
+    next_due_date: string;
+    notes: string;
+  };
+  treatment?: {
+    symptoms: string;
+    procedures: string;
+    medications: string[];
+    estimated_cost: string;
+  };
+  reminders: Reminder[];
 }
 
 export interface Reminder {

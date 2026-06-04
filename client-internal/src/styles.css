@@ -148,10 +148,16 @@ h2 {
 .login-card button,
 .primary-button,
 .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
+  padding: 0 18px;
   border-radius: 8px;
   border: 1px solid transparent;
   font-weight: 700;
+  text-decoration: none;
 }
 
 .login-card button,
@@ -424,6 +430,16 @@ h2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.action-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.inline-actions button,
+.action-stack button {
+  width: 100%;
 }
 
 .request-card {
@@ -875,6 +891,12 @@ textarea {
   padding: 0 12px;
 }
 
+.checkup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .reminder-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -888,6 +910,56 @@ textarea {
 .staff-page {
   max-width: 1440px;
   margin: 0 auto;
+}
+
+.staff-form-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.stack-form {
+  display: grid;
+  gap: 18px;
+}
+
+.stack-form label,
+.stack-form .section-title {
+  width: 100%;
+}
+
+.stack-form input,
+.stack-form textarea,
+.stack-form select {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid #bec9c2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0b1c30;
+}
+
+.stack-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.button-row {
+  display: flex;
+  gap: 14px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.staff-detail-hero .metric strong,
+.staff-detail-hero .metric small,
+.staff-detail-hero .metric .material-symbols-outlined {
+  color: #ffffff;
+}
+
+.staff-detail-hero .metric {
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 .tabs {
@@ -933,6 +1005,48 @@ textarea {
   opacity: 0.7;
 }
 
+.staff-card-link {
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.staff-card-link:hover {
+  border-color: #8bd6b6;
+  box-shadow: 0 14px 30px rgba(11, 28, 48, 0.08);
+  transform: translateY(-2px);
+}
+
+.staff-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.staff-card-main button {
+  flex-shrink: 0;
+  min-width: 130px;
+}
+
+.staff-card-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.staff-card-link:hover {
+  border-color: #8bd6b6;
+  box-shadow: 0 14px 30px rgba(11, 28, 48, 0.08);
+  transform: translateY(-2px);
+}
+
 .staff-card img {
   width: 72px;
   height: 72px;
@@ -958,6 +1072,244 @@ textarea {
   white-space: nowrap;
 }
 
+.staff-detail-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 560px);
+  gap: 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+  border-radius: 8px;
+  background: #213145;
+}
+
+.staff-profile-panel {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+}
+
+.staff-profile-panel img {
+  width: 160px;
+  height: 160px;
+  border: 4px solid rgba(139, 214, 182, 0.45);
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.staff-profile-panel h2 {
+  margin: 12px 0 6px;
+  color: #ffffff;
+  font-size: 36px;
+  line-height: 42px;
+}
+
+.staff-profile-panel p,
+.staff-profile-panel small {
+  display: block;
+  max-width: 680px;
+  color: #d9e6dd;
+}
+
+.staff-profile-panel small {
+  margin-top: 12px;
+  line-height: 22px;
+}
+
+.staff-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 20px;
+  max-width: 1440px;
+  margin: 20px auto 0;
+}
+
+.detail-card-grid,
+.service-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-tile,
+.service-detail-card,
+.contact-row,
+.next-appointment-card {
+  border: 1px solid #d3e4fe;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.detail-tile {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.detail-tile .material-symbols-outlined {
+  color: #00513b;
+}
+
+.detail-tile small,
+.contact-row small,
+.service-detail-card small,
+.next-appointment-card small {
+  color: #6f7973;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-tile strong,
+.contact-row strong {
+  color: #0b1c30;
+  line-height: 22px;
+}
+
+.detail-section-gap {
+  margin-top: 24px;
+}
+
+.service-detail-card {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+}
+
+.service-detail-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 8px;
+  color: #004532;
+  background: #a6f2d1;
+}
+
+.service-detail-card h3,
+.next-appointment-card h3 {
+  margin: 0;
+  color: #0b1c30;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+.service-detail-card p,
+.next-appointment-card p {
+  margin: 6px 0;
+  color: #3f4944;
+  line-height: 22px;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  border: 1px solid #bec9c2;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: #00513b;
+  background: #eff4ff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.next-appointment-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.next-appointment-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.next-appointment-card .primary-button {
+  width: fit-content;
+  white-space: nowrap;
+  margin-top: 8px;
+}
+
+.contact-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.contact-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+}
+
+.contact-row > .material-symbols-outlined {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 8px;
+  color: #004532;
+  background: #dce9ff;
+}
+
+.appointment-detail-table {
+  display: grid;
+  gap: 10px;
+}
+
+.appointment-detail-row {
+  display: grid;
+  grid-template-columns: 60px minmax(160px, 1fr) minmax(150px, 0.8fr) minmax(130px, 0.7fr) minmax(160px, 0.8fr) auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 84px;
+  border: 1px solid #d3e4fe;
+  border-radius: 8px;
+  padding: 12px;
+  color: inherit;
+  background: #ffffff;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.appointment-detail-row:hover {
+  border-color: #8bd6b6;
+  background: #eff4ff;
+  box-shadow: 0 10px 24px rgba(11, 28, 48, 0.06);
+}
+
+.appointment-detail-row img {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.appointment-detail-row strong,
+.appointment-detail-row span {
+  display: block;
+}
+
+.appointment-detail-row div span {
+  overflow: hidden;
+  margin-top: 4px;
+  color: #6f7973;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -976,11 +1328,15 @@ textarea {
   .hero-band,
   .workspace,
   .detail-layout,
-  .manager-grid {
+  .manager-grid,
+  .staff-detail-hero,
+  .staff-detail-layout {
     grid-template-columns: 1fr;
   }
 
   .info-grid,
+  .detail-card-grid,
+  .service-detail-grid,
   .staff-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -989,12 +1345,18 @@ textarea {
     order: -1;
   }
 
-  .table-row {
+  .table-row,
+  .appointment-detail-row {
     grid-template-columns: 56px minmax(180px, 1fr) 120px 72px;
   }
 
   .table-row > .status {
     grid-column: 2 / -1;
+  }
+
+  .appointment-detail-row > div:nth-of-type(3),
+  .appointment-detail-row > div:nth-of-type(4) {
+    display: none;
   }
 }
 
@@ -1041,7 +1403,11 @@ textarea {
 
   .service-hero,
   .service-hero.compact,
+  .staff-profile-panel,
   .staff-card,
+  .checkup-grid,
+  .detail-card-grid,
+  .service-detail-grid,
   .reminder-grid,
   .info-grid,
   .staff-grid {
@@ -1049,11 +1415,23 @@ textarea {
   }
 
   .request-card > .material-symbols-outlined,
-  .table-row > span:not(.status) {
+  .table-row > span:not(.status),
+  .appointment-detail-row > span:not(.status) {
     display: none;
   }
 
-  .table-row .status {
+  .table-row .status,
+  .appointment-detail-row .status {
     grid-column: 2;
+  }
+
+  .staff-profile-panel img {
+    width: 112px;
+    height: 112px;
+  }
+
+  .staff-profile-panel h2 {
+    font-size: 28px;
+    line-height: 34px;
   }
 }

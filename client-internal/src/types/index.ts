@@ -47,7 +47,20 @@ export type Reminder = {
   note: string
 }
 
+export type CheckupData = {
+  bodyWeight: string
+  temperature: string
+  heartRate: string
+  respiratoryRate: string
+  capillaryRefillTime: string
+  mucousMembrane: string
+  bodyConditionScore: string
+  hydration: string
+  physicalExamNotes: string
+}
+
 export type MedicalReport = {
+  checkup: CheckupData
   diagnosis: string
   treatment: string
   medication: string
@@ -65,4 +78,12 @@ export type StaffMember = {
   email: string
   status: StaffStatus
   image: string
+  bio?: string
+  schedule?: string
+  room?: string
+  licenseNumber?: string
+  education?: string
+  experience?: string
+  services?: string[]
+  certifications?: string[]
 }

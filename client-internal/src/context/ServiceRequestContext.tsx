@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 
 import { internalApiClient } from '../services/api'
 import type { MedicalReport, RequestStatus, ServiceRequest } from '../types'
+import { useAuth } from './AuthContext'
 
 type ServiceRequestContextValue = {
   isLoading: boolean
@@ -18,6 +19,7 @@ const ServiceRequestContext = createContext<ServiceRequestContextValue | undefin
 export function ServiceRequestProvider({ children }: { children: ReactNode }) {
   const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
     internalApiClient
@@ -41,7 +43,16 @@ export function ServiceRequestProvider({ children }: { children: ReactNode }) {
     }))
   }
 
-  const assignDoctor = (id: number, doctor: string) => updateStatus(id, 'doctor-pending', doctor)
+  const assignDoctor = (id: number, doctor: string) => {
+    // Prevent staff with role 'doctor' from assigning doctors
+    if (user?.role === 'doctor') {
+      // silently ignore or optionally log for debugging
+      // console.warn('Assign action blocked: doctors cannot assign doctors')
+      return
+    }
+
+    updateStatus(id, 'doctor-pending', doctor)
+  }
   const confirmRequest = (id: number) => updateStatus(id, 'confirmed')
   const rejectRequest = (id: number, reason: string) => updateStatus(id, 'rejected', undefined, reason)
   const saveMedicalReport = (id: number, report: MedicalReport) => {

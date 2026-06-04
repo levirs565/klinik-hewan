@@ -10,6 +10,8 @@ import type {
   CreatePetResponse,
   Appointment,
   Reminder,
+  Doctor,
+  MedicalRecord,
 } from '../types';
 import { DUMMY_MODE } from '../config';
 import * as dummy from '../data/dummy';
@@ -154,6 +156,18 @@ class APIClient {
   async getAppointments(): Promise<Appointment[]> {
     if (DUMMY_MODE) return dummy.getAppointmentsDummy();
     const response = await this.client.get<Appointment[]>('/appointments');
+    return response.data;
+  }
+
+  async getDoctors(): Promise<Doctor[]> {
+    if (DUMMY_MODE) return dummy.getDoctorsDummy();
+    const response = await this.client.get<Doctor[]>('/doctors');
+    return response.data;
+  }
+
+  async getMedicalRecords(): Promise<MedicalRecord[]> {
+    if (DUMMY_MODE) return dummy.getMedicalRecordsDummy();
+    const response = await this.client.get<MedicalRecord[]>('/medical-records');
     return response.data;
   }
 

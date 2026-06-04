@@ -64,7 +64,7 @@ export function ManagerDashboardPage() {
 
           <div className="staff-grid compact">
             {staffMembers.map((staff) => (
-              <article className="staff-card" key={staff.id}>
+              <Link className="staff-card staff-card-link" to={`/staff/${staff.id}`} key={staff.id}>
                 <img src={staff.image} alt={staff.name} />
                 <div>
                   <h2>{staff.name}</h2>
@@ -72,7 +72,7 @@ export function ManagerDashboardPage() {
                   <small>{staff.role}</small>
                 </div>
                 <span className="status confirmed">{staff.status}</span>
-              </article>
+              </Link>
             ))}
           </div>
         </article>
@@ -86,14 +86,14 @@ export function ManagerDashboardPage() {
           </div>
           <div className="stack-list">
             {requests.map((request) => (
-              <div className="mini-row" key={request.id}>
+              <Link className="mini-row" to={`/requests/${request.id}`} key={request.id}>
                 <img src={request.image} alt={request.petName} />
                 <div>
                   <strong>{request.petName}</strong>
                   <span>{request.service}</span>
                 </div>
                 <span className={`status ${request.status}`}>{statusLabel[request.status]}</span>
-              </div>
+              </Link>
             ))}
           </div>
         </aside>

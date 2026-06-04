@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ServiceRequestProvider } from './context/ServiceRequestContext'
-import { DashboardPage, LoginPage, MedicalRecordPage, ServiceDetailPage, StaffDirectoryPage } from './pages'
+import { AddStaffPage, DashboardPage, LoginPage, MedicalRecordPage, PetDetailPage, ServiceDetailPage, StaffDetailPage, StaffDirectoryPage } from './pages'
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth()
@@ -28,6 +28,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/requests/:id/pet"
+        element={
+          <ProtectedRoute>
+            <PetDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/requests/:id/medical-record"
         element={
           <ProtectedRoute>
@@ -40,6 +48,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <StaffDirectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/new"
+        element={
+          <ProtectedRoute>
+            <AddStaffPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/:id"
+        element={
+          <ProtectedRoute>
+            <StaffDetailPage />
           </ProtectedRoute>
         }
       />

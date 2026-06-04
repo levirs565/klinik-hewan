@@ -8,7 +8,11 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AddPetPage } from './pages/AddPetPage';
 import { PetsPage } from './pages/PetsPage';
+import { PetDetailPage } from './pages/PetDetailPage';
 import { AppointmentsPage } from './pages/AppointmentsPage';
+import { AppointmentDetailPage } from './pages/AppointmentDetailPage';
+import { DoctorProfilePage } from './pages/DoctorProfilePage';
+import { MedicalRecordPage } from './pages/MedicalRecordPage';
 import { BookingFormPage } from './pages/BookingFormPage';
 import { RemindersPage } from './pages/RemindersPage';
 
@@ -71,7 +75,7 @@ function AppRoutes() {
         path="/pets/:id"
         element={
           <ProtectedRoute>
-            <PetsPage />
+            <PetDetailPage />
           </ProtectedRoute>
         }
       />
@@ -95,7 +99,23 @@ function AppRoutes() {
         path="/appointments/:id"
         element={
           <ProtectedRoute>
-            <AppointmentsPage />
+            <AppointmentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments/:id/medical-record"
+        element={
+          <ProtectedRoute>
+            <MedicalRecordPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctors/:id"
+        element={
+          <ProtectedRoute>
+            <DoctorProfilePage />
           </ProtectedRoute>
         }
       />

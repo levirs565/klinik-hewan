@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { internalApiClient } from '../services/api'
+import { getStaffMembers, updateStaffMember } from '../services/staff'
 import type { StaffMember } from '../types'
 
 export function StaffDirectoryPage() {
+  const navigate = useNavigate()
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([])
   const [activeRole, setActiveRole] = useState<StaffMember['role']>('doctor')
-  const [showForm, setShowForm] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    internalApiClient.getStaffMembers().then(setStaffMembers)
+    getStaffMembers()
+      .then((staff) => setStaffMembers(staff))
+      .finally(() => setIsLoading(false))
   }, [])
 
   const filteredStaff = useMemo(
@@ -19,23 +21,17 @@ export function StaffDirectoryPage() {
     [activeRole, staffMembers],
   )
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const nextStaff: StaffMember = {
-      id: Date.now(),
-      name: String(formData.get('name') ?? ''),
-      role: activeRole,
-      specialization: String(formData.get('specialization') ?? ''),
-      phone: String(formData.get('phone') ?? ''),
-      email: String(formData.get('email') ?? ''),
-      status: 'active',
-      image:
-        'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=320&q=80',
+  const handleToggleStatus = async (id: number) => {
+    const nextStaff = staffMembers.map((staff) =>
+      staff.id === id
+        ? { ...staff, status: staff.status === 'active' ? ('inactive' as const) : ('active' as const) }
+        : staff,
+    )
+    setStaffMembers(nextStaff)
+    const updated = nextStaff.find((staff) => staff.id === id)
+    if (updated) {
+      await updateStaffMember(updated)
     }
-
-    setStaffMembers((currentStaff) => [nextStaff, ...currentStaff])
-    setShowForm(false)
   }
 
   return (
@@ -50,7 +46,7 @@ export function StaffDirectoryPage() {
             <h1>Staff Directory</h1>
           </div>
         </div>
-        <button className="primary-button toolbar-action" onClick={() => setShowForm(true)} type="button">
+        <button className="primary-button toolbar-action" onClick={() => navigate('/staff/new')} type="button">
           Tambah Staff
         </button>
       </header>
@@ -65,55 +61,30 @@ export function StaffDirectoryPage() {
           </button>
         </div>
 
+        {isLoading ? <p className="empty">Memuat staff...</p> : null}
+
         <div className="staff-grid">
           {filteredStaff.map((staff) => (
-            <article className={staff.status === 'inactive' ? 'staff-card muted' : 'staff-card'} key={staff.id}>
-              <img src={staff.image} alt={staff.name} />
-              <div>
-                <h2>{staff.name}</h2>
-                <p>{staff.specialization}</p>
-                <small>{staff.email}</small>
+            <div className={staff.status === 'inactive' ? 'staff-card muted' : 'staff-card'} key={staff.id}>
+              <div className="staff-card-main">
+                <Link className="staff-card-link" to={`/staff/${staff.id}`}>
+                  <img src={staff.image} alt={staff.name} />
+                  <div>
+                    <h2>{staff.name}</h2>
+                    <p>{staff.specialization}</p>
+                    <small>{staff.email}</small>
+                  </div>
+                  <span className={`status ${staff.status === 'active' ? 'confirmed' : 'rejected'}`}>{staff.status}</span>
+                </Link>
+                <button className="secondary-button" type="button" onClick={() => void handleToggleStatus(staff.id)}>
+                  {staff.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}
+                </button>
               </div>
-              <span className={`status ${staff.status === 'active' ? 'confirmed' : 'rejected'}`}>{staff.status}</span>
-            </article>
+            </div>
           ))}
+          {!isLoading && filteredStaff.length === 0 ? <p className="empty">Tidak ada staff untuk peran ini.</p> : null}
         </div>
       </section>
-
-      {showForm ? (
-        <div className="overlay">
-          <form className="modal-card staff-form" onSubmit={handleSubmit}>
-            <div className="section-title">
-              <div>
-                <p>Tambah</p>
-                <h2>{activeRole === 'doctor' ? 'Dokter' : 'Resepsionis'}</h2>
-              </div>
-              <button className="icon-button" onClick={() => setShowForm(false)} type="button" aria-label="Tutup">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <label>
-              Nama
-              <input name="name" required />
-            </label>
-            <label>
-              Spesialisasi / Jabatan
-              <input name="specialization" required />
-            </label>
-            <label>
-              Telepon
-              <input name="phone" required />
-            </label>
-            <label>
-              Email
-              <input name="email" type="email" required />
-            </label>
-            <button className="primary-button strong" type="submit">
-              Simpan Staff
-            </button>
-          </form>
-        </div>
-      ) : null}
     </main>
   )
 }

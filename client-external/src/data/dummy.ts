@@ -1,4 +1,4 @@
-import type { User, Pet, AuthResponse, CreatePetRequest, CreatePetResponse, Appointment, Reminder } from '../types';
+import type { User, Pet, AuthResponse, CreatePetRequest, CreatePetResponse, Appointment, Reminder, Doctor, MedicalRecord } from '../types';
 
 const now = new Date().toISOString();
 
@@ -23,6 +23,7 @@ const pets: Pet[] = [
     color: 'Golden',
     gender: 'male',
     date_of_birth: '2019-04-12',
+    weight: '28.4 kg',
     avatar_url: '',
     created_at: now,
     updated_at: now,
@@ -36,6 +37,7 @@ const pets: Pet[] = [
     color: 'Cream',
     gender: 'female',
     date_of_birth: '2021-08-30',
+    weight: '4.2 kg',
     avatar_url: '',
     created_at: now,
     updated_at: now,
@@ -49,6 +51,7 @@ const pets: Pet[] = [
     color: 'Tri-color',
     gender: 'female',
     date_of_birth: '2020-06-15',
+    weight: '10.8 kg',
     avatar_url: '',
     created_at: now,
     updated_at: now,
@@ -57,11 +60,43 @@ const pets: Pet[] = [
 
 let nextPetId = 4;
 
+const doctors: Doctor[] = [
+  {
+    id: 1,
+    name: 'Dr. Sarah Wilson',
+    specialization: 'General Practice & Surgery',
+    phone: '+62 812 1000 2000',
+    email: 'sarah@vetconnect.local',
+    status: 'available',
+    schedule: 'Mon-Fri, 09:00-16:00',
+    education: 'Doctor of Veterinary Medicine, Universitas Airlangga',
+    practice_start: '2018-02-12',
+    joined_at: '2022-01-10',
+    practice_history: ['VetConnect Animal Clinic', 'Surabaya Small Animal Center'],
+    image_url: '',
+  },
+  {
+    id: 2,
+    name: 'Dr. James Chen',
+    specialization: 'Vaccination & Preventive Care',
+    phone: '+62 812 3000 4000',
+    email: 'james@vetconnect.local',
+    status: 'busy',
+    schedule: 'Tue-Sat, 10:00-17:00',
+    education: 'Doctor of Veterinary Medicine, IPB University',
+    practice_start: '2020-05-03',
+    joined_at: '2023-03-15',
+    practice_history: ['VetConnect Animal Clinic', 'Jakarta Preventive Vet Care'],
+    image_url: '',
+  },
+];
+
 const appointments: Appointment[] = [
   {
     id: 1,
     owner_id: 1,
     pet_id: 1,
+    doctor_id: 1,
     service_type: 'checkup',
     status: 'menunggu_konfirmasi',
     queue_number: 'Q-01',
@@ -73,6 +108,7 @@ const appointments: Appointment[] = [
     id: 2,
     owner_id: 1,
     pet_id: 2,
+    doctor_id: 2,
     service_type: 'vaksin',
     status: 'diterima',
     queue_number: 'Q-02',
@@ -84,6 +120,7 @@ const appointments: Appointment[] = [
     id: 3,
     owner_id: 1,
     pet_id: 3,
+    doctor_id: 1,
     service_type: 'pengobatan',
     status: 'menunggu_dokter',
     queue_number: 'Q-03',
@@ -137,6 +174,66 @@ const reminders: Reminder[] = [
   },
 ];
 
+const medicalRecords: MedicalRecord[] = [
+  {
+    id: 1,
+    appointment_id: 1,
+    pet_id: 1,
+    doctor_id: 1,
+    service_type: 'checkup',
+    record_number: 'MR-CHK-001',
+    created_at: now,
+    diagnosis: 'Kondisi umum stabil',
+    summary: 'Pemeriksaan fisik rutin menunjukkan parameter vital dalam batas normal.',
+    checkup: {
+      body_weight: '28.4 kg',
+      temperature: '38.5 C',
+      heart_rate: '92 bpm',
+      respiratory_rate: '24 rpm',
+      bcs: '5/9',
+      hydration: 'Normal',
+      physical_exam: 'Mukosa pink, CRT <2 detik, auskultasi jantung dan paru normal.',
+    },
+    reminders: [reminders[1]],
+  },
+  {
+    id: 2,
+    appointment_id: 2,
+    pet_id: 2,
+    doctor_id: 2,
+    service_type: 'vaksin',
+    record_number: 'MR-VAC-002',
+    created_at: now,
+    diagnosis: 'Vaksin tahunan selesai',
+    summary: 'Luna menerima vaksin booster dan tidak menunjukkan reaksi akut saat observasi.',
+    vaccine: {
+      vaccine_name: 'F3 Booster',
+      batch_number: 'F3-24-901',
+      next_due_date: '2026-10-24T09:00:00.000Z',
+      notes: 'Observasi 20 menit pasca vaksin, kondisi stabil.',
+    },
+    reminders: [reminders[0]],
+  },
+  {
+    id: 3,
+    appointment_id: 3,
+    pet_id: 3,
+    doctor_id: 1,
+    service_type: 'pengobatan',
+    record_number: 'MR-TX-003',
+    created_at: now,
+    diagnosis: 'Dermatitis ringan',
+    summary: 'Terapi topikal diberikan dan pemilik diinstruksikan menjaga area tetap kering.',
+    treatment: {
+      symptoms: 'Gatal, kemerahan ringan pada area abdomen.',
+      procedures: 'Pemeriksaan kulit, pembersihan area, edukasi perawatan rumah.',
+      medications: ['Chlorhexidine spray 2x sehari', 'Omega supplement 1 kapsul/hari'],
+      estimated_cost: 'Rp 275.000',
+    },
+    reminders: [reminders[2]],
+  },
+];
+
 // nextReminderId reserved for future reminder creation
 
 export async function loginDummy(email: string) {
@@ -184,6 +281,7 @@ export async function createPetDummy(data: CreatePetRequest): Promise<CreatePetR
     color: created.color ?? '',
     gender: created.gender as string,
     date_of_birth: created.date_of_birth,
+    weight: '',
     avatar_url: created.avatar_url,
     created_at: created.created_at,
     updated_at: created.created_at,
@@ -208,12 +306,21 @@ export async function getAppointmentsDummy(): Promise<Appointment[]> {
   return Promise.resolve(appointments.slice());
 }
 
+export async function getDoctorsDummy(): Promise<Doctor[]> {
+  return Promise.resolve(doctors.slice());
+}
+
+export async function getMedicalRecordsDummy(): Promise<MedicalRecord[]> {
+  return Promise.resolve(medicalRecords.slice());
+}
+
 export async function createAppointmentDummy(data: { pet_id: number; service_type: Appointment['service_type']; scheduled_date: string; }) {
   const now = new Date().toISOString();
   const appointment: Appointment = {
     id: nextAppointmentId++,
     owner_id: dummyUser.id,
     pet_id: data.pet_id,
+    doctor_id: doctors[0]?.id,
     service_type: data.service_type,
     status: 'menunggu_konfirmasi',
     queue_number: `Q-${String(appointments.length + 1).padStart(2, '0')}`,

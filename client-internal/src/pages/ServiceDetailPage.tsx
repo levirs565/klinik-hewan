@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import { doctors } from '../data/dummy'
 import { useServiceRequests } from '../context/ServiceRequestContext'
+import { useAuth } from '../context/AuthContext'
 import { formatDate, statusLabel } from '../utils/serviceRequest'
 
 export function ServiceDetailPage() {
@@ -13,6 +14,7 @@ export function ServiceDetailPage() {
   const [doctorSelection, setDoctorSelection] = useState(doctors[0])
   const [showRejectReason, setShowRejectReason] = useState(false)
   const [reason, setReason] = useState('')
+  const { user } = useAuth()
 
   if (!request && requests.length > 0) {
     return <Navigate to="/" replace />
@@ -27,8 +29,11 @@ export function ServiceDetailPage() {
     navigate('/')
   }
 
-  const handleConfirm = () => {
+  const handleAccept = () => {
     confirmRequest(request.id)
+  }
+
+  const openMedicalRecord = () => {
     navigate(`/requests/${request.id}/medical-record`)
   }
 
@@ -96,19 +101,40 @@ export function ServiceDetailPage() {
           <label className="field-label" htmlFor="doctor">
             Pilih Dokter
           </label>
-          <select id="doctor" value={doctorSelection} onChange={(event) => setDoctorSelection(event.target.value)}>
-            {doctors.map((doctor) => (
-              <option key={doctor}>{doctor}</option>
-            ))}
-          </select>
+
+          {user?.role !== 'doctor' ? (
+            <select id="doctor" value={doctorSelection} onChange={(event) => setDoctorSelection(event.target.value)}>
+              {doctors.map((doctor) => (
+                <option key={doctor}>{doctor}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="note">Dokter tidak dapat menugaskan dokter.</div>
+          )}
 
           <div className="action-stack">
-            <button className="primary-button" onClick={() => assignDoctor(request.id, doctorSelection)} type="button">
-              Assign Dokter
-            </button>
-            <button className="primary-button strong" onClick={handleConfirm} type="button">
-              Terima & Lanjut Rekam Medis
-            </button>
+            {user?.role !== 'doctor' ? (
+              <button className="primary-button" onClick={() => assignDoctor(request.id, doctorSelection)} type="button">
+                Assign Dokter
+              </button>
+            ) : null}
+
+            {request.status !== 'confirmed' ? (
+              <button className="primary-button strong" onClick={handleAccept} type="button">
+                Terima
+              </button>
+            ) : null}
+
+            <Link className="primary-button strong" to={`/requests/${request.id}/pet`}>
+              Detail Hewan
+            </Link>
+
+            {request.status === 'confirmed' ? (
+              <button className="primary-button strong" onClick={openMedicalRecord} type="button">
+                Isi Rekam Medis
+              </button>
+            ) : null}
+
             <button className="secondary-button" onClick={() => setShowRejectReason(true)} type="button">
               Tolak Permintaan
             </button>

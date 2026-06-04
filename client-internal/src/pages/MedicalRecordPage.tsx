@@ -24,6 +24,17 @@ export function MedicalRecordPage() {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const report: MedicalReport = {
+      checkup: {
+        bodyWeight: String(formData.get('body_weight') ?? ''),
+        temperature: String(formData.get('temperature') ?? ''),
+        heartRate: String(formData.get('heart_rate') ?? ''),
+        respiratoryRate: String(formData.get('respiratory_rate') ?? ''),
+        capillaryRefillTime: String(formData.get('capillary_refill_time') ?? ''),
+        mucousMembrane: String(formData.get('mucous_membrane') ?? ''),
+        bodyConditionScore: String(formData.get('body_condition_score') ?? ''),
+        hydration: String(formData.get('hydration') ?? ''),
+        physicalExamNotes: String(formData.get('physical_exam_notes') ?? ''),
+      },
       diagnosis: String(formData.get('diagnosis') ?? ''),
       treatment: String(formData.get('treatment') ?? ''),
       medication: String(formData.get('medication') ?? ''),
@@ -71,6 +82,53 @@ export function MedicalRecordPage() {
           </div>
 
           <form className="record-form" onSubmit={handleSubmit}>
+            <div className="section-title">
+              <div>
+                <p>Checkup</p>
+                <h2>Data Pemeriksaan Awal</h2>
+              </div>
+            </div>
+
+            <div className="checkup-grid">
+              <label>
+                Berat Badan (kg)
+                <input name="body_weight" inputMode="decimal" defaultValue={request.medicalReport?.checkup?.bodyWeight} placeholder="Contoh: 12.5" />
+              </label>
+              <label>
+                Suhu (C)
+                <input name="temperature" inputMode="decimal" defaultValue={request.medicalReport?.checkup?.temperature} placeholder="Contoh: 38.6" />
+              </label>
+              <label>
+                Heart Rate / HR (x/menit)
+                <input name="heart_rate" inputMode="numeric" defaultValue={request.medicalReport?.checkup?.heartRate} placeholder="Contoh: 96" />
+              </label>
+              <label>
+                Respiratory Rate / RR (x/menit)
+                <input name="respiratory_rate" inputMode="numeric" defaultValue={request.medicalReport?.checkup?.respiratoryRate} placeholder="Contoh: 24" />
+              </label>
+              <label>
+                CRT (detik)
+                <input name="capillary_refill_time" inputMode="decimal" defaultValue={request.medicalReport?.checkup?.capillaryRefillTime} placeholder="Contoh: &lt;2" />
+              </label>
+              <label>
+                Membran Mukosa
+                <input name="mucous_membrane" defaultValue={request.medicalReport?.checkup?.mucousMembrane} placeholder="Contoh: Pink, lembap" />
+              </label>
+              <label>
+                Body Condition Score
+                <input name="body_condition_score" defaultValue={request.medicalReport?.checkup?.bodyConditionScore} placeholder="Contoh: 5/9" />
+              </label>
+              <label>
+                Hidrasi
+                <input name="hydration" defaultValue={request.medicalReport?.checkup?.hydration} placeholder="Contoh: Normal / dehidrasi 5%" />
+              </label>
+            </div>
+
+            <label>
+              Catatan Pemeriksaan Fisik
+              <textarea name="physical_exam_notes" defaultValue={request.medicalReport?.checkup?.physicalExamNotes} placeholder="Temuan umum, auskultasi, palpasi, kondisi kulit, mata, telinga..." />
+            </label>
+
             <label>
               Diagnosis
               <textarea name="diagnosis" defaultValue={request.medicalReport?.diagnosis} placeholder="Contoh: Otitis externa ringan..." />
