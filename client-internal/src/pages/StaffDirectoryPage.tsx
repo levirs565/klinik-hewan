@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useStaffMembers } from "../hooks/useStaff";
 import { useAuth } from "../context/AuthContext";
+import { StaffCard } from "../components";
 import type { StaffMember } from "../types";
 
 export function StaffDirectoryPage() {
@@ -59,17 +60,7 @@ export function StaffDirectoryPage() {
 
         <div className="staff-grid">
           {filteredStaff.map((staff) => (
-            <div className="staff-card" key={staff.id}>
-              <div className="staff-card-main">
-                <Link className="staff-card-link" to={`/staff/${staff.id}`}>
-                  <img src={staff.avatar_url} alt={staff.full_name} />
-                  <div>
-                    <h2>{staff.full_name}</h2>
-                    <small>{staff.role}</small>
-                  </div>
-                </Link>
-              </div>
-            </div>
+            <StaffCard key={staff.id} staff={staff} />
           ))}
           {!isLoading && filteredStaff.length === 0 ? (
             <p className="empty">Tidak ada staff untuk peran ini.</p>

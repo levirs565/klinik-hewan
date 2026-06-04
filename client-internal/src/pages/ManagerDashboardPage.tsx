@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { Metric } from "../components";
+import { Metric, StaffCard } from "../components";
 import { useAuth } from "../context/AuthContext";
 import { useServiceRequests } from "../context/ServiceRequestContext";
 import { useStaffMembers } from "../hooks/useStaff";
@@ -102,23 +102,7 @@ export function ManagerDashboardPage() {
 
           <div className="staff-grid compact">
             {staffMembers.map((staff) => (
-              <Link
-                className="staff-card staff-card-link"
-                to={`/staff/${staff.id}`}
-                key={staff.id}
-              >
-                <img
-                  src={
-                    staff.avatar_url ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(staff.full_name)}&background=random`
-                  }
-                  alt={staff.full_name}
-                />
-                <div>
-                  <h2>{staff.full_name}</h2>
-                  <small>{staff.role}</small>
-                </div>
-              </Link>
+              <StaffCard key={staff.id} staff={staff} />
             ))}
           </div>
         </article>
