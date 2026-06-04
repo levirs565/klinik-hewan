@@ -16,14 +16,42 @@ export const useStaffMembers = (enabled: boolean = true) => {
   };
 };
 
-export const useStaffDetail = (id?: string | number) => {
+export const useDoctorDetail = (id?: string | number) => {
   const { data, error, isLoading, mutate } = useSWR<StaffDetail>(
-    id ? `/staff/doctor/${id}` : null, // Note: Server has /doctor/:id and /receptionist/:id
+    id ? `/staff/doctor/${id}` : null,
     apiClient,
   );
 
   return {
-    staff: data,
+    doctor: data,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+export const useReceptionistDetail = (id?: string | number) => {
+  const { data, error, isLoading, mutate } = useSWR<StaffDetail>(
+    id ? `/staff/receptionist/${id}` : null,
+    apiClient,
+  );
+
+  return {
+    receptionist: data,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+export const useDoctorAppointments = (doctorId?: string | number) => {
+  const { data, error, isLoading, mutate } = useSWR<any[]>(
+    doctorId ? `/internal/appointments?doctor_id=${doctorId}` : null,
+    apiClient,
+  );
+
+  return {
+    appointments: data || [],
     isLoading,
     isError: error,
     mutate,

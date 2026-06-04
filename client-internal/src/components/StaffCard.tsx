@@ -13,7 +13,10 @@ export function StaffCard({ staff }: StaffCardProps) {
     )}&background=random`;
 
   return (
-    <Link className="staff-card staff-card-link" to={`/staff/${staff.id}`}>
+    <Link
+      className="staff-card staff-card-link"
+      to={`/staff/${staff.role}/${staff.id}`}
+    >
       <img src={avatarUrl} alt={staff.full_name} />
       <div>
         <h2>{staff.full_name}</h2>

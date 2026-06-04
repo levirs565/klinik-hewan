@@ -1,16 +1,29 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import { ProtectedRoute } from './components'
-import { AuthProvider, useAuth } from './context/AuthContext'
-import { ServiceRequestProvider } from './context/ServiceRequestContext'
-import { AddStaffPage, DashboardPage, LoginPage, MedicalRecordPage, PetDetailPage, ServiceDetailPage, StaffDetailPage, StaffDirectoryPage } from './pages'
+import { ProtectedRoute } from "./components";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ServiceRequestProvider } from "./context/ServiceRequestContext";
+import {
+  AddStaffPage,
+  DashboardPage,
+  DoctorDetailPage,
+  LoginPage,
+  MedicalRecordPage,
+  PetDetailPage,
+  ReceptionistDetailPage,
+  ServiceDetailPage,
+  StaffDirectoryPage,
+} from "./pages";
 
 function AppRoutes() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
+      />
       <Route
         path="/"
         element={
@@ -60,16 +73,24 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/staff/:id"
+        path="/staff/doctor/:id"
         element={
           <ProtectedRoute>
-            <StaffDetailPage />
+            <DoctorDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/receptionist/:id"
+        element={
+          <ProtectedRoute>
+            <ReceptionistDetailPage />
           </ProtectedRoute>
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  )
+  );
 }
 
 function App() {
@@ -81,7 +102,7 @@ function App() {
         </ServiceRequestProvider>
       </AuthProvider>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
