@@ -104,7 +104,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s3Helper.ConfigureLifecyclePolicy(ctx); err != nil {
-		panic(fmt.Errorf("failed to configure S3 lifecycle policy: %w", err))
+		fmt.Printf("failed to configure S3 lifecycle policy: %w\n", err)
 	}
 
 	petService := pet.NewService(db, s3Helper)
