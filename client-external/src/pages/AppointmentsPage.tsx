@@ -217,7 +217,7 @@ export const AppointmentsPage = () => {
                             {pet?.name || "Unknown Pet"}
                           </h3>
                           <p className="text-body-sm text-on-surface-variant">
-                            {pet?.breed || pet?.species}
+                            {pet?.species}
                           </p>
                         </div>
                         {getStatusBadge(appointment.status)}

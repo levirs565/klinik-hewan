@@ -2,10 +2,13 @@ import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import axios from "axios";
 import { apiClient, client } from "../services/api";
-import type { Pet, CreatePetRequest, CreatePetResponse } from "../types";
+import type { MyPet, CreatePetRequest, CreatePetResponse } from "../types";
 
 export const usePets = () => {
-  const { data, error, isLoading, mutate } = useSWR<Pet[]>("/pets", apiClient);
+  const { data, error, isLoading, mutate } = useSWR<MyPet[]>(
+    "/pets",
+    apiClient,
+  );
 
   return {
     pets: data || [],

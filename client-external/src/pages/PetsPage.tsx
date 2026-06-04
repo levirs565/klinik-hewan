@@ -59,10 +59,9 @@ export const PetsPage = () => {
                         {pet.name}
                       </h3>
                       <p className="text-body-md text-on-surface-variant">
-                        {pet.species} • {pet.breed}
+                        {pet.species}
                       </p>
                       <p className="text-label-sm text-on-surface-variant mt-1">
-                        {pet.gender} •{" "}
                         {new Date().getFullYear() -
                           new Date(pet.birth_date).getFullYear()}{" "}
                         years old

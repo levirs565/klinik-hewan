@@ -246,7 +246,7 @@ export const BookingFormPage = () => {
                           {pet.name}
                         </p>
                         <p className="text-xs text-on-surface-variant">
-                          {pet.breed || pet.species}
+                          {pet.species}
                         </p>
                       </div>
                     </div>
@@ -515,7 +515,7 @@ export const BookingFormPage = () => {
                         {selectedPet.name}
                       </p>
                       <p className="text-body-sm text-on-surface-variant">
-                        {selectedPet.breed || selectedPet.species}
+                        {selectedPet.species}
                       </p>
                     </div>
                   </div>

@@ -1,3 +1,11 @@
+export interface MyPet {
+  id: number;
+  name: string;
+  avatar_url?: string;
+  species: string;
+  birth_date: string;
+}
+
 export interface Pet {
   id: number;
   owner_id: number;
