@@ -97,3 +97,13 @@ export const useDoctorRejectAppointment = (id?: string) => {
     },
   );
 };
+
+export const useSaveMedicalRecord = (id?: string) => {
+  return useSWRMutation(
+    id ? `/internal/appointments/${id}` : null,
+    async (url, { arg }: { arg: any }) => {
+      const response = await client.post(`${url}/medical-record`, arg);
+      return response.data;
+    },
+  );
+};
