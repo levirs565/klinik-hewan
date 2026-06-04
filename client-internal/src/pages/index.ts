@@ -1,0 +1,8 @@
+export { DashboardPage } from './DashboardPage'
+export { DoctorDashboardPage } from './DoctorDashboardPage'
+export { LoginPage } from './LoginPage'
+export { ManagerDashboardPage } from './ManagerDashboardPage'
+export { MedicalRecordPage } from './MedicalRecordPage'
+export { ReceptionistDashboardPage } from './ReceptionistDashboardPage'
+export { ServiceDetailPage } from './ServiceDetailPage'
+export { StaffDirectoryPage } from './StaffDirectoryPage'

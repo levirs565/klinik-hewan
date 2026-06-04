@@ -1,72 +1,62 @@
-import { useEffect, useMemo, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import loginHtml from './stitch-pages/internal_staff_login_1.html?raw'
-import receptionistDashboardHtml from './stitch-pages/receptionist_landing_page.html?raw'
+import { ProtectedRoute } from './components'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { ServiceRequestProvider } from './context/ServiceRequestContext'
+import { DashboardPage, LoginPage, MedicalRecordPage, ServiceDetailPage, StaffDirectoryPage } from './pages'
 
-type StaffRole = 'receptionist'
+function AppRoutes() {
+  const { isAuthenticated } = useAuth()
 
-type DummySession = {
-  role: StaffRole
-}
-
-const sessionKey = 'vetconnect-internal-dummy-session'
-
-function addDummyLoginHandler(html: string) {
-  return html.replace(
-    '</body>',
-    `<script>
-      const form = document.querySelector('form');
-      if (form) {
-        form.addEventListener('submit', function (event) {
-          event.preventDefault();
-          window.parent.postMessage({ type: 'vetconnect:dummy-login', role: 'receptionist' }, '*');
-        });
-      }
-    </script></body>`,
+  return (
+    <Routes>
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/requests/:id"
+        element={
+          <ProtectedRoute>
+            <ServiceDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/requests/:id/medical-record"
+        element={
+          <ProtectedRoute>
+            <MedicalRecordPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff"
+        element={
+          <ProtectedRoute>
+            <StaffDirectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
-function readSavedSession(): DummySession | null {
-  const savedSession = window.localStorage.getItem(sessionKey)
-
-  if (!savedSession) {
-    return null
-  }
-
-  try {
-    return JSON.parse(savedSession) as DummySession
-  } catch {
-    window.localStorage.removeItem(sessionKey)
-    return null
-  }
-}
-
 function App() {
-  const [session, setSession] = useState<DummySession | null>(() => readSavedSession())
-  const loginScreen = useMemo(() => addDummyLoginHandler(loginHtml), [])
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type !== 'vetconnect:dummy-login') {
-        return
-      }
-
-      const nextSession: DummySession = { role: 'receptionist' }
-      window.localStorage.setItem(sessionKey, JSON.stringify(nextSession))
-      setSession(nextSession)
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [])
-
   return (
-    <iframe
-      className="app-frame"
-      title="VetConnect Internal Portal"
-      srcDoc={session ? receptionistDashboardHtml : loginScreen}
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-    />
+    <BrowserRouter>
+      <AuthProvider>
+        <ServiceRequestProvider>
+          <AppRoutes />
+        </ServiceRequestProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
