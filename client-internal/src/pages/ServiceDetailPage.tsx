@@ -2,7 +2,11 @@ import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { useServiceRequests } from "../context/ServiceRequestContext";
-import { formatDate, statusLabel } from "../utils/serviceRequest";
+import {
+  formatDate,
+  statusLabel,
+  getStatusClass,
+} from "../utils/serviceRequest";
 
 export function ServiceDetailPage() {
   const { id } = useParams();
@@ -32,7 +36,7 @@ export function ServiceDetailPage() {
         <div className="service-hero">
           <img src={request.pet.avatar_url} alt={request.pet.name} />
           <div>
-            <span className={`status ${request.status}`}>
+            <span className={`status ${getStatusClass(request.status)}`}>
               {statusLabel[request.status]}
             </span>
             <h2>{request.pet.name}</h2>
@@ -54,11 +58,13 @@ export function ServiceDetailPage() {
         </div>
 
         <div className="button-row mt-8">
-          {request.status === "new" && (
+          {request.status === "Menunggu Konfirmasi" && (
             <>
               <button
                 className="secondary-button"
-                onClick={() => rejectRequest(request.id, "Rejected")}
+                onClick={() =>
+                  rejectRequest(request.id, "Tidak dapat diproses")
+                }
                 type="button"
               >
                 Tolak

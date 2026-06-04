@@ -642,6 +642,44 @@ select {
     white-space: nowrap;
 }
 
+.mini-row .flex-grow {
+    flex-grow: 1;
+}
+
+.mini-row .row-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mini-row .breed-tag {
+    font-size: 11px;
+    background: #eff4ff;
+    color: #3f4944;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.mini-row .row-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 13px;
+    color: #6f7973;
+}
+
+.mini-row .meta-separator {
+    color: #bec9c2;
+}
+
+.mini-row .row-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .staff-grid.compact {
     grid-template-columns: 1fr;
 }

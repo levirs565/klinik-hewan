@@ -32,6 +32,24 @@ export const statusIcon: Record<RequestStatus, string> = {
   "Selesai Administrasi": "payments",
 };
 
+export const getStatusClass = (status: string) => {
+  switch (status) {
+    case "Menunggu Konfirmasi":
+      return "new";
+    case "Diterima":
+    case "Dalam Penanganan":
+    case "Selesai":
+    case "Selesai Administrasi":
+      return "confirmed";
+    case "Ditolak":
+      return "rejected";
+    case "Menunggu Dokter":
+      return "doctor-pending";
+    default:
+      return status.toLowerCase().replace(/\s+/g, "-");
+  }
+};
+
 export const formatDate = (dateStr: string) => {
   if (!dateStr) return "-";
   return new Date(dateStr).toLocaleDateString("id-ID", {

@@ -2,22 +2,50 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { Metric, RequestCard } from "../components";
 import { useAuth } from "../context/AuthContext";
-import { useServiceRequests } from "../context/ServiceRequestContext";
-import { formatDate, statusIcon, statusLabel } from "../utils/serviceRequest";
+import { useServiceRequests } from "../hooks/useServiceRequests";
+import {
+  formatDate,
+  getStatusClass,
+  statusIcon,
+  statusLabel,
+} from "../utils/serviceRequest";
+import { client } from "../services/api";
 
 export function DoctorDashboardPage() {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
-  const { confirmRequest, requests } = useServiceRequests();
+  const { logout, user, isAuthenticated } = useAuth();
+  const { requests, mutate, isLoading } = useServiceRequests(
+    { my_appointments: true },
+    isAuthenticated,
+  );
 
-  // Since list doesn't have doctor info, we show all for now or filter if we have detail logic
-  const assignedRequests = requests;
-  const waitingConfirmation = assignedRequests.filter(
-    (request) => request.status === "doctor-pending",
+  const waitingConfirmation = requests.filter(
+    (request) => request.status === "Menunggu Dokter",
   );
-  const confirmedRequests = assignedRequests.filter(
-    (request) => request.status === "confirmed",
+  const confirmedRequests = requests.filter(
+    (request) =>
+      request.status === "Diterima" ||
+      request.status === "Dalam Penanganan" ||
+      request.status === "Selesai",
   );
+
+  const confirmRequest = async (id: string) => {
+    try {
+      await client.post(`/internal/appointments/${id}/doctor-approve`);
+      await mutate();
+    } catch (error) {
+      console.error("Failed to approve appointment:", error);
+      alert("Gagal mengonfirmasi janji temu");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <main className="app">
+        <p className="empty">Memuat data dashboard...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="app">
@@ -48,27 +76,21 @@ export function DoctorDashboardPage() {
 
       <section className="hero-band doctor-hero">
         <div>
-          <p>Good Morning</p>
-          <h2>
-            Total appointments today: {assignedRequests.length} scheduled.
-          </h2>
+          <p>Selamat Pagi</p>
+          <h2>Ada {requests.length} janji temu yang dijadwalkan hari ini.</h2>
         </div>
         <div className="metric-grid">
           <Metric
-            label="Pending"
+            label="Menunggu"
             value={waitingConfirmation.length}
             icon="hourglass_empty"
           />
           <Metric
-            label="Confirmed"
+            label="Diterima"
             value={confirmedRequests.length}
             icon="check_circle"
           />
-          <Metric
-            label="Total"
-            value={assignedRequests.length}
-            icon="calendar_month"
-          />
+          <Metric label="Total" value={requests.length} icon="calendar_month" />
         </div>
       </section>
 
@@ -76,8 +98,8 @@ export function DoctorDashboardPage() {
         <article className="column">
           <div className="section-title">
             <div>
-              <p>Action Required</p>
-              <h2>Waiting for Confirmation</h2>
+              <p>Perlu Tindakan</p>
+              <h2>Menunggu Konfirmasi Anda</h2>
             </div>
           </div>
 
@@ -107,28 +129,28 @@ export function DoctorDashboardPage() {
                     onClick={() => confirmRequest(request.id)}
                     type="button"
                   >
-                    Confirm
+                    Konfirmasi
                   </button>
                 </div>
               </div>
             ))}
             {waitingConfirmation.length === 0 ? (
-              <p className="empty">No pending confirmations.</p>
+              <p className="empty">Tidak ada konfirmasi tertunda.</p>
             ) : null}
           </div>
 
           <div className="section-title detail-section-gap">
             <div>
               <p>Janji Temu</p>
-              <h2>Schedule Today</h2>
+              <h2>Jadwal Hari Ini</h2>
             </div>
           </div>
           <div className="request-grid">
-            {assignedRequests.map((request) => (
+            {requests.map((request) => (
               <RequestCard key={request.id} request={request} />
             ))}
-            {assignedRequests.length === 0 ? (
-              <p className="empty">No appointments scheduled today.</p>
+            {requests.length === 0 ? (
+              <p className="empty">Tidak ada janji temu hari ini.</p>
             ) : null}
           </div>
         </article>
@@ -137,11 +159,11 @@ export function DoctorDashboardPage() {
           <div className="section-title compact">
             <div>
               <p>Status</p>
-              <h2>Recent Updates</h2>
+              <h2>Pembaruan Terkini</h2>
             </div>
           </div>
           <div className="stack-list">
-            {assignedRequests.slice(0, 5).map((request) => (
+            {requests.slice(0, 5).map((request) => (
               <Link
                 className="mini-row"
                 to={`/requests/${request.id}`}
@@ -153,7 +175,7 @@ export function DoctorDashboardPage() {
                   <p>{request.pet.breed}</p>
                 </div>
                 <div className="status-indicator">
-                  <span className={`status ${request.status}`}>
+                  <span className={`status ${getStatusClass(request.status)}`}>
                     <span className="material-symbols-outlined">
                       {statusIcon[request.status]}
                     </span>

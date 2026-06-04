@@ -1,16 +1,17 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 
 import { useServiceRequests as useServiceRequestsSWR } from "../hooks/useServiceRequests";
 import type { ServiceRequest } from "../types";
 import { useAuth } from "./AuthContext";
+import { client } from "../services/api";
 
 type ServiceRequestContextValue = {
   isLoading: boolean;
   requests: ServiceRequest[];
-  assignDoctor: (id: string, doctorID: number) => void;
-  confirmRequest: (id: string) => void;
-  rejectRequest: (id: string, reason: string) => void;
+  assignDoctor: (id: string, doctorID: number) => Promise<void>;
+  confirmRequest: (id: string) => Promise<void>;
+  rejectRequest: (id: string, reason: string) => Promise<void>;
   mutate: () => void;
 };
 
@@ -20,39 +21,44 @@ const ServiceRequestContext = createContext<
 
 export function ServiceRequestProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
-  const {
-    requests: swrRequests,
-    isLoading,
-    mutate,
-  } = useServiceRequestsSWR(isAuthenticated);
-  const [updatedRequests, setUpdatedRequests] = useState<
-    Record<string, Partial<ServiceRequest>>
-  >({});
-  const { user } = useAuth();
+  const { requests, isLoading, mutate } = useServiceRequestsSWR(
+    {},
+    isAuthenticated,
+  );
 
-  // Compute merged requests: SWR data + local updates
-  const requests = swrRequests.map((req) => ({
-    ...req,
-    ...(updatedRequests[req.id] || {}),
-  }));
-
-  const updateRequestLocal = (id: string, update: Partial<ServiceRequest>) => {
-    setUpdatedRequests((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] || {}), ...update },
-    }));
+  const assignDoctor = async (id: string, doctorID: number) => {
+    try {
+      await client.post(`/internal/appointments/${id}/select-doctor`, {
+        doctor_id: doctorID,
+      });
+      await mutate();
+    } catch (error) {
+      console.error("Failed to assign doctor:", error);
+      throw error;
+    }
   };
 
-  const assignDoctor = (id: string, _doctorID: number) => {
-    if (user?.role === "doctor") return;
-    updateRequestLocal(id, { status: "doctor-pending" });
+  const confirmRequest = async (id: string) => {
+    try {
+      await client.post(`/internal/appointments/${id}/approve`);
+      await mutate();
+    } catch (error) {
+      console.error("Failed to confirm request:", error);
+      throw error;
+    }
   };
 
-  const confirmRequest = (id: string) =>
-    updateRequestLocal(id, { status: "confirmed" });
-
-  const rejectRequest = (id: string, _reason: string) =>
-    updateRequestLocal(id, { status: "rejected" });
+  const rejectRequest = async (id: string, reason: string) => {
+    try {
+      await client.post(`/internal/appointments/${id}/reject`, {
+        reason,
+      });
+      await mutate();
+    } catch (error) {
+      console.error("Failed to reject request:", error);
+      throw error;
+    }
+  };
 
   return (
     <ServiceRequestContext.Provider

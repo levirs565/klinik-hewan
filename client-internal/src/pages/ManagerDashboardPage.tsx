@@ -4,6 +4,7 @@ import { Metric, StaffCard } from "../components";
 import { useAuth } from "../context/AuthContext";
 import { useServiceRequests } from "../context/ServiceRequestContext";
 import { useStaffMembers } from "../hooks/useStaff";
+import { getStatusClass } from "../utils/serviceRequest";
 
 export function ManagerDashboardPage() {
   const { logout, user, isAuthenticated } = useAuth();
@@ -14,24 +15,6 @@ export function ManagerDashboardPage() {
   const receptionists = staffMembers.filter(
     (staff) => staff.role === "receptionist",
   );
-
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "Menunggu Konfirmasi":
-        return "new";
-      case "Diterima":
-      case "Dalam Penanganan":
-      case "Selesai":
-      case "Selesai Administrasi":
-        return "confirmed";
-      case "Ditolak":
-        return "rejected";
-      case "Menunggu Dokter":
-        return "doctor-pending";
-      default:
-        return status.toLowerCase().replace(/\s+/g, "-");
-    }
-  };
 
   const confirmed = requests.filter(
     (request) =>
