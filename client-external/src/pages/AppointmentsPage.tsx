@@ -84,7 +84,7 @@ export const AppointmentsPage = () => {
 
   const now = new Date();
   const filteredAppointments = appointments.filter((appt) => {
-    const apptDate = new Date(appt.scheduled_date);
+    const apptDate = new Date(appt.appointment_date);
     return activeTab === "upcoming" ? apptDate >= now : apptDate < now;
   });
 
@@ -170,7 +170,7 @@ export const AppointmentsPage = () => {
           ) : (
             filteredAppointments.map((appointment) => {
               const pet = getPetInfo(appointment.pet_id);
-              const apptDate = new Date(appointment.scheduled_date);
+              const apptDate = new Date(appointment.appointment_date);
               const dateStr = apptDate.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
@@ -226,14 +226,14 @@ export const AppointmentsPage = () => {
                       <div className="flex items-center gap-4 text-body-sm text-on-surface-variant mb-3">
                         <div className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-base">
-                            {appointment.service_type === "vaksin"
+                            {appointment.service_type === "vaccine"
                               ? "vaccines"
                               : appointment.service_type === "checkup"
                                 ? "medical_services"
                                 : "healing"}
                           </span>
                           <span className="capitalize">
-                            {appointment.service_type === "pengobatan"
+                            {appointment.service_type === "treatment"
                               ? "Treatment"
                               : appointment.service_type}
                           </span>

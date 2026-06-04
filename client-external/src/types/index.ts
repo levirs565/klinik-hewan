@@ -72,23 +72,34 @@ export interface CreatePetResponse {
   created_at: string;
 }
 
+export interface CreateAppointmentRequest {
+  pet_id: number;
+  reminder_id?: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  appointment_date: string;
+  owner_notes?: string;
+  previous_medical_history?: string;
+  checkup?: {
+    purpose: string;
+    focus_area: string;
+  };
+  treatment?: {
+    observed_symptoms: string[];
+    symptom_duration: string;
+    home_care_received?: boolean;
+  };
+  vaccine?: {
+    vaccine_type: string;
+  };
+}
+
 export interface Appointment {
-  id: number;
+  id: string;
   owner_id: number;
   pet_id: number;
-  service_type: "vaksin" | "checkup" | "pengobatan";
-  status:
-    | "menunggu_konfirmasi"
-    | "diterima"
-    | "ditolak"
-    | "check_in"
-    | "alokasi_dokter"
-    | "menunggu_dokter"
-    | "dalam_penanganan"
-    | "selesai"
-    | "selesai_administrasi";
-  queue_number?: string;
-  scheduled_date: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  status: string;
+  appointment_date: string;
   created_at: string;
   updated_at: string;
 }

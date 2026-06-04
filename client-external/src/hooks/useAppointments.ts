@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import { apiClient, client } from "../services/api";
-import type { Appointment } from "../types";
+import type { Appointment, CreateAppointmentRequest } from "../types";
 
 export const useAppointments = () => {
   const { data, error, isLoading, mutate } = useSWR<Appointment[]>(
@@ -22,18 +22,9 @@ export const useCreateAppointment = () => {
     "/appointments",
     async (
       _,
-      {
-        arg,
-      }: {
-        arg: {
-          pet_id: number;
-          service_type: Appointment["service_type"];
-          scheduled_date: string;
-          notes?: string;
-        };
-      },
-    ): Promise<Appointment> => {
-      const response = await client.post<Appointment>("/appointments", arg);
+      { arg }: { arg: CreateAppointmentRequest },
+    ): Promise<{ id: string }> => {
+      const response = await client.post<{ id: string }>("/appointments", arg);
       return response.data;
     },
   );

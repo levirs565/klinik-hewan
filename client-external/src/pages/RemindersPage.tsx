@@ -1,9 +1,11 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { BottomNavigation, Card } from "../components";
 import { usePets } from "../hooks/usePets";
 import { useReminders } from "../hooks/useReminders";
 
 export const RemindersPage = () => {
+  const navigate = useNavigate();
   const { pets } = usePets();
   const { reminders } = useReminders();
 
@@ -136,7 +138,10 @@ export const RemindersPage = () => {
                         </div>
                       </div>
                     </div>
-                    <button className="w-full rounded-[24px] bg-[#0f4d35] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#113e30] sm:w-auto">
+                    <button
+                      onClick={() => navigate("/appointments/new")}
+                      className="w-full rounded-[24px] bg-[#0f4d35] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#113e30] sm:w-auto"
+                    >
                       Book Now
                     </button>
                   </Card>

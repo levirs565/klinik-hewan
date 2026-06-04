@@ -91,7 +91,7 @@ export const DashboardPage = () => {
               <p className="text-body-md text-on-primary mb-4 opacity-90">
                 Schedule a checkup, vaccination, or grooming session.
               </p>
-              <Link to="/appointments">
+              <Link to="/appointments/new">
                 <Button variant="secondary" size="sm">
                   Book Now
                   <span className="material-symbols-outlined">

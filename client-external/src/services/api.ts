@@ -28,10 +28,8 @@ const getAccessToken = () => localStorage.getItem("access_token");
 // Add token to requests
 client.interceptors.request.use((config) => {
   const token = getAccessToken();
-  if (token) {
-    // add Authorization header when token exists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (config as any).headers.Authorization = `Bearer ${token}`;
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
