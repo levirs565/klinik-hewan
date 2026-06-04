@@ -14,47 +14,37 @@ export const AppointmentsPage = () => {
       string,
       { label: string; bgColor: string; textColor: string }
     > = {
-      diterima: {
+      Diterima: {
         label: "DITERIMA",
         bgColor: "bg-green-100",
         textColor: "text-green-700",
       },
-      menunggu_konfirmasi: {
+      "Menunggu Konfirmasi": {
         label: "MENUNGGU KONFIRMASI",
         bgColor: "bg-yellow-100",
         textColor: "text-yellow-700",
       },
-      ditolak: {
+      Ditolak: {
         label: "DITOLAK",
         bgColor: "bg-red-100",
         textColor: "text-red-700",
       },
-      check_in: {
-        label: "CHECK-IN",
-        bgColor: "bg-blue-100",
-        textColor: "text-blue-700",
-      },
-      alokasi_dokter: {
-        label: "ALOKASI DOKTER",
-        bgColor: "bg-blue-100",
-        textColor: "text-blue-700",
-      },
-      menunggu_dokter: {
+      "Menunggu Dokter": {
         label: "MENUNGGU DOKTER",
         bgColor: "bg-yellow-100",
         textColor: "text-yellow-700",
       },
-      dalam_penanganan: {
+      "Dalam Penanganan": {
         label: "DALAM PENANGANAN",
         bgColor: "bg-purple-100",
         textColor: "text-purple-700",
       },
-      selesai: {
+      Selesai: {
         label: "SELESAI",
         bgColor: "bg-gray-100",
         textColor: "text-gray-700",
       },
-      selesai_administrasi: {
+      "Selesai Administrasi": {
         label: "SELESAI ADMINISTRASI",
         bgColor: "bg-gray-100",
         textColor: "text-gray-700",
@@ -163,11 +153,6 @@ export const AppointmentsPage = () => {
                 day: "numeric",
                 year: "numeric",
               });
-              const timeStr = apptDate.toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              });
 
               return (
                 <div
@@ -225,13 +210,6 @@ export const AppointmentsPage = () => {
                             calendar_today
                           </span>
                           <span>{dateStr}</span>
-                        </div>
-                        <span>•</span>
-                        <div className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-base">
-                            schedule
-                          </span>
-                          <span>{timeStr}</span>
                         </div>
                       </div>
 

@@ -111,12 +111,13 @@ export interface AppointmentDetail extends Appointment {
 }
 
 export interface Reminder {
-  id: number;
-  owner_id: number;
-  pet_id: number;
-  title: string;
+  id: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  date: string;
   description: string;
-  scheduled_date: string;
-  status: "pending" | "completed";
-  created_at: string;
+  pet: {
+    id: number;
+    name: string;
+    avatar_url?: string;
+  };
 }

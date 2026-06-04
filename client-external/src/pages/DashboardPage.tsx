@@ -1,18 +1,22 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Button, Card, Badge, Avatar, BottomNavigation } from "../components";
+import { Button, Card, Avatar, BottomNavigation } from "../components";
 import { usePets } from "../hooks/usePets";
+import { useReminders } from "../hooks/useReminders";
 
 export const DashboardPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const { pets, isError: error, isLoading } = usePets();
+  const { pets, isError: error, isLoading: isLoadingPets } = usePets();
+  const { reminders, isLoading: isLoadingReminders } = useReminders();
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
+
+  const isLoading = isLoadingPets || isLoadingReminders;
 
   if (isLoading) {
     return (
@@ -103,107 +107,58 @@ export const DashboardPage = () => {
           </div>
         </Card>
 
-        {/* Active Appointment */}
-        {pets.length > 0 && (
-          <section>
-            <h2 className="text-headline-md text-on-surface mb-4">
-              Active Appointment
-            </h2>
-            <Card>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <Avatar
-                    src={pets[0].avatar_url}
-                    alt={pets[0].name}
-                    size="lg"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-headline-sm text-on-surface font-600">
-                        {pets[0].name}
-                      </h3>
-                      <Badge variant="success" size="sm">
-                        DITERIMA
-                      </Badge>
-                    </div>
-                    <p className="text-body-sm text-on-surface-variant">
-                      General Checkup
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-surface-variant">
-                  <div>
-                    <p className="text-label-sm text-on-surface-variant mb-1">
-                      DATE & TIME
-                    </p>
-                    <p className="text-body-md text-on-surface font-600">
-                      Today, 14:30
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-label-sm text-on-surface-variant mb-1">
-                      QUEUE NUMBER
-                    </p>
-                    <p className="text-body-md text-on-surface font-600">
-                      A-04
-                    </p>
-                  </div>
-                </div>
-
-                <Link to={`/appointments/${pets[0].id}`} className="block">
-                  <Button variant="tertiary" fullWidth>
-                    View Details
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          </section>
-        )}
-
         {/* Health Reminders */}
         <section>
           <h2 className="text-headline-md text-on-surface mb-4">
             Health Reminders
           </h2>
           <div className="space-y-3">
-            <Card className="bg-error-container/10 border-error-container/30">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-error text-3xl">
-                  medical_information
-                </span>
-                <div className="flex-1">
-                  <h3 className="text-body-md text-on-surface font-600">
-                    Rabies Vaccination
-                  </h3>
-                  <p className="text-label-sm text-on-surface-variant">
-                    Max • In 5 days
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-error">
-                  close
-                </span>
-              </div>
-            </Card>
-
-            <Card className="bg-primary-fixed/10 border-primary-fixed/30">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-primary fill-1 text-3xl">
-                  medication
-                </span>
-                <div className="flex-1">
-                  <h3 className="text-body-md text-on-surface font-600">
-                    Morning Meds (Apoquel)
-                  </h3>
-                  <p className="text-label-sm text-on-surface-variant">
-                    Luna •
-                  </p>
-                </div>
-                <span className="material-symbols-outlined text-primary">
-                  done
-                </span>
-              </div>
-            </Card>
+            {reminders.length === 0 ? (
+              <p className="text-body-md text-on-surface-variant italic">
+                No upcoming reminders.
+              </p>
+            ) : (
+              reminders.slice(0, 3).map((reminder) => (
+                <Card
+                  key={reminder.id}
+                  className="bg-surface-container-low border-surface-variant/50 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate("/reminders")}
+                >
+                  <div className="flex items-center gap-4">
+                    <Avatar
+                      src={reminder.pet.avatar_url}
+                      alt={reminder.pet.name}
+                      size="md"
+                      initials={reminder.pet.name.substring(0, 2).toUpperCase()}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-body-md text-on-surface font-600 truncate">
+                        {reminder.description}
+                      </h3>
+                      <p className="text-label-md text-on-surface-variant mt-0.5 capitalize">
+                        {reminder.pet.name} • {reminder.service_type}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-label-sm text-primary font-600">
+                        {new Date(reminder.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+            {reminders.length > 3 && (
+              <Link
+                to="/reminders"
+                className="text-label-md text-primary font-600 block text-center mt-2 hover:underline"
+              >
+                View all reminders
+              </Link>
+            )}
           </div>
         </section>
 
