@@ -3,9 +3,10 @@ import useSWRMutation from "swr/mutation";
 import { apiClient, client } from "../services/api";
 import type { Appointment, CreateAppointmentRequest } from "../types";
 
-export const useAppointments = () => {
+export const useAppointments = (filter?: "upcoming" | "past") => {
+  const url = filter ? `/appointments?filter=${filter}` : "/appointments";
   const { data, error, isLoading, mutate } = useSWR<Appointment[]>(
-    "/appointments",
+    url,
     apiClient,
   );
 

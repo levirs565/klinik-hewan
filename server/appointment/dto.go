@@ -52,10 +52,6 @@ type AppointmentListItem struct {
 	AppointmentDate core.Date               `json:"appointment_date"`
 }
 
-type GetOwnerAppointmentsResponse struct {
-	Items []AppointmentListItem `json:"items"`
-}
-
 type AppointmentDetailPet struct {
 	ID        uint      `json:"id"`
 	Name      string    `json:"name"`

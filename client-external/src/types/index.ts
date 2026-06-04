@@ -95,13 +95,19 @@ export interface CreateAppointmentRequest {
 
 export interface Appointment {
   id: string;
-  owner_id: number;
-  pet_id: number;
+  pet: {
+    name: string;
+    breed: string;
+    avatar_url?: string;
+  };
   service_type: "vaccine" | "checkup" | "treatment";
   status: string;
   appointment_date: string;
-  created_at: string;
-  updated_at: string;
+}
+
+export interface AppointmentDetail extends Appointment {
+  owner_notes?: string;
+  previous_medical_history?: string;
 }
 
 export interface Reminder {

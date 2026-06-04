@@ -8,6 +8,7 @@ import (
 	"vetconnect-server/models"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/datatypes"
@@ -213,7 +214,7 @@ func (s *Service) CreateAppointment(ctx context.Context, ownerID uint, req Creat
 	}, nil
 }
 
-func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter string) (*GetOwnerAppointmentsResponse, error) {
+func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter string) ([]AppointmentListItem, error) {
 	query := gorm.G[models.Appointment](s.db).
 		Select("appointments.id", "current_state", "service_type", "appointment_date").
 		Joins(clause.JoinTarget{Association: "Pet"}, func(db gorm.JoinBuilder, joinTable, curTable clause.Table) error {
@@ -238,9 +239,8 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 		return nil, err
 	}
 
-	items := make([]AppointmentListItem, len(appointments))
-	for i, app := range appointments {
-		items[i] = AppointmentListItem{
+	return lo.Map(appointments, func(app models.Appointment, _ int) AppointmentListItem {
+		return AppointmentListItem{
 			ID: app.ID,
 			Pet: AppointmentPetSummary{
 				Name:      app.Pet.Name,
@@ -251,11 +251,7 @@ func (s *Service) GetOwnerAppointments(ctx context.Context, ownerID uint, filter
 			ServiceType:     app.ServiceType,
 			AppointmentDate: core.Date(app.AppointmentDate),
 		}
-	}
-
-	return &GetOwnerAppointmentsResponse{
-		Items: items,
-	}, nil
+	}), nil
 }
 
 func (s *Service) GetAllAppointments(ctx context.Context, status models.AppointmentState, date string, doctorID *uint) ([]AppointmentListItem, error) {

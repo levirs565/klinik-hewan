@@ -1,19 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "../components";
-import { usePets } from "../hooks/usePets";
 import { useAppointments } from "../hooks/useAppointments";
 
 export const AppointmentsPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
 
-  const { pets, isLoading: isLoadingPets } = usePets();
-  const { appointments, isLoading: isLoadingAppts } = useAppointments();
-
-  const isLoading = isLoadingPets || isLoadingAppts;
-
-  const getPetInfo = (petId: number) => pets.find((p) => p.id === petId);
+  const { appointments, isLoading } = useAppointments(activeTab);
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<
@@ -81,12 +75,6 @@ export const AppointmentsPage = () => {
       </span>
     );
   };
-
-  const now = new Date();
-  const filteredAppointments = appointments.filter((appt) => {
-    const apptDate = new Date(appt.appointment_date);
-    return activeTab === "upcoming" ? apptDate >= now : apptDate < now;
-  });
 
   if (isLoading) {
     return (
@@ -156,7 +144,7 @@ export const AppointmentsPage = () => {
 
         {/* Appointments List */}
         <div className="space-y-4">
-          {filteredAppointments.length === 0 ? (
+          {appointments.length === 0 ? (
             <div className="text-center py-12">
               <span className="material-symbols-outlined text-4xl text-surface-variant mb-4 inline-block">
                 calendar_month
@@ -168,8 +156,7 @@ export const AppointmentsPage = () => {
               </p>
             </div>
           ) : (
-            filteredAppointments.map((appointment) => {
-              const pet = getPetInfo(appointment.pet_id);
+            appointments.map((appointment) => {
               const apptDate = new Date(appointment.appointment_date);
               const dateStr = apptDate.toLocaleDateString("en-US", {
                 month: "short",
@@ -191,20 +178,14 @@ export const AppointmentsPage = () => {
                     {/* Pet Avatar */}
                     <div className="flex-shrink-0">
                       <div className="w-16 h-16 rounded-xl bg-surface-variant flex items-center justify-center overflow-hidden">
-                        {pet?.avatar_url ? (
+                        {appointment.pet.avatar_url ? (
                           <img
-                            src={pet.avatar_url}
-                            alt={pet.name}
+                            src={appointment.pet.avatar_url}
+                            alt={appointment.pet.name}
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-2xl">
-                            {pet?.species === "dog"
-                              ? "🐕"
-                              : pet?.species === "cat"
-                                ? "🐈"
-                                : "🐾"}
-                          </span>
+                          <span className="text-2xl">🐾</span>
                         )}
                       </div>
                     </div>
@@ -214,10 +195,10 @@ export const AppointmentsPage = () => {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="text-body-lg font-semibold text-on-surface">
-                            {pet?.name || "Unknown Pet"}
+                            {appointment.pet.name}
                           </h3>
                           <p className="text-body-sm text-on-surface-variant">
-                            {pet?.species}
+                            {appointment.pet.breed}
                           </p>
                         </div>
                         {getStatusBadge(appointment.status)}
