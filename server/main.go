@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 	"vetconnect-server/appointment"
 	"vetconnect-server/auth"
@@ -71,6 +72,20 @@ func main() {
 	}
 
 	e := echo.New()
+
+	allowedOriginsStr := os.Getenv("CORS_ALLOWED_ORIGINS")
+	var allowedOrigins []string
+	if allowedOriginsStr != "" {
+		allowedOrigins = strings.Split(allowedOriginsStr, ",")
+	} else {
+		allowedOrigins = []string{"http://localhost:5173", "http://localhost:5174"}
+	}
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     allowedOrigins,
+		AllowCredentials: true,
+	}))
+
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
