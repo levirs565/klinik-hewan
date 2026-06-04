@@ -25,7 +25,7 @@ export function MedicalRecordPage() {
         <div className="brand">
           <Link
             className="icon-button"
-            to={`/requests/${id}`}
+            to={`/appointments/${id}`}
             aria-label="Kembali"
           >
             <span className="material-symbols-outlined">arrow_back</span>

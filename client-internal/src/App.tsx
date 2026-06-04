@@ -14,7 +14,7 @@ import {
   MedicalRecordPage,
   PetDetailPage,
   ReceptionistDetailPage,
-  ServiceDetailPage,
+  AppointmentDetailPage,
   StaffDirectoryPage,
 } from "./pages";
 
@@ -36,15 +36,15 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/requests/:id"
+        path="/appointments/:id"
         element={
           <ProtectedRoute>
-            <ServiceDetailPage />
+            <AppointmentDetailPage />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/requests/:id/pet"
+        path="/appointments/:id/pet"
         element={
           <ProtectedRoute>
             <PetDetailPage />
@@ -52,7 +52,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/requests/:id/medical-record"
+        path="/appointments/:id/medical-record"
         element={
           <ProtectedRoute>
             <MedicalRecordPage />

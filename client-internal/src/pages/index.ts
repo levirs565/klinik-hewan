@@ -5,7 +5,7 @@ export { ManagerDashboardPage } from "./ManagerDashboardPage";
 export { MedicalRecordPage } from "./MedicalRecordPage";
 export { PetDetailPage } from "./PetDetailPage";
 export { ReceptionistDashboardPage } from "./ReceptionistDashboardPage";
-export { ServiceDetailPage } from "./ServiceDetailPage";
+export { AppointmentDetailPage } from "./AppointmentDetailPage";
 export { StaffDirectoryPage } from "./StaffDirectoryPage";
 export { DoctorDetailPage } from "./DoctorDetailPage";
 export { ReceptionistDetailPage } from "./ReceptionistDetailPage";

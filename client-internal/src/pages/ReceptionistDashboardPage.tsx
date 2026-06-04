@@ -108,7 +108,7 @@ export function ReceptionistDashboardPage() {
             <Link
               className="mini-row"
               key={request.id}
-              to={`/requests/${request.id}`}
+              to={`/appointments/${request.id}`}
             >
               <img
                 src={
@@ -167,7 +167,7 @@ export function ReceptionistDashboardPage() {
             <Link
               className="mini-row"
               key={request.id}
-              to={`/requests/${request.id}`}
+              to={`/appointments/${request.id}`}
             >
               <img
                 src={

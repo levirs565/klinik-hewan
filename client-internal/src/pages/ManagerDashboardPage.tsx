@@ -101,7 +101,7 @@ export function ManagerDashboardPage() {
             {requests.map((request) => (
               <Link
                 className="mini-row"
-                to={`/requests/${request.id}`}
+                to={`/appointments/${request.id}`}
                 key={request.id}
               >
                 <img src={request.pet.avatar_url} alt={request.pet.name} />

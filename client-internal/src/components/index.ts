@@ -4,3 +4,4 @@ export { RequestCard } from "./RequestCard";
 export { StaffCard } from "./StaffCard";
 export { StaffAccountFields } from "./StaffAccountFields";
 export { DoctorProfessionalFields } from "./DoctorProfessionalFields";
+export { RejectionDialog } from "./RejectionDialog";

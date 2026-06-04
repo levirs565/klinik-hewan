@@ -1,5 +1,6 @@
 import useSWR from "swr";
-import { apiClient } from "../services/api";
+import useSWRMutation from "swr/mutation";
+import { apiClient, client } from "../services/api";
 import type { ServiceRequest } from "../types";
 
 export interface ServiceRequestFilter {
@@ -31,4 +32,38 @@ export const useServiceRequests = (
     isError: error,
     mutate,
   };
+};
+
+export const useAppointmentDetail = (id?: string) => {
+  const { data, error, isLoading, mutate } = useSWR<any>(
+    id ? `/internal/appointments/${id}` : null,
+    apiClient,
+  );
+
+  return {
+    appointment: data,
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+export const useApproveAppointment = (id?: string) => {
+  return useSWRMutation(
+    id ? `/internal/appointments/${id}` : null,
+    async (url) => {
+      const response = await client.post(`${url}/approve`);
+      return response.data;
+    },
+  );
+};
+
+export const useRejectAppointment = (id?: string) => {
+  return useSWRMutation(
+    id ? `/internal/appointments/${id}` : null,
+    async (url, { arg }: { arg: { reason: string } }) => {
+      const response = await client.post(`${url}/reject`, arg);
+      return response.data;
+    },
+  );
 };

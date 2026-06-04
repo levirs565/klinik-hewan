@@ -119,7 +119,7 @@ export function DoctorDashboardPage() {
                 <div className="button-row">
                   <button
                     className="secondary-button"
-                    onClick={() => navigate(`/requests/${request.id}`)}
+                    onClick={() => navigate(`/appointments/${request.id}`)}
                     type="button"
                   >
                     Detail
@@ -166,7 +166,7 @@ export function DoctorDashboardPage() {
             {requests.slice(0, 5).map((request) => (
               <Link
                 className="mini-row"
-                to={`/requests/${request.id}`}
+                to={`/appointments/${request.id}`}
                 key={request.id}
               >
                 <img src={request.pet.avatar_url} alt={request.pet.name} />

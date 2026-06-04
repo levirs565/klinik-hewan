@@ -14,7 +14,7 @@ type RequestCardProps = {
 
 export function RequestCard({ request }: RequestCardProps) {
   return (
-    <Link className="request-card" to={`/requests/${request.id}`}>
+    <Link className="request-card" to={`/appointments/${request.id}`}>
       <div className="request-card-info">
         <img src={request.pet.avatar_url} alt={request.pet.name} />
         <div>
