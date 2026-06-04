@@ -106,8 +106,48 @@ export interface Appointment {
 }
 
 export interface AppointmentDetail extends Appointment {
+  doctor?: {
+    id: number;
+    name: string;
+  };
   owner_notes?: string;
   previous_medical_history?: string;
+  medical_record?: {
+    type: "vaccine" | "checkup" | "treatment";
+    physical_examination: {
+      weight: number;
+      temperature: number;
+      physical_condition: string;
+      heart_rate?: string;
+      respiratory_rate?: string;
+    };
+    vaccine?: {
+      vaccine_type: string;
+      brand: string;
+      batch_number: string;
+      administration_date: string;
+      pre_vaccine_condition: string;
+      post_vaccine_reaction?: string;
+    };
+    checkup?: {
+      palpation: string;
+      cleanliness_notes: string;
+      nutrition_recommendations?: string;
+      periodic_care_recommendations?: string;
+    };
+    treatment?: {
+      clinical_symptoms: string;
+      diagnosis: string;
+      medical_actions: string;
+      prescriptions: Array<{
+        name: string;
+        dosage: string;
+        frequency: string;
+      }>;
+      home_care_notes?: string;
+      estimated_cost: number;
+    };
+  };
 }
 
 export interface Reminder {

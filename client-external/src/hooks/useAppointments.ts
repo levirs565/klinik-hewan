@@ -1,7 +1,11 @@
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import { apiClient, client } from "../services/api";
-import type { Appointment, CreateAppointmentRequest } from "../types";
+import type {
+  Appointment,
+  AppointmentDetail,
+  CreateAppointmentRequest,
+} from "../types";
 
 export const useAppointments = (filter?: "upcoming" | "past") => {
   const url = filter ? `/appointments?filter=${filter}` : "/appointments";
@@ -12,6 +16,20 @@ export const useAppointments = (filter?: "upcoming" | "past") => {
 
   return {
     appointments: data || [],
+    isLoading,
+    isError: error,
+    mutate,
+  };
+};
+
+export const useAppointmentDetail = (id?: string) => {
+  const { data, error, isLoading, mutate } = useSWR<AppointmentDetail>(
+    id ? `/appointments/${id}` : null,
+    apiClient,
+  );
+
+  return {
+    appointment: data,
     isLoading,
     isError: error,
     mutate,

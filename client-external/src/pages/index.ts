@@ -5,5 +5,6 @@ export { AddPetPage } from "./AddPetPage";
 export { PetsPage } from "./PetsPage";
 export { PetDetailPage } from "./PetDetailPage";
 export { AppointmentsPage } from "./AppointmentsPage";
+export { AppointmentDetailPage } from "./AppointmentDetailPage";
 export { BookingFormPage } from "./BookingFormPage";
 export { RemindersPage } from "./RemindersPage";
