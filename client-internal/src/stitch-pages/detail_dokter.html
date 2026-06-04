@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Detail Dokter</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#004532",
+                      "inverse-surface": "#213145",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "surface-dim": "#cbdbf5",
+                      "on-background": "#0b1c30",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#8bd6b6",
+                      "on-tertiary-fixed": "#131e19",
+                      "secondary-container": "#dae2fd",
+                      "on-tertiary-container": "#becac2",
+                      "surface-tint": "#1b6b51",
+                      "on-primary-fixed-variant": "#00513b",
+                      "surface-container": "#e5eeff",
+                      "primary-fixed": "#a6f2d1",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface": "#f8f9ff",
+                      "on-secondary-fixed": "#131b2e",
+                      "tertiary-fixed": "#d9e6dd",
+                      "on-tertiary-fixed-variant": "#3e4943",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#bdcac1",
+                      "on-primary-container": "#8bd6b7",
+                      "on-primary": "#ffffff",
+                      "tertiary-container": "#4a564f",
+                      "surface-container-highest": "#d3e4fe",
+                      "secondary": "#565e74",
+                      "outline-variant": "#bec9c2",
+                      "background": "#f8f9ff",
+                      "primary-fixed-dim": "#8bd6b6",
+                      "surface-variant": "#d3e4fe",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#6f7973",
+                      "error-container": "#ffdad6",
+                      "primary-container": "#065f46",
+                      "on-surface-variant": "#3f4944",
+                      "on-primary-fixed": "#002116",
+                      "on-surface": "#0b1c30",
+                      "on-secondary-container": "#5c647a",
+                      "tertiary": "#333f39",
+                      "surface-container-low": "#eff4ff",
+                      "secondary-fixed": "#dae2fd",
+                      "error": "#ba1a1a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "container-margin": "24px",
+                      "section-gap": "40px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Hanken Grotesk"],
+                      "body-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "label-sm": ["Inter"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "headline-sm": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                      "label-sm": ["12px", { "lineHeight": "14px", "fontWeight": "500" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen pb-24 md:max-w-md md:mx-auto md:border-x md:border-outline-variant md:shadow-lg relative">
+<!-- TopAppBar (Mapped from JSON) -->
+<header class="fixed top-0 w-full md:max-w-md z-50 bg-surface border-b border-outline-variant flex items-center justify-between px-gutter h-16">
+<button class="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Detail Dokter</h1>
+<div class="w-10"></div> <!-- Placeholder for balance -->
+</header>
+<main class="pt-24 px-container-margin">
+<!-- Profile Picture -->
+<div class="flex justify-center mb-8">
+<div class="relative w-32 h-32 rounded-full overflow-hidden border-4 border-surface-container-lowest shadow-sm">
+<img alt="Doctor Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a female veterinary doctor in a bright, modern clinic environment. She is smiling warmly, wearing a white coat over a dark green scrub top. The lighting is soft and natural, emphasizing a sterile but compassionate atmosphere. The background is slightly blurred showing subtle clinic equipment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSReCm9kKOxC8Vu3czN3HW00Kkev398L_Ai5VvnRwYrf4O9abecsOxTKykwqifYLqWhtufLNbMzMLZw05CwLFTQRbRNuRVt9skjinZrz5b7h0Qg_Je5Egvul226gSf_OIsmYcMsXZxuQJz5SoD_W4WPlPtWWg3KwoJWxRvXjgNj-zxBFiV56itv_iswgKRpU0EKBnSdWyJnJSQJyKN50RzieF3NI6MX4oRa8sfpMkvH-vhXF46Zy0KtiEGNdiNPEYX1aYJNNFqq94"/>
+</div>
+</div>
+<!-- Information List -->
+<section class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-sm mb-section-gap flex flex-col gap-4">
+<div class="flex flex-col gap-1 border-b border-surface-container-high pb-3 last:border-0 last:pb-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Nama Dokter</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Dr. Sarah Wilson</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-surface-container-high pb-3 last:border-0 last:pb-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Tanggal Lahir</span>
+<span class="font-body-md text-body-md text-on-surface">15 Aug 1988</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-surface-container-high pb-3 last:border-0 last:pb-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Riwayat Pendidikan</span>
+<span class="font-body-md text-body-md text-on-surface">DVM, University of Veterinary Medicine</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-surface-container-high pb-3 last:border-0 last:pb-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Tanggal Mulai Praktik</span>
+<span class="font-body-md text-body-md text-on-surface">01 Sep 2014</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-surface-container-high pb-3 last:border-0 last:pb-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Tanggal Masuk</span>
+<span class="font-body-md text-body-md text-on-surface">10 Jan 2020</span>
+</div>
+<div class="flex flex-col gap-1 border-b border-surface-container-high pb-3 last:border-0 last:pb-0">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Riwayat Tempat Praktek</span>
+<span class="font-body-md text-body-md text-on-surface">City Pet Hospital (2014-2020)</span>
+</div>
+<div class="flex flex-col gap-2 pt-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status</span>
+<div>
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-primary mr-2"></span>
+                        Aktif
+                    </span>
+</div>
+</div>
+</section>
+<!-- Service History Section -->
+<section class="mb-8">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-4">Riwayat Pelayanan</h2>
+<div class="flex flex-col gap-3">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center justify-between shadow-sm hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Max</p>
+<p class="font-body-sm text-body-sm text-secondary">Checkup</p>
+</div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Oct 24</span>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center justify-between shadow-sm hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="vaccines">vaccines</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Luna</p>
+<p class="font-body-sm text-body-sm text-secondary">Vaccine</p>
+</div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Oct 22</span>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center justify-between shadow-sm hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="healing">healing</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Buddy</p>
+<p class="font-body-sm text-body-sm text-secondary">Treatment</p>
+</div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Oct 20</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Sticky Action -->
+<div class="fixed bottom-0 left-0 right-0 md:max-w-md md:mx-auto bg-surface border-t border-outline-variant p-4 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<button class="w-full border-2 border-primary text-primary bg-surface-container-lowest hover:bg-surface-container-low font-label-md text-label-md py-3 rounded-full transition-colors active:scale-95 duration-150 flex justify-center items-center gap-2">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+            Edit
+        </button>
+</div>
+</body></html>

@@ -1,13 +1,19 @@
 package auth
 
+import (
+	"time"
+	"vetconnect-server/models"
+)
+
 type LoginOwnerRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 }
 
 type LoginOwnerResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken           string    `json:"access_token"`
+	RefreshToken          string    `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
 }
 
 type LoginInternalRequest struct {
@@ -16,8 +22,9 @@ type LoginInternalRequest struct {
 }
 
 type LoginInternalResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken           string    `json:"access_token"`
+	RefreshToken          string    `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
 }
 
 type RegisterOwnerRequest struct {
@@ -37,8 +44,9 @@ type RefreshTokenRequest struct {
 }
 
 type RefreshTokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken           string    `json:"access_token"`
+	RefreshToken          string    `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
 }
 
 type LogoutRequest struct {
@@ -46,11 +54,11 @@ type LogoutRequest struct {
 }
 
 type MeResponse struct {
-	ID       uint   `json:"id"`
-	FullName string `json:"full_name"`
-	Email    string `json:"email,omitempty"`
-	Username string `json:"username,omitempty"`
-	Role     string `json:"role"`
+	ID       uint               `json:"id"`
+	FullName string             `json:"full_name"`
+	Email    string             `json:"email,omitempty"`
+	Username string             `json:"username,omitempty"`
+	Role     models.AccountRole `json:"role"`
 }
 
 type SaveFCMTokenRequest struct {

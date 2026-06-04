@@ -13,12 +13,20 @@ const (
 	StateWaitingConfirmation AppointmentState = "Menunggu Konfirmasi"
 	StateAccepted            AppointmentState = "Diterima"
 	StateRejected            AppointmentState = "Ditolak"
-	StateCheckIn             AppointmentState = "Check-In"
-	StateDoctorAllocation    AppointmentState = "Alokasi Dokter"
-	StateWaitingDoctor       AppointmentState = "Menunggu Dokter"
-	StateInTreatment         AppointmentState = "Dalam Penanganan"
-	StateFinished            AppointmentState = "Selesai"
-	StateAdminFinished       AppointmentState = "Selesai Administrasi"
+	// StateCheckIn             AppointmentState = "Check-In"
+	// StateDoctorAllocation    AppointmentState = "Alokasi Dokter"
+	StateWaitingDoctor AppointmentState = "Menunggu Dokter"
+	StateInTreatment   AppointmentState = "Dalam Penanganan"
+	StateFinished      AppointmentState = "Selesai"
+	StateAdminFinished AppointmentState = "Selesai Administrasi"
+)
+
+type ServiceType string
+
+const (
+	ServiceTypeVaccine   ServiceType = "vaccine"
+	ServiceTypeCheckup   ServiceType = "checkup"
+	ServiceTypeTreatment ServiceType = "treatment"
 )
 
 type Appointment struct {
@@ -27,7 +35,7 @@ type Appointment struct {
 	Pet                    Pet              `gorm:"foreignKey:PetID"`
 	DoctorID               *uint            `gorm:"default:null"`
 	Doctor                 *DoctorProfile   `gorm:"foreignKey:DoctorID"`
-	ServiceType            string           `gorm:"type:enum('vaccine','checkup','treatment');not null"`
+	ServiceType            ServiceType      `gorm:"type:enum('vaccine','checkup','treatment');not null"`
 	AppointmentDate        datatypes.Date   `gorm:"type:date;not null"`
 	QueueNumber            *int             `gorm:"default:null"`
 	OwnerNotes             string           `gorm:"type:text"`

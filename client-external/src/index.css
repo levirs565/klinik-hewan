@@ -30,60 +30,7 @@ h1, h2, h3, h4, h5, h6 {
 
 #root {
   width: 100%;
-  max-width: 480px;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
-  background: #f8f9ff;
-  box-shadow: 0 0 32px rgba(11, 28, 48, 0.12);
-  overflow-x: hidden;
-}
-
-body {
-  background: #dce9ff;
-}
-
-@media (min-width: 768px) {
-  #root .hidden.md\:flex,
-  #root .hidden.md\:block,
-  #root .hidden.md\:grid {
-    display: none !important;
-  }
-
-  #root .md\:hidden {
-    display: flex !important;
-  }
-
-  #root .md\:flex-row {
-    flex-direction: column !important;
-  }
-
-  #root .md\:w-1\/2,
-  #root .md\:w-80 {
-    width: 100% !important;
-  }
-
-  #root .md\:max-w-none,
-  #root .max-w-2xl,
-  #root .max-w-4xl,
-  #root .max-w-5xl {
-    max-width: 480px !important;
-  }
-
-  #root .md\:grid-cols-2,
-  #root .lg\:grid-cols-12 {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  #root .lg\:col-span-4,
-  #root .lg\:col-span-8,
-  #root .lg\:col-span-12 {
-    grid-column: auto !important;
-  }
-
-  #root .md\:pb-0,
-  #root .md\:pb-8 {
-    padding-bottom: 6rem !important;
-  }
 }

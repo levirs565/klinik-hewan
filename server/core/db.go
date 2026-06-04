@@ -32,6 +32,7 @@ func InitDB() (*gorm.DB, error) {
 		&models.DoctorProfile{},
 		&models.Pet{},
 		&models.Appointment{},
+		&models.Reminder{},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
@@ -46,6 +47,7 @@ type MongoStorage struct {
 	RefreshTokens           *mongo.Collection
 	AppointmentReservations *mongo.Collection
 	StatusHistories         *mongo.Collection
+	MedicalRecords          *mongo.Collection
 	FCMTokens               *mongo.Collection
 }
 
@@ -81,6 +83,7 @@ func InitMongoDB() (*MongoStorage, error) {
 		RefreshTokens:           db.Collection("refresh_tokens"),
 		AppointmentReservations: db.Collection("appointment_reservations"),
 		StatusHistories:         db.Collection("status_histories"),
+		MedicalRecords:          db.Collection("medical_records"),
 		FCMTokens:               db.Collection("fcm_tokens"),
 	}
 
@@ -128,6 +131,14 @@ func ensureIndexes(ctx context.Context, s *MongoStorage) error {
 
 	// Indexes for StatusHistories
 	_, err = s.StatusHistories.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "appointment_id", Value: 1}},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Indexes for MedicalRecords
+	_, err = s.MedicalRecords.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{{Key: "appointment_id", Value: 1}},
 	})
 	if err != nil {

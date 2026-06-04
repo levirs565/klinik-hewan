@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"time"
 	"vetconnect-server/core"
 
 	"github.com/labstack/echo/v5"
@@ -25,6 +26,19 @@ func (ctrl *Controller) RegisterRoutes(e *echo.Group) {
 	e.GET("/me", ctrl.GetMe, core.NewGuardRoleMiddleware(core.GuardRoleLoggedIn))
 	e.POST("/fcm/token", ctrl.SaveFCMToken, core.NewGuardRoleMiddleware(core.GuardRoleLoggedIn))
 	e.DELETE("/fcm/token", ctrl.DeleteFCMToken, core.NewGuardRoleMiddleware(core.GuardRoleLoggedIn))
+}
+
+func (ctrl *Controller) setRefreshTokenCookie(c *echo.Context, token string, expiresAt time.Time) {
+	cookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    token,
+		Expires:  expiresAt,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // Set to true in production
+		SameSite: http.SameSiteLaxMode,
+	}
+	(*c).SetCookie(cookie)
 }
 
 func (ctrl *Controller) RegisterOwner(c *echo.Context) error {
@@ -58,6 +72,8 @@ func (ctrl *Controller) LoginOwner(c *echo.Context) error {
 		return err
 	}
 
+	ctrl.setRefreshTokenCookie(c, res.RefreshToken, res.RefreshTokenExpiresAt)
+
 	return c.JSON(http.StatusOK, res)
 }
 
@@ -75,13 +91,24 @@ func (ctrl *Controller) LoginInternal(c *echo.Context) error {
 		return err
 	}
 
+	ctrl.setRefreshTokenCookie(c, res.RefreshToken, res.RefreshTokenExpiresAt)
+
 	return c.JSON(http.StatusOK, res)
 }
 
 func (ctrl *Controller) RefreshToken(c *echo.Context) error {
 	var req RefreshTokenRequest
-	if err := core.BindAndValidate(c, &req); err != nil {
-		return err
+	_ = core.BindAndValidate(c, &req)
+
+	if req.RefreshToken == "" {
+		cookie, err := c.Cookie("refresh_token")
+		if err == nil {
+			req.RefreshToken = cookie.Value
+		}
+	}
+
+	if req.RefreshToken == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "refresh token is required")
 	}
 
 	res, err := ctrl.service.RefreshToken((*c).Request().Context(), req)
@@ -92,13 +119,37 @@ func (ctrl *Controller) RefreshToken(c *echo.Context) error {
 		return err
 	}
 
+	ctrl.setRefreshTokenCookie(c, res.RefreshToken, res.RefreshTokenExpiresAt)
+
 	return c.JSON(http.StatusOK, res)
+}
+
+func (ctrl *Controller) clearRefreshTokenCookie(c *echo.Context) {
+	cookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Expires:  time.Now().Add(-1 * time.Hour),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // Set to true in production
+		SameSite: http.SameSiteLaxMode,
+	}
+	(*c).SetCookie(cookie)
 }
 
 func (ctrl *Controller) Logout(c *echo.Context) error {
 	var req LogoutRequest
-	if err := core.BindAndValidate(c, &req); err != nil {
-		return err
+	_ = core.BindAndValidate(c, &req)
+
+	if req.RefreshToken == "" {
+		cookie, err := (*c).Cookie("refresh_token")
+		if err == nil {
+			req.RefreshToken = cookie.Value
+		}
+	}
+
+	if req.RefreshToken == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "refresh token is required")
 	}
 
 	err := ctrl.service.Logout((*c).Request().Context(), req)
@@ -108,6 +159,8 @@ func (ctrl *Controller) Logout(c *echo.Context) error {
 		}
 		return err
 	}
+
+	ctrl.clearRefreshTokenCookie(c)
 
 	return c.JSON(http.StatusOK, core.CreateActionResponse(true))
 }

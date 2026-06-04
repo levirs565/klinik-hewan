@@ -1,0 +1,248 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Manager Landing Page</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-tint": "#1b6b51",
+                        "on-tertiary-container": "#becac2",
+                        "on-tertiary-fixed-variant": "#3e4943",
+                        "on-surface-variant": "#3f4944",
+                        "on-primary-fixed-variant": "#00513b",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "inverse-primary": "#8bd6b6",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#d9e6dd",
+                        "surface-variant": "#d3e4fe",
+                        "on-tertiary-fixed": "#131e19",
+                        "on-primary-fixed": "#002116",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#213145",
+                        "outline": "#6f7973",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#e5eeff",
+                        "tertiary-container": "#4a564f",
+                        "primary": "#004532",
+                        "tertiary": "#333f39",
+                        "error": "#ba1a1a",
+                        "primary-container": "#065f46",
+                        "primary-fixed": "#a6f2d1",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed": "#dae2fd",
+                        "on-surface": "#0b1c30",
+                        "on-primary-container": "#8bd6b7",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "tertiary-fixed-dim": "#bdcac1",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#bec9c2",
+                        "surface-container-low": "#eff4ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-fixed": "#131b2e",
+                        "primary-fixed-dim": "#8bd6b6",
+                        "secondary": "#565e74",
+                        "on-secondary-container": "#5c647a",
+                        "secondary-container": "#dae2fd",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "background": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "container-margin": "24px",
+                        "section-gap": "40px",
+                        "gutter": "16px",
+                        "base": "8px",
+                        "safe": "env(safe-area-inset-bottom, 16px)"
+                    },
+                    fontFamily: {
+                        "headline-sm": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    fontSize: {
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+        .min-h-screen-safe { min-height: calc(100vh - env(safe-area-inset-bottom, 0px)); }
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased">
+<!-- Mobile App Container constraint for preview -->
+<div class="max-w-md mx-auto min-h-screen-safe bg-surface relative flex flex-col shadow-2xl overflow-hidden">
+<!-- TopAppBar (From JSON) -->
+<header class="w-full sticky top-0 border-b border-outline-variant bg-surface flex items-center justify-between px-container-margin h-16 w-full z-40">
+<!-- Leading Avatar -->
+<div class="cursor-pointer active:scale-95 transition-transform">
+<img alt="Pet owner profile picture" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-alt="A professional headshot of a modern clinic manager, smiling warmly. The lighting is soft and high-key, emphasizing a clean, trustworthy medical environment. The background is a crisp, bright white clinic corridor, slightly out of focus. The overall mood is approachable, organized, and confident, perfectly matching a professional profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTUQEnbpnqxlXAO-15Wf4tFqttfJlDMymANKOSSUQq_GgPvDKhfyTvm-OUbGpTZMbO_pIm0gJKBWVqDNPBSdvuRAPO1FJZasTVsfI4y4SPz40-yMZqHUCyyiHsjDoe4u-ywhm7Cy3t3LeYkED28y6xjBg0sngPPTkxfMltGle198YGCEsHQW0wug2r_v0npkfzxR8AQ3X89wXf9tin27uDs0xYrc0nj-nEU3wzxDlSTIBnaXeOlmiEbsVlvfXPZ7rrm3362zMwHcA">
+</div>
+<!-- Headline -->
+<h1 class="font-headline-md text-headline-md font-bold text-primary">VetConnect</h1>
+<!-- Trailing Icon -->
+<button class="cursor-pointer active:scale-95 text-primary hover:bg-surface-container-low transition-colors w-10 h-10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto px-container-margin pt-6 pb-32 space-y-section-gap">
+<!-- Greeting Section -->
+<section class="space-y-1">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Hello, Manager Alex</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Here is the clinic staff overview for today.</p>
+</section>
+<!-- Summary Card -->
+<section>
+<div class="bg-primary rounded-xl p-6 relative overflow-hidden shadow-sm">
+<!-- Subtle pattern overlay -->
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:16px_16px]"></div>
+<div class="relative z-10 flex flex-col justify-between h-full">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary-fixed-dim uppercase tracking-wider">Total Active Staff</span>
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-on-primary">24</span>
+<span class="font-body-sm text-body-sm text-primary-fixed">On Duty</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 1: Daftar Dokter -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Daftar Dokter</h3>
+<button class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors cursor-pointer">View All</button>
+</div>
+<div class="space-y-3">
+<!-- Doctor Card 1 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<img alt="Dr. Sarah Wilson" class="w-12 h-12 rounded-full object-cover" data-alt="A close-up portrait of a female veterinary surgeon in clean, crisp medical scrubs. The lighting is bright and sterile, yet her expression is compassionate and focused. The background is a subtle blur of a modern veterinary examination room with soft natural light coming from a window. The aesthetic is highly professional and reassuring." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4wCq_YILXKOBWU7IHh4QHI2oDaKLFYgqgrjj5_7mHcOD1bhpP8ah_-YfeHQpxeP7lL-5WDhcW7lIHzQGMd_uQ--NTL8qOeCNJzC6TBax2-VzZhQInlDiiHQt3fCS-jxMKBm8-9lYs5cSvYYi_EcaIqWQ9CUaPYdNejLSC9ngJ8mK025c98bRhQH-q6P07cyr-x5UvClzo8ne3otqt7YZaac8CExewoT9_FI5Lnz55nDHwLo29zpWtHjlrJJX8kk9y8-Qe7k0HKk8">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                                    Dr. Sarah Wilson
+                                    <span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_4px_rgba(6,95,70,0.4)]"></span>
+</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Surgeon</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<!-- Doctor Card 2 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<img alt="Dr. James Carter" class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of a male veterinarian wearing a white coat over neat scrubs. The background features a clean, well-lit clinic environment with a hint of soft blue tones. The lighting is balanced and crisp, highlighting his approachable and knowledgeable demeanor. The overall visual tone is authoritative yet warm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf-fR1V2kYFz38gLpq6J-TAk6njIPzQ6UT4iJgmtGDfRXreNyvTScL2lXFsTRJkuthXncH5waQn5BcxtGUyIUQtVHy5Hv5q99wFBh6JFZ0BxCuSDEg07nsXRFlbbMYj1NC6UEEUq4tMyUdhB4QLQ8Kisx8eCu8UZgwg9mplBswmozjnOdSkB0nz5VwCyqnsSf3ODqNffzwQQ2c5KpMizxUE2aSpZl8v7im2ia7OsrRympzfEoLK1qz4Q9HZ7hziPIhQtbGo8glNHY">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                                    Dr. James Carter
+                                    <span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_4px_rgba(6,95,70,0.4)]"></span>
+</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">General Practitioner</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Section 2: Daftar Resepsionis -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Daftar Resepsionis</h3>
+<button class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors cursor-pointer">View All</button>
+</div>
+<div class="space-y-3">
+<!-- Receptionist Card 1 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<img alt="Michael Chen" class="w-12 h-12 rounded-full object-cover" data-alt="A friendly male front desk receptionist in a neat, modern corporate uniform. The lighting is soft and welcoming, typical of a high-end clinic reception area. The background is slightly blurred, showing clean white walls and a hint of a green indoor plant. The mood is highly approachable and efficient, radiating excellent customer service." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9xvPkipd8wo-4JzDZK-Rx5XwAIHO-QpEWHUWLbAzTAKbMZjcMT4ec7MTACALBStym8kioveg11NnVKThhY4EHQReT2WgvtGyuGxJIVL-IaH1FtvWSMApTm13pMpvhDK1AZ29T9mq9aTLJ5s4kMgg-LvmFOxsml4p_3oBqUbzfAV65yKdELCbh63fgQG1X6TwL8IGPqY_nfKD4S_3A-_AYiWzTSJ1pzcIZgGK8KQNBqz8uuGozzivi_SYiR-dZHgKml7tYpTjsNv4">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                                    Michael Chen
+                                    <span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_4px_rgba(6,95,70,0.4)]"></span>
+</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Senior Front Desk</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<!-- Receptionist Card 2 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer active:scale-[0.98]">
+<div class="flex items-center gap-4">
+<img alt="Emily Davis" class="w-12 h-12 rounded-full object-cover" data-alt="A cheerful female receptionist wearing a professional dark green blouse, sitting at a pristine white reception desk. The scene is brightly lit with natural daylight, creating a fresh, modern clinic atmosphere. Her expression is welcoming and attentive, perfectly capturing the essence of frontline clinic staff in a premium healthcare setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFuEQqFT07CAd4EKqzs5l3ClJXwn6fOD7RFPk8KxKpzKdtLEaqM09RQMl1pBY4MRPDAVHVG-LOAIwpx0H2OTuD5uNVWXKzHlCyVThuWS3RUZIvM7Q5_MH8CdfoEwMfVZtKxRHCgGT_Z5cIb9ZmGUTHFQO7Igj4QvNaazgHd3ppNzptrwiwonnXQD8L4VuxvuT7A6t5RUPy8ePWX5HaeA5aCf18NNSPWsD4_sPaQfdD3-BFwzMjQi-ROXpfVbxx3xbdRYNtbfnoAjs">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                                    Emily Davis
+                                    <span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_4px_rgba(6,95,70,0.4)]"></span>
+</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Receptionist</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (From JSON) -->
+<!-- Note: Using exact JSON content (4 tabs), mapping Manager Landing to "Home" tab as active -->
+<nav class="fixed bottom-0 max-w-md w-full z-50 border-t border-outline-variant bg-surface flex justify-around items-center h-20 px-4 pb-safe transition-transform duration-300"><!-- Home (Active) -->
+<button class="transition-all duration-200 active:scale-90 flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-5 py-1.5 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</button>
+<!-- Directory (Inactive) -->
+<button class="transition-all duration-200 active:scale-90 flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-full px-4 py-1.5 cursor-pointer">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-sm text-label-sm mt-1">Directory</span>
+</button>
+<!-- Settings (Inactive) -->
+<button class="transition-all duration-200 active:scale-90 flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-full px-4 py-1.5 cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm mt-1">Settings</span>
+</button></nav>
+</div>
+
+
+</body></html>

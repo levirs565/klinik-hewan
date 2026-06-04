@@ -1,13 +1,20 @@
+export interface MyPet {
+  id: number;
+  name: string;
+  avatar_url?: string;
+  species: string;
+  birth_date: string;
+}
+
 export interface Pet {
   id: number;
   owner_id: number;
   name: string;
   species: string;
   breed: string;
-  color: string;
   gender: string;
-  date_of_birth: string;
-  weight?: string;
+  birth_date: string;
+  initial_medical_history?: string;
   avatar_url?: string;
   created_at: string;
   updated_at: string;
@@ -19,7 +26,7 @@ export interface User {
   full_name: string;
   address?: string;
   phone_number?: string;
-  role: 'owner' | 'receptionist' | 'doctor' | 'manager';
+  role: "owner" | "receptionist" | "doctor" | "manager";
   created_at: string;
   updated_at: string;
 }
@@ -47,10 +54,10 @@ export interface CreatePetRequest {
   name: string;
   species: string;
   breed: string;
-  color?: string;
-  gender: 'male' | 'female';
-  date_of_birth: string;
-  avatar_id?: string;
+  gender: "male" | "female";
+  birth_date: string;
+  initial_medical_history?: string;
+  avatar_upload_id?: string;
 }
 
 export interface CreatePetResponse {
@@ -58,82 +65,59 @@ export interface CreatePetResponse {
   name: string;
   species: string;
   breed: string;
-  color?: string;
   gender: string;
-  date_of_birth: string;
+  birth_date: string;
+  initial_medical_history?: string;
   avatar_url?: string;
   created_at: string;
 }
 
-export interface Appointment {
-  id: number;
-  owner_id: number;
+export interface CreateAppointmentRequest {
   pet_id: number;
-  doctor_id?: number;
-  service_type: 'vaksin' | 'checkup' | 'pengobatan';
-  status: 'menunggu_konfirmasi' | 'diterima' | 'ditolak' | 'check_in' | 'alokasi_dokter' | 'menunggu_dokter' | 'dalam_penanganan' | 'selesai' | 'selesai_administrasi';
-  queue_number?: string;
-  scheduled_date: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Doctor {
-  id: number;
-  name: string;
-  specialization: string;
-  phone: string;
-  email: string;
-  status: 'available' | 'busy' | 'offline';
-  schedule: string;
-  education?: string;
-  practice_start?: string;
-  joined_at?: string;
-  practice_history?: string[];
-  image_url?: string;
-}
-
-export interface MedicalRecord {
-  id: number;
-  appointment_id: number;
-  pet_id: number;
-  doctor_id?: number;
-  service_type: Appointment['service_type'];
-  record_number: string;
-  created_at: string;
-  diagnosis?: string;
-  summary: string;
+  reminder_id?: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  appointment_date: string;
+  owner_notes?: string;
+  previous_medical_history?: string;
   checkup?: {
-    body_weight: string;
-    temperature: string;
-    heart_rate: string;
-    respiratory_rate: string;
-    bcs: string;
-    hydration: string;
-    physical_exam: string;
-  };
-  vaccine?: {
-    vaccine_name: string;
-    batch_number: string;
-    next_due_date: string;
-    notes: string;
+    purpose: string;
+    focus_area: string;
   };
   treatment?: {
-    symptoms: string;
-    procedures: string;
-    medications: string[];
-    estimated_cost: string;
+    observed_symptoms: string[];
+    symptom_duration: string;
+    home_care_received?: boolean;
   };
-  reminders: Reminder[];
+  vaccine?: {
+    vaccine_type: string;
+  };
+}
+
+export interface Appointment {
+  id: string;
+  pet: {
+    name: string;
+    breed: string;
+    avatar_url?: string;
+  };
+  service_type: "vaccine" | "checkup" | "treatment";
+  status: string;
+  appointment_date: string;
+}
+
+export interface AppointmentDetail extends Appointment {
+  owner_notes?: string;
+  previous_medical_history?: string;
 }
 
 export interface Reminder {
-  id: number;
-  owner_id: number;
-  pet_id: number;
-  title: string;
+  id: string;
+  service_type: "vaccine" | "checkup" | "treatment";
+  date: string;
   description: string;
-  scheduled_date: string;
-  status: 'pending' | 'completed';
-  created_at: string;
+  pet: {
+    id: number;
+    name: string;
+    avatar_url?: string;
+  };
 }

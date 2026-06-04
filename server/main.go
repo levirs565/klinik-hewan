@@ -6,11 +6,14 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 	"vetconnect-server/appointment"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
 	"vetconnect-server/pet"
+	"vetconnect-server/reminder"
+	"vetconnect-server/staff"
 
 	"vetconnect-server/models"
 
@@ -69,6 +72,20 @@ func main() {
 	}
 
 	e := echo.New()
+
+	allowedOriginsStr := os.Getenv("CORS_ALLOWED_ORIGINS")
+	var allowedOrigins []string
+	if allowedOriginsStr != "" {
+		allowedOrigins = strings.Split(allowedOriginsStr, ",")
+	} else {
+		allowedOrigins = []string{"http://localhost:5173", "http://localhost:5174"}
+	}
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     allowedOrigins,
+		AllowCredentials: true,
+	}))
+
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
@@ -96,6 +113,12 @@ func main() {
 	appointmentService := appointment.NewService(db, mongoClient, s3Helper)
 	appointmentController := appointment.NewController(appointmentService)
 
+	staffService := staff.NewService(db, s3Helper)
+	staffController := staff.NewController(staffService)
+
+	reminderService := reminder.NewService(db, s3Helper)
+	reminderController := reminder.NewController(reminderService)
+
 	// Routes
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "VetConnect API")
@@ -107,6 +130,8 @@ func main() {
 	authController.RegisterRoutes(api)
 	petController.RegisterRoutes(api)
 	appointmentController.RegisterRoutes(api)
+	reminderController.RegisterRoutes(api)
+	staffController.RegisterRoutes(api.Group("/staff"))
 
 	if err := e.Start(":1323"); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
