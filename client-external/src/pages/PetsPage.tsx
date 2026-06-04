@@ -64,7 +64,7 @@ export const PetsPage = () => {
                       <p className="text-label-sm text-on-surface-variant mt-1">
                         {pet.gender} •{" "}
                         {new Date().getFullYear() -
-                          new Date(pet.date_of_birth).getFullYear()}{" "}
+                          new Date(pet.birth_date).getFullYear()}{" "}
                         years old
                       </p>
                     </div>

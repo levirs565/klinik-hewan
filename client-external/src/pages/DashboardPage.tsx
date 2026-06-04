@@ -228,10 +228,10 @@ export const DashboardPage = () => {
                   </h3>
                   <p className="text-label-sm text-on-surface-variant">
                     {pet.species} •{" "}
-                    {new Date(pet.date_of_birth).getFullYear() ===
+                    {new Date(pet.birth_date).getFullYear() ===
                     new Date().getFullYear()
                       ? "Young"
-                      : `${new Date().getFullYear() - new Date(pet.date_of_birth).getFullYear()} yrs`}
+                      : `${new Date().getFullYear() - new Date(pet.birth_date).getFullYear()} yrs`}
                   </p>
                 </Card>
               </Link>

@@ -22,22 +22,26 @@ export const useCreatePet = () => {
       _,
       { arg }: { arg: { data: CreatePetRequest; file?: File } },
     ): Promise<CreatePetResponse> => {
-      let avatarId = arg.data.avatar_id;
+      let avatarUploadId = arg.data.avatar_upload_id;
 
       if (arg.file) {
-        const presignedRes = await client.post<{ url: string; key: string }>(
-          "/pets/avatar/presigned-url",
-          { content_type: arg.file.type, file_size: arg.file.size },
-        );
-        await axios.put(presignedRes.data.url, arg.file, {
-          headers: { "Content-Type": arg.file.type },
+        const presignedRes = await client.post<{
+          url: string;
+          upload_id: string;
+          headers: Record<string, string>;
+        }>("/pets/avatar/presigned-url", {
+          content_type: arg.file.type,
+          file_size: arg.file.size,
         });
-        avatarId = presignedRes.data.key;
+        await axios.put(presignedRes.data.url, arg.file, {
+          headers: presignedRes.data.headers,
+        });
+        avatarUploadId = presignedRes.data.upload_id;
       }
 
       const response = await client.post<CreatePetResponse>("/pets", {
         ...arg.data,
-        avatar_id: avatarId,
+        avatar_upload_id: avatarUploadId,
       });
 
       return response.data;

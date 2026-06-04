@@ -1,30 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Select, BottomNavigation } from "../components";
+import { Button, Input, BottomNavigation } from "../components";
 import { useCreatePet } from "../hooks/usePets";
-
-const SPECIES_OPTIONS = [
-  { value: "dog", label: "Dog" },
-  { value: "cat", label: "Cat" },
-  { value: "rabbit", label: "Rabbit" },
-  { value: "bird", label: "Bird" },
-  { value: "other", label: "Other" },
-];
-
-const BREED_OPTIONS = {
-  dog: [
-    { value: "labrador", label: "Labrador Retriever" },
-    { value: "golden", label: "Golden Retriever" },
-    { value: "german_shepherd", label: "German Shepherd" },
-    { value: "beagle", label: "Beagle" },
-  ],
-  cat: [
-    { value: "persian", label: "Persian" },
-    { value: "siamese", label: "Siamese" },
-    { value: "bengal", label: "Bengal" },
-    { value: "mixed", label: "Mixed" },
-  ],
-};
 
 export const AddPetPage = () => {
   const navigate = useNavigate();
@@ -36,9 +13,9 @@ export const AddPetPage = () => {
     name: "",
     species: "",
     breed: "",
-    color: "",
     gender: "",
-    date_of_birth: "",
+    birth_date: "",
+    initial_medical_history: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -79,8 +56,8 @@ export const AddPetPage = () => {
       if (!formData.species) newErrors.species = "Species is required";
       if (!formData.breed) newErrors.breed = "Breed is required";
       if (!formData.gender) newErrors.gender = "Gender is required";
-      if (!formData.date_of_birth)
-        newErrors.date_of_birth = "Date of birth is required";
+      if (!formData.birth_date)
+        newErrors.birth_date = "Date of birth is required";
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
@@ -92,9 +69,9 @@ export const AddPetPage = () => {
           name: formData.name,
           species: formData.species,
           breed: formData.breed,
-          color: formData.color,
           gender: formData.gender as "male" | "female",
-          date_of_birth: formData.date_of_birth,
+          birth_date: formData.birth_date,
+          initial_medical_history: formData.initial_medical_history,
         },
         file: avatarFile || undefined,
       });
@@ -105,9 +82,6 @@ export const AddPetPage = () => {
       setErrors({ general: "Failed to create pet. Please try again." });
     }
   };
-
-  const breedOptions =
-    BREED_OPTIONS[formData.species as keyof typeof BREED_OPTIONS] || [];
 
   return (
     <div className="min-h-screen bg-surface pb-24">
@@ -214,35 +188,34 @@ export const AddPetPage = () => {
               required
             />
 
-            <Select
+            <Input
               label="Species"
+              type="text"
               name="species"
+              placeholder="e.g. Dog, Cat, etc."
               value={formData.species}
               onChange={handleChange}
-              options={SPECIES_OPTIONS}
-              placeholder="Select species"
               error={errors.species}
               required
             />
 
-            <Select
+            <Input
               label="Breed"
+              type="text"
               name="breed"
+              placeholder="e.g. Golden Retriever, Persian, etc."
               value={formData.breed}
               onChange={handleChange}
-              options={breedOptions}
-              placeholder="Start typing to search breeds..."
               error={errors.breed}
               required
-              disabled={!formData.species}
             />
 
             <Input
-              label="Color / Markings"
+              label="Initial Medical History"
               type="text"
-              name="color"
-              placeholder="e.g. Black and white"
-              value={formData.color}
+              name="initial_medical_history"
+              placeholder="e.g. Allergies, previous surgeries, etc."
+              value={formData.initial_medical_history}
               onChange={handleChange}
             />
           </div>
@@ -292,10 +265,10 @@ export const AddPetPage = () => {
             <Input
               label="Date of Birth / Est. Age"
               type="date"
-              name="date_of_birth"
-              value={formData.date_of_birth}
+              name="birth_date"
+              value={formData.birth_date}
               onChange={handleChange}
-              error={errors.date_of_birth}
+              error={errors.birth_date}
               required
             />
           </div>
