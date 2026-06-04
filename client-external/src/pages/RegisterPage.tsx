@@ -43,7 +43,7 @@ export const RegisterPage = () => {
         address: "",
       });
 
-      navigate("/");
+      navigate("/login");
     } catch (error: unknown) {
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 409) {

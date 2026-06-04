@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 import { client, setTokens, clearTokens, apiClient } from "../services/api";
 import type {
@@ -18,7 +18,7 @@ export const useMe = () => {
     user: data,
     isLoading,
     isError: error,
-    isAuthenticated: !!data,
+    isAuthenticated: !!data && !error && !isLoading,
     mutate,
   };
 };
@@ -45,18 +45,14 @@ export const useRegister = () => {
 };
 
 export const useLogout = () => {
-  return useSWRMutation(
-    () => true,
-    async () => {
-      try {
-        const refreshToken = localStorage.getItem("refresh_token");
-        await client.post("/logout", { refresh_token: refreshToken });
-      } finally {
-        clearTokens();
-      }
-    },
-    {
-      revalidate: false,
-    },
-  );
+  const { mutate } = useSWRConfig();
+  return useSWRMutation("/me", async () => {
+    try {
+      const refreshToken = localStorage.getItem("refresh_token");
+      await client.post("/logout", { refresh_token: refreshToken });
+    } finally {
+      clearTokens();
+      await mutate((key) => key !== "/me", undefined, { revalidate: false });
+    }
+  });
 };

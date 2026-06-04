@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button, Input } from "../components";
 import { useLogin } from "../hooks/useAuth";
 
 export const LoginPage = () => {
-  const navigate = useNavigate();
   const { trigger: loginTrigger, isMutating: isLoading } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +25,6 @@ export const LoginPage = () => {
 
     try {
       await loginTrigger({ email, password });
-      navigate("/");
     } catch (error: unknown) {
       const err = error as { response?: { status?: number } };
       if (err.response?.status === 401) {
