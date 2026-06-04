@@ -122,7 +122,11 @@ export const DashboardPage = () => {
                 <Card
                   key={reminder.id}
                   className="bg-surface-container-low border-surface-variant/50 cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate("/reminders")}
+                  onClick={() =>
+                    navigate(
+                      `/appointments/new?pet_id=${reminder.pet.id}&service_type=${reminder.service_type}&reminder_id=${reminder.id}`,
+                    )
+                  }
                 >
                   <div className="flex items-center gap-4">
                     <Avatar

@@ -145,7 +145,11 @@ export const RemindersPage = () => {
                           <Button
                             size="sm"
                             variant="primary"
-                            onClick={() => navigate("/appointments/new")}
+                            onClick={() =>
+                              navigate(
+                                `/appointments/new?pet_id=${reminder.pet.id}&service_type=${reminder.service_type}&reminder_id=${reminder.id}`,
+                              )
+                            }
                           >
                             Book Now
                           </Button>

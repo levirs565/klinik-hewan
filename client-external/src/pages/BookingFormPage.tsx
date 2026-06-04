@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { BottomNavigation } from "../components";
 import { usePets } from "../hooks/usePets";
 import { useCreateAppointment } from "../hooks/useAppointments";
@@ -8,18 +8,32 @@ import type { CreateAppointmentRequest } from "../types";
 
 export const BookingFormPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { pets, isLoading } = usePets();
   const { trigger: createAppointmentTrigger, isCreating } =
     useCreateAppointment();
 
-  const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
+  const queryPetId = searchParams.get("pet_id");
+  const queryServiceType = searchParams.get("service_type");
+  const queryReminderId = searchParams.get("reminder_id");
+
+  const [selectedPetId, setSelectedPetId] = useState<number | null>(
+    queryPetId ? parseInt(queryPetId) : null,
+  );
 
   // Use the first pet as default if none selected
   const effectivePetId = selectedPetId || (pets.length > 0 ? pets[0].id : null);
 
   const [serviceType, setServiceType] = useState<
     "vaccine" | "checkup" | "treatment"
-  >("checkup");
+  >((queryServiceType as "vaccine" | "checkup" | "treatment") || "checkup");
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (queryPetId) setSelectedPetId(parseInt(queryPetId));
+    if (queryServiceType)
+      setServiceType(queryServiceType as "vaccine" | "checkup" | "treatment");
+  }, [queryPetId, queryServiceType]);
   const [preferredDate, setPreferredDate] = useState("");
   const [notesForVet, setNotesForVet] = useState("");
   const [previousMedicalHistory, setPreviousMedicalHistory] = useState("");
@@ -84,6 +98,7 @@ export const BookingFormPage = () => {
         appointment_date: preferredDate,
         owner_notes: notesForVet,
         previous_medical_history: previousMedicalHistory,
+        reminder_id: queryReminderId || undefined,
       };
 
       if (serviceType === "checkup") {
@@ -169,6 +184,7 @@ export const BookingFormPage = () => {
                 <button
                   key={pet.id}
                   type="button"
+                  disabled={!!queryPetId}
                   onClick={() => {
                     setSelectedPetId(pet.id);
                     setErrors({ ...errors, pet: "" });
@@ -177,7 +193,7 @@ export const BookingFormPage = () => {
                     effectivePetId === pet.id
                       ? "border-primary bg-primary/5"
                       : "border-surface-variant bg-surface hover:border-primary/50"
-                  }`}
+                  } ${queryPetId ? "opacity-80 cursor-not-allowed" : ""}`}
                 >
                   <div className="flex flex-col items-center text-center gap-3">
                     <div className="w-16 h-16 rounded-xl bg-surface-variant flex items-center justify-center overflow-hidden">
@@ -243,6 +259,7 @@ export const BookingFormPage = () => {
                 <button
                   key={type}
                   type="button"
+                  disabled={!!queryServiceType}
                   onClick={() => {
                     setServiceType(type);
                     setErrors({ ...errors, service: "" });
@@ -251,7 +268,7 @@ export const BookingFormPage = () => {
                     serviceType === type
                       ? "border-primary bg-primary/5"
                       : "border-surface-variant bg-surface hover:border-primary/50"
-                  }`}
+                  } ${queryServiceType ? "opacity-80 cursor-not-allowed" : ""}`}
                 >
                   <div className="flex items-center gap-4">
                     <div
