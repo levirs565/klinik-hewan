@@ -46,9 +46,6 @@ export function ReceptionistDashboardPage() {
         </div>
 
         <div className="profile">
-          <Link className="text-button" to="/staff">
-            Staf
-          </Link>
           <span className="material-symbols-outlined">notifications</span>
           <div>
             <strong>{user?.full_name ?? "Staf"}</strong>

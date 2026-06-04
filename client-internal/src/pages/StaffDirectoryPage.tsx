@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 
 import { useStaffMembers } from "../hooks/useStaff";
 import { useAuth } from "../context/AuthContext";
@@ -8,7 +8,7 @@ import type { StaffMember } from "../types";
 
 export function StaffDirectoryPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { staffMembers, isLoading } = useStaffMembers(isAuthenticated);
   const [activeRole, setActiveRole] = useState<StaffMember["role"]>("doctor");
 
@@ -16,6 +16,10 @@ export function StaffDirectoryPage() {
     () => staffMembers.filter((staff) => staff.role === activeRole),
     [activeRole, staffMembers],
   );
+
+  if (user && user.role !== "manager") {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <main className="app">
