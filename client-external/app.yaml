@@ -1,5 +1,5 @@
 runtime: nodejs22
-service: vetconnect-client-external
+service: default
 instance_class: F1
 
 handlers:
