@@ -1,5 +1,5 @@
 substitutions:
-  _REPO_NAME: "levirs565"
+  _REPO_NAME: "vetconnect"
   _IMAGE_NAME: "vetconnect-server"
   _SERVICE_NAME: "vetconnect-server"
 
@@ -9,14 +9,14 @@ steps:
     args:
       - "build"
       - "-t"
-      - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+      - "asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
       - "./server"
 
   - name: "gcr.io/cloud-builders/docker"
     id: "Push Image"
     args:
       - "push"
-      - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+      - "asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
 
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "Deploy to Cloud Run"
@@ -26,15 +26,15 @@ steps:
       - "deploy"
       - "${_SERVICE_NAME}"
       - "--image"
-      - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+      - "asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
       - "--region"
-      - "asia-southeast1"
+      - "asia-southeast2"
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
 
 images:
-  - "asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
+  - "asia-southeast2-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_IMAGE_NAME}:$SHORT_SHA"
 
 options:
   logging: CLOUD_LOGGING_ONLY
