@@ -11,6 +11,7 @@ import (
 	"vetconnect-server/appointment"
 	"vetconnect-server/auth"
 	"vetconnect-server/core"
+	"vetconnect-server/notification"
 	"vetconnect-server/pet"
 	"vetconnect-server/reminder"
 	"vetconnect-server/staff"
@@ -38,6 +39,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Initialize Notification Service
+	var notificationServices []notification.Service
+	firebaseSA := os.Getenv("FIREBASE_SA")
+	if firebaseSA != "" {
+		fcmSvc, err := notification.NewFCMService(mongoClient, []byte(firebaseSA))
+		if err != nil {
+			slog.Error("failed to initialize FCM service", "error", err)
+		} else {
+			notificationServices = append(notificationServices, fcmSvc)
+			fmt.Println("FCM service initialized")
+		}
+	}
+	notificationService := notification.NewCompositeService(notificationServices...)
+	slog.Info("Notification service initialized", "providers_count", len(notificationServices))
 
 	// Initialize TokenHelper
 	jwtKey := os.Getenv("JWT_SECRET")
@@ -110,7 +126,7 @@ func main() {
 	petService := pet.NewService(db, s3Helper)
 	petController := pet.NewController(petService)
 
-	appointmentService := appointment.NewService(db, mongoClient, s3Helper)
+	appointmentService := appointment.NewService(db, mongoClient, s3Helper, notificationService)
 	appointmentController := appointment.NewController(appointmentService)
 
 	staffService := staff.NewService(db, s3Helper)

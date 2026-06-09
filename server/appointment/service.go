@@ -6,6 +6,7 @@ import (
 	"time"
 	"vetconnect-server/core"
 	"vetconnect-server/models"
+	"vetconnect-server/notification"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -26,16 +27,18 @@ var (
 )
 
 type Service struct {
-	db    *gorm.DB
-	mongo *core.MongoStorage
-	s3    *core.S3Helper
+	db           *gorm.DB
+	mongo        *core.MongoStorage
+	s3           *core.S3Helper
+	notification notification.Service
 }
 
-func NewService(db *gorm.DB, mongo *core.MongoStorage, s3 *core.S3Helper) *Service {
+func NewService(db *gorm.DB, mongo *core.MongoStorage, s3 *core.S3Helper, notification notification.Service) *Service {
 	return &Service{
-		db:    db,
-		mongo: mongo,
-		s3:    s3,
+		db:           db,
+		mongo:        mongo,
+		s3:           s3,
+		notification: notification,
 	}
 }
 
@@ -481,7 +484,7 @@ func (s *Service) SelectDoctor(ctx context.Context, receptionistID uint, appoint
 		return err
 	}
 
-	return s.db.Transaction(func(tx *gorm.DB) error {
+	err = s.db.Transaction(func(tx *gorm.DB) error {
 		// Update appointment doctor and state
 		_, err := gorm.G[models.Appointment](tx).
 			Where("id = ?", appointmentID).
@@ -509,6 +512,18 @@ func (s *Service) SelectDoctor(ctx context.Context, receptionistID uint, appoint
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
+
+	err = s.notification.SendNotification(ctx, models.UserTypeInternal, doctorID, notification.NotificationData{Title: "Janji Temu Baru", Body: "Janji Temu Baru"}, map[string]string{})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) DoctorApproveAppointment(ctx context.Context, internalUserID uint, appointmentID uuid.UUID) error {
