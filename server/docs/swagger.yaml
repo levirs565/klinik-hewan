@@ -1,0 +1,1625 @@
+basePath: /api
+definitions:
+  appointment.AppointmentDetailPet:
+    properties:
+      avatar_url:
+        type: string
+      birth_date:
+        type: string
+      breed:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  appointment.AppointmentDetailResponse:
+    properties:
+      appointment_date:
+        type: string
+      doctor:
+        $ref: '#/definitions/appointment.AppointmentDoctorSummary'
+      id:
+        type: string
+      medical_record:
+        $ref: '#/definitions/appointment.MedicalRecordResponse'
+      owner_notes:
+        type: string
+      pet:
+        $ref: '#/definitions/appointment.AppointmentDetailPet'
+      previous_medical_history:
+        type: string
+      service_type:
+        $ref: '#/definitions/models.ServiceType'
+      status:
+        $ref: '#/definitions/models.AppointmentState'
+    type: object
+  appointment.AppointmentDoctorSummary:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  appointment.AppointmentListItem:
+    properties:
+      appointment_date:
+        type: string
+      id:
+        type: string
+      pet:
+        $ref: '#/definitions/appointment.AppointmentPetSummary'
+      service_type:
+        $ref: '#/definitions/models.ServiceType'
+      status:
+        $ref: '#/definitions/models.AppointmentState'
+    type: object
+  appointment.AppointmentOwnerSummary:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  appointment.AppointmentPetSummary:
+    properties:
+      avatar_url:
+        type: string
+      breed:
+        type: string
+      name:
+        type: string
+    type: object
+  appointment.CheckupDetails:
+    properties:
+      focus_area:
+        type: string
+      purpose:
+        type: string
+    required:
+    - focus_area
+    - purpose
+    type: object
+  appointment.CheckupMedicalDataDTO:
+    properties:
+      cleanliness_notes:
+        type: string
+      nutrition_recommendations:
+        type: string
+      palpation:
+        type: string
+      periodic_care_recommendations:
+        type: string
+    required:
+    - cleanliness_notes
+    - palpation
+    type: object
+  appointment.CreateAppointmentRequest:
+    properties:
+      appointment_date:
+        type: string
+      checkup:
+        $ref: '#/definitions/appointment.CheckupDetails'
+      owner_notes:
+        type: string
+      pet_id:
+        type: integer
+      previous_medical_history:
+        type: string
+      reminder_id:
+        type: string
+      service_type:
+        allOf:
+        - $ref: '#/definitions/models.ServiceType'
+        enum:
+        - vaccine
+        - checkup
+        - treatment
+      treatment:
+        $ref: '#/definitions/appointment.TreatmentDetails'
+      vaccine:
+        $ref: '#/definitions/appointment.VaccineDetails'
+    required:
+    - appointment_date
+    - pet_id
+    - service_type
+    type: object
+  appointment.CreateAppointmentResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  appointment.InternalAppointmentDetailResponse:
+    properties:
+      appointment_date:
+        type: string
+      doctor:
+        $ref: '#/definitions/appointment.AppointmentDoctorSummary'
+      id:
+        type: string
+      medical_record:
+        $ref: '#/definitions/appointment.MedicalRecordResponse'
+      owner:
+        $ref: '#/definitions/appointment.AppointmentOwnerSummary'
+      owner_notes:
+        type: string
+      pet:
+        $ref: '#/definitions/appointment.AppointmentDetailPet'
+      previous_medical_history:
+        type: string
+      service_type:
+        $ref: '#/definitions/models.ServiceType'
+      status:
+        $ref: '#/definitions/models.AppointmentState'
+    type: object
+  appointment.MedicalRecordResponse:
+    properties:
+      checkup:
+        $ref: '#/definitions/appointment.CheckupMedicalDataDTO'
+      physical_examination:
+        $ref: '#/definitions/appointment.PhysicalExaminationDTO'
+      treatment:
+        $ref: '#/definitions/appointment.TreatmentMedicalDataDTO'
+      type:
+        $ref: '#/definitions/models.ServiceType'
+      vaccine:
+        $ref: '#/definitions/appointment.VaccineMedicalDataDTO'
+    type: object
+  appointment.PhysicalExaminationDTO:
+    properties:
+      heart_rate:
+        type: string
+      physical_condition:
+        type: string
+      respiratory_rate:
+        type: string
+      temperature:
+        type: number
+      weight:
+        type: number
+    required:
+    - physical_condition
+    - temperature
+    - weight
+    type: object
+  appointment.PrescriptionDTO:
+    properties:
+      dosage:
+        type: string
+      frequency:
+        type: string
+      name:
+        type: string
+    required:
+    - dosage
+    - frequency
+    - name
+    type: object
+  appointment.RejectAppointmentRequest:
+    properties:
+      reason:
+        type: string
+    required:
+    - reason
+    type: object
+  appointment.ReminderInputDTO:
+    properties:
+      description:
+        type: string
+      reminder_date:
+        type: string
+      service_type:
+        allOf:
+        - $ref: '#/definitions/models.ServiceType'
+        enum:
+        - vaccine
+        - checkup
+        - treatment
+    required:
+    - description
+    - reminder_date
+    - service_type
+    type: object
+  appointment.SaveMedicalRecordRequest:
+    properties:
+      checkup:
+        $ref: '#/definitions/appointment.CheckupMedicalDataDTO'
+      physical_examination:
+        $ref: '#/definitions/appointment.PhysicalExaminationDTO'
+      reminders:
+        items:
+          $ref: '#/definitions/appointment.ReminderInputDTO'
+        type: array
+      treatment:
+        $ref: '#/definitions/appointment.TreatmentMedicalDataDTO'
+      vaccine:
+        $ref: '#/definitions/appointment.VaccineMedicalDataDTO'
+    required:
+    - physical_examination
+    type: object
+  appointment.SelectDoctorRequest:
+    properties:
+      doctor_id:
+        type: integer
+    required:
+    - doctor_id
+    type: object
+  appointment.TreatmentDetails:
+    properties:
+      home_care_received:
+        type: boolean
+      observed_symptoms:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      symptom_duration:
+        type: string
+    required:
+    - observed_symptoms
+    - symptom_duration
+    type: object
+  appointment.TreatmentMedicalDataDTO:
+    properties:
+      clinical_symptoms:
+        type: string
+      diagnosis:
+        type: string
+      estimated_cost:
+        minimum: 0
+        type: number
+      home_care_notes:
+        type: string
+      medical_actions:
+        type: string
+      prescriptions:
+        items:
+          $ref: '#/definitions/appointment.PrescriptionDTO'
+        type: array
+    required:
+    - clinical_symptoms
+    - diagnosis
+    - estimated_cost
+    - medical_actions
+    - prescriptions
+    type: object
+  appointment.VaccineDetails:
+    properties:
+      vaccine_type:
+        type: string
+    required:
+    - vaccine_type
+    type: object
+  appointment.VaccineMedicalDataDTO:
+    properties:
+      administration_date:
+        type: string
+      batch_number:
+        type: string
+      brand:
+        type: string
+      post_vaccine_reaction:
+        type: string
+      pre_vaccine_condition:
+        type: string
+      vaccine_type:
+        type: string
+    required:
+    - administration_date
+    - batch_number
+    - brand
+    - pre_vaccine_condition
+    - vaccine_type
+    type: object
+  auth.DeleteFCMTokenRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  auth.LoginInternalRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  auth.LoginInternalResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      refresh_token_expires_at:
+        type: string
+    type: object
+  auth.LoginOwnerRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginOwnerResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      refresh_token_expires_at:
+        type: string
+    type: object
+  auth.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.MeResponse:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/models.AccountRole'
+      username:
+        type: string
+    type: object
+  auth.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      refresh_token_expires_at:
+        type: string
+    type: object
+  auth.RegisterOwnerRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    type: object
+  auth.RegisterOwnerResponse:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+    type: object
+  auth.SaveFCMTokenRequest:
+    properties:
+      device_type:
+        type: string
+      token:
+        type: string
+    required:
+    - device_type
+    - token
+    type: object
+  core.ActionResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  models.AccountRole:
+    enum:
+    - manager
+    - receptionist
+    - doctor
+    - owner
+    type: string
+    x-enum-varnames:
+    - RoleManager
+    - RoleReceptionist
+    - RoleDoctor
+    - RoleOwner
+  models.AppointmentState:
+    enum:
+    - Menunggu Konfirmasi
+    - Diterima
+    - Ditolak
+    - Menunggu Dokter
+    - Dalam Penanganan
+    - Selesai
+    - Selesai Administrasi
+    type: string
+    x-enum-varnames:
+    - StateWaitingConfirmation
+    - StateAccepted
+    - StateRejected
+    - StateWaitingDoctor
+    - StateInTreatment
+    - StateFinished
+    - StateAdminFinished
+  models.Gender:
+    enum:
+    - male
+    - female
+    type: string
+    x-enum-varnames:
+    - GenderMale
+    - GenderFemale
+  models.ServiceType:
+    enum:
+    - vaccine
+    - checkup
+    - treatment
+    type: string
+    x-enum-varnames:
+    - ServiceTypeVaccine
+    - ServiceTypeCheckup
+    - ServiceTypeTreatment
+  pet.CreatePetRequest:
+    properties:
+      avatar_upload_id:
+        type: string
+      birth_date:
+        type: string
+      breed:
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/models.Gender'
+        enum:
+        - male
+        - female
+      initial_medical_history:
+        type: string
+      name:
+        type: string
+      species:
+        type: string
+    required:
+    - birth_date
+    - breed
+    - gender
+    - name
+    - species
+    type: object
+  pet.GetPresignedURLRequest:
+    properties:
+      content_type:
+        enum:
+        - image/jpeg
+        - image/png
+        - image/webp
+        type: string
+      file_size:
+        description: Max 5MB
+        maximum: 5242880
+        minimum: 1
+        type: integer
+    required:
+    - content_type
+    - file_size
+    type: object
+  pet.GetPresignedURLResponse:
+    properties:
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      method:
+        type: string
+      upload_id:
+        type: string
+      url:
+        type: string
+    type: object
+  pet.MyPetResponse:
+    properties:
+      avatar_url:
+        type: string
+      birth_date:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      species:
+        type: string
+    type: object
+  pet.PetAppointmentResponse:
+    properties:
+      appointment_date:
+        type: string
+      id:
+        type: string
+      service_type:
+        $ref: '#/definitions/models.ServiceType'
+      status:
+        $ref: '#/definitions/models.AppointmentState'
+    type: object
+  pet.PetReminderResponse:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      service_type:
+        $ref: '#/definitions/models.ServiceType'
+    type: object
+  pet.PetResponse:
+    properties:
+      avatar_url:
+        type: string
+      birth_date:
+        type: string
+      breed:
+        type: string
+      created_at:
+        type: string
+      gender:
+        $ref: '#/definitions/models.Gender'
+      id:
+        type: integer
+      initial_medical_history:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: integer
+      species:
+        type: string
+    type: object
+  reminder.PetResponse:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  reminder.ReminderResponse:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      pet:
+        $ref: '#/definitions/reminder.PetResponse'
+      service_type:
+        $ref: '#/definitions/models.ServiceType'
+    type: object
+  staff.CreateDoctorRequest:
+    properties:
+      birth_date:
+        type: string
+      education_history:
+        type: string
+      full_name:
+        maxLength: 255
+        type: string
+      is_active:
+        type: boolean
+      join_date:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      practice_location_history:
+        type: string
+      practice_start_date:
+        type: string
+      username:
+        maxLength: 100
+        minLength: 4
+        type: string
+    required:
+    - birth_date
+    - education_history
+    - full_name
+    - join_date
+    - password
+    - practice_location_history
+    - practice_start_date
+    - username
+    type: object
+  staff.CreateDoctorResponse:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  staff.CreateReceptionistRequest:
+    properties:
+      full_name:
+        maxLength: 255
+        type: string
+      is_active:
+        type: boolean
+      password:
+        minLength: 6
+        type: string
+      username:
+        maxLength: 100
+        minLength: 4
+        type: string
+    required:
+    - full_name
+    - password
+    - username
+    type: object
+  staff.CreateReceptionistResponse:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  staff.DoctorDetailResponse:
+    properties:
+      avatar_url:
+        type: string
+      birth_date:
+        type: string
+      education_history:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      join_date:
+        type: string
+      practice_location_history:
+        type: string
+      practice_start_date:
+        type: string
+      role:
+        $ref: '#/definitions/models.AccountRole'
+      username:
+        type: string
+    type: object
+  staff.ReceptionistDetailResponse:
+    properties:
+      avatar_url:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      role:
+        $ref: '#/definitions/models.AccountRole'
+      username:
+        type: string
+    type: object
+  staff.StaffResponse:
+    properties:
+      avatar_url:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/models.AccountRole'
+    type: object
+  staff.UpdateDoctorRequest:
+    properties:
+      birth_date:
+        type: string
+      education_history:
+        type: string
+      full_name:
+        maxLength: 255
+        type: string
+      is_active:
+        type: boolean
+      join_date:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      practice_location_history:
+        type: string
+      practice_start_date:
+        type: string
+    required:
+    - birth_date
+    - education_history
+    - full_name
+    - join_date
+    - practice_location_history
+    - practice_start_date
+    type: object
+  staff.UpdateReceptionistRequest:
+    properties:
+      full_name:
+        maxLength: 255
+        type: string
+      is_active:
+        type: boolean
+      password:
+        minLength: 6
+        type: string
+    required:
+    - full_name
+    type: object
+host: localhost:1323
+info:
+  contact: {}
+  description: API for VetConnect Clinic Management System.
+  title: VetConnect API
+  version: "1.0"
+paths:
+  /appointments:
+    get:
+      description: Get a list of upcoming or past appointments for the current pet
+        owner.
+      parameters:
+      - description: 'Filter: ''upcoming'' or ''past'''
+        in: query
+        name: filter
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/appointment.AppointmentListItem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Owner Appointments
+      tags:
+      - Appointment
+    post:
+      consumes:
+      - application/json
+      description: Create a new appointment request for a pet.
+      parameters:
+      - description: Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.CreateAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/appointment.CreateAppointmentResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Appointment
+      tags:
+      - Appointment
+  /appointments/{id}:
+    get:
+      description: Get details of a specific appointment for the authenticated owner.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appointment.AppointmentDetailResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Appointment Detail
+      tags:
+      - Appointment
+  /fcm/token:
+    delete:
+      consumes:
+      - application/json
+      description: Remove the Firebase Cloud Messaging token for the current user
+        session.
+      parameters:
+      - description: FCM Token Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.DeleteFCMTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete FCM Token
+      tags:
+      - Auth
+    post:
+      consumes:
+      - application/json
+      description: Save or update the Firebase Cloud Messaging token for the current
+        user session.
+      parameters:
+      - description: FCM Token Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.SaveFCMTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Save FCM Token
+      tags:
+      - Auth
+  /internal/appointments:
+    get:
+      description: Get a list of appointments for staff, with optional status, date,
+        and doctor filters.
+      parameters:
+      - description: Appointment Status
+        in: query
+        name: status
+        type: string
+      - description: Appointment Date (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      - description: Filter for doctor's own appointments
+        in: query
+        name: my_appointments
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/appointment.AppointmentListItem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get All Appointments (Internal)
+      tags:
+      - Appointment
+  /internal/appointments/{id}:
+    get:
+      description: Get comprehensive appointment information for staff members.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/appointment.InternalAppointmentDetailResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Internal Appointment Detail
+      tags:
+      - Appointment
+  /internal/appointments/{id}/approve:
+    post:
+      description: Accepts a new appointment request, moving it to 'Accepted' state.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Approve Appointment
+      tags:
+      - Appointment
+  /internal/appointments/{id}/doctor-approve:
+    post:
+      description: Transition an appointment from 'Waiting Doctor' to 'In Treatment'
+        state.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Doctor Approve Appointment
+      tags:
+      - Appointment
+  /internal/appointments/{id}/doctor-reject:
+    post:
+      consumes:
+      - application/json
+      description: Rejects an assigned appointment, moving it back to 'Accepted' state
+        for reassignment.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rejection Reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.RejectAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Doctor Reject Appointment
+      tags:
+      - Appointment
+  /internal/appointments/{id}/medical-record:
+    post:
+      consumes:
+      - application/json
+      description: Save physical examination, service-specific data, and reminders
+        for an appointment.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Medical Record Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.SaveMedicalRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Save Medical Record
+      tags:
+      - Appointment
+  /internal/appointments/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      description: Rejects a new appointment request with a provided reason.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rejection Reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.RejectAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Reject Appointment
+      tags:
+      - Appointment
+  /internal/appointments/{id}/select-doctor:
+    post:
+      consumes:
+      - application/json
+      description: Assign a specific doctor to an appointment that has been accepted.
+      parameters:
+      - description: Appointment ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Doctor ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/appointment.SelectDoctorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      security:
+      - BearerAuth: []
+      summary: Select Doctor
+      tags:
+      - Appointment
+  /internal/login:
+    post:
+      consumes:
+      - application/json
+      description: Login as a staff member (Manager, Receptionist, Doctor) using username
+        and password.
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginInternalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginInternalResponse'
+      summary: Login Internal
+      tags:
+      - Auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate the refresh token (from body or cookie) and clear the
+        session.
+      parameters:
+      - description: Logout Request
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/auth.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.ActionResponse'
+      summary: Logout
+      tags:
+      - Auth
+  /me:
+    get:
+      description: Get the profile information of the currently authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.MeResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Current Profile
+      tags:
+      - Auth
+  /owner/login:
+    post:
+      consumes:
+      - application/json
+      description: Login as a pet owner using email and password.
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginOwnerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginOwnerResponse'
+      summary: Login Owner
+      tags:
+      - Auth
+  /owner/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new account for a pet owner.
+      parameters:
+      - description: Registration Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterOwnerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/auth.RegisterOwnerResponse'
+      summary: Register Owner
+      tags:
+      - Auth
+  /pets:
+    get:
+      description: Get a list of all pets owned by the currently authenticated pet
+        owner.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/pet.MyPetResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get My Pets
+      tags:
+      - Pet
+    post:
+      consumes:
+      - application/json
+      description: Register a new pet under the currently authenticated pet owner's
+        account.
+      parameters:
+      - description: Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pet.CreatePetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/pet.PetResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Pet
+      tags:
+      - Pet
+  /pets/{id}:
+    get:
+      description: Get detailed information about a specific pet owned by the current
+        user.
+      parameters:
+      - description: Pet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pet.PetResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Pet Detail
+      tags:
+      - Pet
+    put:
+      consumes:
+      - application/json
+      description: Update the profile information of an existing pet owned by the
+        current user.
+      parameters:
+      - description: Pet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pet.CreatePetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pet.PetResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Pet
+      tags:
+      - Pet
+  /pets/{id}/appointments:
+    get:
+      description: Get a list of all appointments for a specific pet owned by the
+        current user.
+      parameters:
+      - description: Pet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/pet.PetAppointmentResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Pet Appointments
+      tags:
+      - Pet
+  /pets/{id}/reminders:
+    get:
+      description: Get a list of all reminders for a specific pet owned by the current
+        user.
+      parameters:
+      - description: Pet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/pet.PetReminderResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Pet Reminders
+      tags:
+      - Pet
+  /pets/avatar/presigned-url:
+    post:
+      consumes:
+      - application/json
+      description: Generate a temporary presigned URL for secure avatar image upload.
+      parameters:
+      - description: Presigned URL Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pet.GetPresignedURLRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pet.GetPresignedURLResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Presigned URL
+      tags:
+      - Pet
+  /reminders:
+    get:
+      description: Get a list of all active and unfulfilled reminders for all pets
+        owned by the currently authenticated pet owner.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/reminder.ReminderResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get My Reminders
+      tags:
+      - Reminder
+  /staff:
+    get:
+      description: Get a list of all staff members (Managers, Receptionists, Doctors).
+      parameters:
+      - description: Filter by role
+        in: query
+        name: role
+        type: string
+      - description: Filter by activity status
+        in: query
+        name: is_active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/staff.StaffResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Staff List
+      tags:
+      - Staff
+  /staff/doctor:
+    post:
+      consumes:
+      - application/json
+      description: Create a new internal user with the Doctor role and an associated
+        doctor profile.
+      parameters:
+      - description: Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/staff.CreateDoctorRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/staff.CreateDoctorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Doctor
+      tags:
+      - Staff
+  /staff/doctor/{id}:
+    get:
+      description: Get comprehensive information about a specific doctor, including
+        professional profile.
+      parameters:
+      - description: Internal User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/staff.DoctorDetailResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Doctor Detail
+      tags:
+      - Staff
+    put:
+      consumes:
+      - application/json
+      description: Update the account details and professional profile of an existing
+        doctor.
+      parameters:
+      - description: Internal User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/staff.UpdateDoctorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/staff.CreateDoctorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Doctor
+      tags:
+      - Staff
+  /staff/doctors:
+    get:
+      description: Get a list of all staff members with the Doctor role.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/staff.StaffResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Doctor List
+      tags:
+      - Staff
+  /staff/receptionist:
+    post:
+      consumes:
+      - application/json
+      description: Create a new internal user with the Receptionist role.
+      parameters:
+      - description: Create Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/staff.CreateReceptionistRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/staff.CreateReceptionistResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Receptionist
+      tags:
+      - Staff
+  /staff/receptionist/{id}:
+    get:
+      description: Get information about a specific receptionist account.
+      parameters:
+      - description: Internal User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/staff.ReceptionistDetailResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Receptionist Detail
+      tags:
+      - Staff
+    put:
+      consumes:
+      - application/json
+      description: Update the account details of an existing receptionist.
+      parameters:
+      - description: Internal User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/staff.UpdateReceptionistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/staff.CreateReceptionistResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Receptionist
+      tags:
+      - Staff
+  /token/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Get a new access token using a valid refresh token (from body or
+        cookie).
+      parameters:
+      - description: Refresh Token Request
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/auth.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.RefreshTokenResponse'
+      summary: Refresh Token
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

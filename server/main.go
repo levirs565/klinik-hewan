@@ -18,11 +18,22 @@ import (
 
 	"vetconnect-server/models"
 
+	_ "vetconnect-server/docs"
+
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 )
 
+// @title VetConnect API
+// @version 1.0
+// @description API for VetConnect Clinic Management System.
+// @host localhost:1323
+// @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// Load .env file
 	if err := godotenv.Load(); err != nil {
@@ -139,6 +150,7 @@ func main() {
 	e.GET("/", func(c *echo.Context) error {
 		return c.String(http.StatusOK, "VetConnect API")
 	})
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Register Domain Routes
 	api := e.Group("/api")

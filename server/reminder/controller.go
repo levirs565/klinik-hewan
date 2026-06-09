@@ -21,6 +21,14 @@ func (ctrl *Controller) RegisterRoutes(group *echo.Group) {
 	reminderGroup.GET("", ctrl.GetMyReminders)
 }
 
+// GetMyReminders returns all unfulfilled reminders for the logged-in owner.
+// @Summary Get My Reminders
+// @Description Get a list of all active and unfulfilled reminders for all pets owned by the currently authenticated pet owner.
+// @Tags Reminder
+// @Produce json
+// @Success 200 {array} ReminderResponse
+// @Security BearerAuth
+// @Router /reminders [get]
 func (ctrl *Controller) GetMyReminders(c *echo.Context) error {
 	session := core.GetUserSession(c)
 
