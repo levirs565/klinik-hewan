@@ -780,7 +780,6 @@ definitions:
     required:
     - full_name
     type: object
-host: localhost:1323
 info:
   contact: {}
   description: API for VetConnect Clinic Management System.

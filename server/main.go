@@ -29,7 +29,6 @@ import (
 // @title VetConnect API
 // @version 1.0
 // @description API for VetConnect Clinic Management System.
-// @host localhost:1323
 // @BasePath /api
 // @securityDefinitions.apikey BearerAuth
 // @in header
