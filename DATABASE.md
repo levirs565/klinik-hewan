@@ -33,7 +33,7 @@ erDiagram
 
     DOCTOR_PROFILE ||--o{ APPOINTMENT : has
     DOCTOR_PROFILE {
-        uint internal_user_id PK FK
+        uint internal_user_id PK,FK
         date birth_date
         text education_history
         date practice_start_date
